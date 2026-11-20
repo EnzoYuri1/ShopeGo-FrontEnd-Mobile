@@ -1,4 +1,4 @@
-import type { Product } from '@/types';
+import type { Product } from '@/features/products/types/product';
 
 /** Dados FICTÍCIOS para desenvolvimento. Não usar dados reais. */
 export const mockProducts: Product[] = [

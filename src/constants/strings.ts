@@ -38,6 +38,20 @@ export const strings = {
     logout: 'Sair da conta',
     welcomeAuthenticated: 'Você está conectado!',
   },
+  updates: {
+    checkButton: 'Buscar atualizações',
+    checking: 'Verificando...',
+    modalTitle: 'Nova atualização disponível',
+    modalDescription:
+      'Há uma nova versão do ShopGo pronta para ser aplicada. Deseja atualizar agora?',
+    updateNow: 'Atualizar agora',
+    updating: 'Baixando atualização...',
+    later: 'Mais tarde',
+    upToDateTitle: 'Tudo atualizado',
+    upToDateMessage: 'Você já está na versão mais recente do aplicativo.',
+    unavailableMessage: 'Atualizações automáticas funcionam apenas no aplicativo instalado (APK).',
+    errorMessage: 'Não foi possível verificar ou baixar a atualização.',
+  },
   errors: {
     generic: 'Algo deu errado. Tente novamente.',
     network: 'Sem conexão com o servidor.',

@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 
+import { UpdateModal } from '@/components/ui';
 import { AuthProvider } from '@/features/auth/providers/AuthProvider';
 
 export default function RootLayout() {
@@ -23,6 +24,7 @@ export default function RootLayout() {
       <AuthProvider>
         <StatusBar style="dark" />
         <Stack screenOptions={{ headerShown: false }} />
+        <UpdateModal />
       </AuthProvider>
     </QueryClientProvider>
   );

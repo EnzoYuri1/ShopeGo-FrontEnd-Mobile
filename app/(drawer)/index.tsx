@@ -4,10 +4,12 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/ui';
 import { colors, fontSize, fontWeight, spacing, strings } from '@/constants';
 import { useAuth, useSignOut } from '@/features/auth/hooks/useAuth';
+import { useAppUpdate } from '@/hooks/useAppUpdate';
 
 export default function AuthenticatedHomePlaceholder() {
   const { user } = useAuth();
   const signOutMutation = useSignOut();
+  const { isChecking, checkForUpdates } = useAppUpdate();
 
   function handleSignOut() {
     signOutMutation.mutate(undefined, {
@@ -23,12 +25,19 @@ export default function AuthenticatedHomePlaceholder() {
       <Text style={styles.subtitle}>{strings.auth.welcomeAuthenticated}</Text>
       <Text style={styles.email}>{user?.displayName || user?.email}</Text>
 
-      <Button
-        title={strings.auth.logout}
-        onPress={handleSignOut}
-        loading={signOutMutation.isPending}
-        style={styles.button}
-      />
+      <View style={styles.actions}>
+        <Button
+          title={isChecking ? strings.updates.checking : strings.updates.checkButton}
+          onPress={() => void checkForUpdates()}
+          loading={isChecking}
+        />
+
+        <Button
+          title={strings.auth.logout}
+          onPress={handleSignOut}
+          loading={signOutMutation.isPending}
+        />
+      </View>
     </View>
   );
 }
@@ -57,7 +66,9 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     color: colors.textSecondary,
   },
-  button: {
+  actions: {
+    width: '100%',
     marginTop: spacing.xl,
+    gap: spacing.md,
   },
 });

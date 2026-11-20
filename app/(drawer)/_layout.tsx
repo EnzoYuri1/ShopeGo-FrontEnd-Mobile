@@ -14,7 +14,9 @@ export default function DrawerLayout() {
   return (
     <Drawer
       drawerContent={(props) => <CustomDrawerContent {...props} />}
-      screenOptions={{ headerShown: false }}
-    />
+      screenOptions={{ headerShown: false, drawerType: 'front' }}
+    >
+      <Drawer.Screen name="index" />
+    </Drawer>
   );
 }

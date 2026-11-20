@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
@@ -55,11 +54,7 @@ export function CustomDrawerContent({ navigation }: CustomDrawerContentProps) {
   ];
 
   function handleSignOut() {
-    signOutMutation.mutate(undefined, {
-      onSuccess: () => {
-        router.replace('/(auth)/login');
-      },
-    });
+    signOutMutation.mutate();
   }
 
   return (

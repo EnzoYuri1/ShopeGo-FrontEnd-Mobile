@@ -1,5 +1,7 @@
-import { Redirect, Stack } from 'expo-router';
+import { Redirect } from 'expo-router';
+import { Drawer } from 'expo-router/drawer';
 
+import { CustomDrawerContent } from '@/components/layout/CustomDrawerContent';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export default function DrawerLayout() {
@@ -9,5 +11,10 @@ export default function DrawerLayout() {
     return <Redirect href="/(auth)/login" />;
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Drawer
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={{ headerShown: false }}
+    />
+  );
 }

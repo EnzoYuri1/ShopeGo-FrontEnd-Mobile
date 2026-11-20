@@ -4,6 +4,16 @@ Aplicativo mobile de marketplace construído com **React Native**, **Expo (SDK 5
 
 ---
 
+## Download do APK (Android)
+
+Baixe a versão mais recente do aplicativo diretamente na página de Releases:
+
+- [Download do APK (GitHub Releases)](https://github.com/EnzoYuri1/ShopeGo-FrontEnd-Mobile/releases/latest)
+
+Após instalar o APK uma única vez no celular, novas atualizações de telas e código JS/TS são recebidas automaticamente via **EAS Update (OTA)** ao fechar e reabrir o aplicativo.
+
+---
+
 ## Stack Tecnológica
 
 - **Framework:** React Native + Expo + Expo Router (roteamento baseado em arquivos em `app/`)
@@ -78,6 +88,16 @@ npm run format            # formatação com Prettier
 
 ---
 
+## CI/CD e Atualizações OTA
+
+O projeto conta com pipeline automatizada em `.github/workflows/ci-cd.yml` (GitHub Actions) integrada ao **Expo EAS Update**:
+
+- **CI (Pull Requests e push na `main`):** executa `npm ci`, `npm run typecheck` e `npm run lint`.
+- **CD (push/merge na `main` ou disparo manual):** publica automaticamente uma atualização OTA no canal `preview` (`eas update --branch preview --environment preview`), atualizando o APK já instalado nos celulares sem necessidade de novo build.
+- **Requisito no repositório:** secret `EXPO_TOKEN` configurado em *Settings -> Secrets and variables -> Actions* (as variáveis `EXPO_PUBLIC_FIREBASE_*` ficam gerenciadas no ambiente `preview` do EAS).
+
+---
+
 ## Fluxo do Aplicativo
 
 ```mermaid
@@ -135,6 +155,8 @@ flowchart LR
 
 ```text
 ShopeGo-FrontEnd-Mobile/
+├── .github/workflows/
+│   └── ci-cd.yml                 # Pipeline de CI (typecheck/lint) e CD (EAS Update OTA)
 ├── app/                          # Rotas Expo Router (arquivos finos de navegação)
 │   ├── (auth)/                   # Fluxo público: login e cadastro
 │   ├── (drawer)/                 # Fluxo autenticado principal
@@ -160,5 +182,6 @@ ShopeGo-FrontEnd-Mobile/
 │   ├── types/                    # Tipagens globais compartilhadas
 │   └── utils/                    # Funções utilitárias puras
 ├── .env.example                  # Modelo das variáveis EXPO_PUBLIC_FIREBASE_*
+├── eas.json                      # Perfis do EAS Build e canais do EAS Update
 └── firestore.rules               # Regras de segurança do Cloud Firestore
 ```

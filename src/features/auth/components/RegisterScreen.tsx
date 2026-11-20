@@ -1,4 +1,4 @@
-import { Link, router } from 'expo-router';
+import { Link } from 'expo-router';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -58,9 +58,6 @@ export function RegisterScreen() {
 
     setErrors({});
     signUpMutation.mutate(parsed.data, {
-      onSuccess: () => {
-        router.replace('/(drawer)');
-      },
       onError: (error) => {
         setErrors({ form: getAuthErrorMessage(error) });
       },

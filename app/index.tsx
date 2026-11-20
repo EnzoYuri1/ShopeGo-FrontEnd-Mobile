@@ -1,15 +1,21 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Redirect } from 'expo-router';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
-import { colors, fontSize, fontWeight, strings } from '@/constants';
+import { colors } from '@/constants';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
-/** Tela provisória da Etapa 01. Será substituída pela Welcome na Etapa 02. */
 export default function Index() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{strings.app.name}</Text>
-      <Text style={styles.subtitle}>{strings.app.tagline}</Text>
-    </View>
-  );
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  return <Redirect href={isAuthenticated ? '/(drawer)' : '/(auth)/login'} />;
 }
 
 const styles = StyleSheet.create({
@@ -17,9 +23,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
     backgroundColor: colors.background,
   },
-  title: { fontSize: fontSize.xxl, fontWeight: fontWeight.bold, color: colors.primary },
-  subtitle: { marginTop: 8, textAlign: 'center', color: colors.textSecondary },
 });

@@ -1,8 +1,5 @@
 # ShopGo — Guia de continuidade (HANDOFF)
 
-> Documento para retomar o trabalho em outro computador (e para qualquer sessão nova do Claude Code).
-> Estado em **19/11/2026**: **Etapa 01 concluída** (estrutura/fundação). Nenhuma tela do protótipo foi construída ainda.
-
 ## 1. Projeto
 - **ShopGo**: app mobile de marketplace (projeto acadêmico), **somente Frontend**. O backend é feito por outro integrante.
 - **Stack**: React Native + Expo (SDK 58) + TypeScript (strict) + Expo Router.
@@ -84,5 +81,3 @@ Formato `tipo: descrição` (minúsculo, em português):
 - `style`: estilização
 - `hotfix`: implementação, melhoria ou conserto urgente
 
-## 9. Dica para o Claude Code em casa
-Abra a pasta do projeto, inicie uma sessão e peça: *"Leia docs/HANDOFF.md e continue a Etapa 02"*. O histórico da conversa original não é transferido; este arquivo é o contexto.

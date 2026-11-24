@@ -7,17 +7,17 @@
  * Telas antigas ainda usam fontWeight com a fonte do sistema; ao migrar uma tela,
  * troque `fontWeight` por `fontFamily` (não combine os dois com fontes customizadas).
  */
-import {
-  Inter_400Regular,
-  Inter_600SemiBold,
-  Inter_700Bold,
-} from '@expo-google-fonts/inter';
+import { Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import {
   Poppins_400Regular,
   Poppins_500Medium,
   Poppins_600SemiBold,
   Poppins_700Bold,
 } from '@expo-google-fonts/poppins';
+import { Graduate_400Regular } from '@expo-google-fonts/graduate';
+import { HammersmithOne_400Regular } from '@expo-google-fonts/hammersmith-one';
+import { InriaSans_700Bold } from '@expo-google-fonts/inria-sans';
+import { IrishGrover_400Regular } from '@expo-google-fonts/irish-grover';
 import { Sansita_800ExtraBold_Italic } from '@expo-google-fonts/sansita';
 
 export const fontFamily = {
@@ -29,6 +29,14 @@ export const fontFamily = {
   interSemibold: 'Inter_600SemiBold',
   interBold: 'Inter_700Bold',
   display: 'Sansita_800ExtraBold_Italic',
+  /** Títulos de produto/carrinho (Hammersmith One no Figma). */
+  heading: 'HammersmithOne_400Regular',
+  /** Preços na tela de produto (Graduate no Figma). */
+  price: 'Graduate_400Regular',
+  /** Valores do carrinho e ofertas (Inria Sans Bold no Figma). */
+  inriaBold: 'InriaSans_700Bold',
+  /** Percentual do selo de desconto (Irish Grover no Figma). */
+  badge: 'IrishGrover_400Regular',
 } as const;
 
 /** Mapa passado para `useFonts` no layout raiz. */
@@ -41,6 +49,10 @@ export const appFonts = {
   Inter_600SemiBold,
   Inter_700Bold,
   Sansita_800ExtraBold_Italic,
+  HammersmithOne_400Regular,
+  Graduate_400Regular,
+  InriaSans_700Bold,
+  IrishGrover_400Regular,
 };
 
 export const fontSize = {

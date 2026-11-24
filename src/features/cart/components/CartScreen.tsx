@@ -1,38 +1,47 @@
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { Alert, FlatList, Platform, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BackButton, BrandLogo, Button, QuantityStepper } from '@/components/ui';
 import { colors, fontFamily, strings } from '@/constants';
 import { getEffectivePrice, useCart } from '@/features/cart/hooks/useCart';
+import { useCartTotals } from '@/features/cart/hooks/useCartTotals';
 import type { CartItem } from '@/features/cart/types/cart';
+import { PaymentMethodSheet } from '@/features/checkout/components/PaymentMethodSheet';
+import type { PaymentMethod } from '@/features/checkout/types/payment';
+import { usePlaceOrder } from '@/features/checkout/hooks/usePlaceOrder';
 import { getCardImageSource } from '@/features/products/productImages';
 import { formatPrice } from '@/utils/formatPrice';
-
-/** Imposto aplicado sobre o subtotal (10%, conforme o Figma). */
-const TAX_RATE = 0.1;
 
 export function CartScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { items, subtotal, updateQuantity } = useCart();
-
-  const tax = Number((subtotal * TAX_RATE).toFixed(2));
-  const total = Number((subtotal + tax).toFixed(2));
+  const { items, updateQuantity } = useCart();
+  const { tax, total } = useCartTotals();
+  const { placeOrder, isPlacing } = usePlaceOrder();
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [orderError, setOrderError] = useState(false);
 
   function handleBack() {
     if (router.canGoBack()) router.back();
     else router.replace('/(drawer)');
   }
 
-  function handleConfirm() {
-    // O fluxo de pagamento (método e detalhes) entra na próxima etapa.
-    if (Platform.OS === 'web') {
-      window.alert(strings.cart.confirmSoon);
-    } else {
-      Alert.alert(strings.common.soon, strings.cart.confirmSoon);
+  function handleProceed(method: PaymentMethod) {
+    setSheetOpen(false);
+    if (method === 'card') {
+      router.push('/checkout/payment');
+      return;
     }
+    // "Outro": conclui o pedido direto, sem formulário de cartão.
+    setOrderError(false);
+    placeOrder(
+      'other',
+      () => router.replace('/checkout/success'),
+      () => setOrderError(true),
+    );
   }
 
   return (
@@ -66,14 +75,19 @@ export function CartScreen() {
         }
       />
 
+      {orderError ? <Text style={styles.orderError}>{strings.checkout.orderFailed}</Text> : null}
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <Button
           title={strings.cart.confirm}
-          onPress={handleConfirm}
+          onPress={() => setSheetOpen(true)}
+          loading={isPlacing}
           disabled={items.length === 0}
           style={styles.confirm}
         />
       </View>
+      {sheetOpen ? (
+        <PaymentMethodSheet onClose={() => setSheetOpen(false)} onProceed={handleProceed} />
+      ) : null}
     </View>
   );
 }
@@ -260,6 +274,12 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.interSemibold,
     fontSize: 20,
     color: colors.black,
+  },
+  orderError: {
+    textAlign: 'center',
+    fontFamily: fontFamily.medium,
+    fontSize: 13,
+    color: colors.danger,
   },
   footer: {
     paddingHorizontal: 24,

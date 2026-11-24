@@ -1,6 +1,6 @@
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 
-import { colors, fontSize, radius, spacing } from '@/constants';
+import { colors, fontFamily, fontSize, radius, spacing } from '@/constants';
 
 interface InputProps extends TextInputProps {
   error?: string;
@@ -25,10 +25,11 @@ const styles = StyleSheet.create({
   },
   input: {
     width: '100%',
-    height: 54,
+    height: 64,
     backgroundColor: colors.primaryLight,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md + 2,
+    borderRadius: radius.md - 2,
+    paddingHorizontal: 20,
+    fontFamily: fontFamily.medium,
     fontSize: fontSize.md,
     color: colors.text,
     borderWidth: 1,
@@ -40,6 +41,7 @@ const styles = StyleSheet.create({
   error: {
     marginTop: spacing.xs,
     marginLeft: spacing.xs,
+    fontFamily: fontFamily.regular,
     fontSize: fontSize.xs,
     color: colors.danger,
   },

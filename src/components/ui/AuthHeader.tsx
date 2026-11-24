@@ -1,7 +1,8 @@
-import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { BackButton } from '@/components/ui/BackButton';
 import { colors, fontFamily, fontSize } from '@/constants';
+import { useScreenWidth } from '@/hooks/useScreenWidth';
 
 interface AuthHeaderProps {
   title: string;
@@ -15,7 +16,7 @@ const ELLIPSE_HEIGHT = 572;
 
 /** Cabeçalho laranja com curva elíptica (frames de auth do Figma). */
 export function AuthHeader({ title, onBack }: AuthHeaderProps) {
-  const { width } = useWindowDimensions();
+  const width = useScreenWidth();
 
   return (
     <View style={styles.container}>

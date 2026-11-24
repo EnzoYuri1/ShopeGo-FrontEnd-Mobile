@@ -1,8 +1,11 @@
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,6 +18,7 @@ import Svg, { Circle, Path } from 'react-native-svg';
 import { BackButton, BrandLogo, Button } from '@/components/ui';
 import { colors, fontFamily, strings } from '@/constants';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { getAvatarUri, saveAvatarUri } from '@/features/profile/avatarStorage';
 import { useProfile, useUpdateProfile } from '@/features/profile/hooks/useProfile';
 
 export function ProfileScreen() {
@@ -31,12 +35,43 @@ export function ProfileScreen() {
 
   // `draft` só existe durante a edição; fora dela os campos mostram o perfil salvo.
   const [draft, setDraft] = useState<{ name: string; phone: string; address: string } | null>(null);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
 
   const editing = draft !== null;
   const name = draft?.name ?? savedName;
   const phone = draft?.phone ?? savedPhone;
   const address = draft?.address ?? savedAddress;
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    getAvatarUri(user.uid).then((uri) => {
+      if (active) setAvatarUri(uri);
+    });
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  async function handlePickPhoto() {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      setMessage({ text: strings.profile.photoDenied, error: true });
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+    const uri = result.assets?.[0]?.uri;
+    if (result.canceled || !uri) return;
+    setAvatarUri(uri);
+    setMessage(null);
+    if (user) void saveAvatarUri(user.uid, uri);
+  }
 
   function handleBack() {
     if (router.canGoBack()) router.back();
@@ -82,12 +117,34 @@ export function ProfileScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.avatar}>
-          <Svg width={96} height={96} viewBox="0 0 96 96">
-            <Circle cx={48} cy={48} r={48} fill="#F4896B" />
-            <Circle cx={48} cy={38} r={15} fill="#1B1B1B" />
-            <Path d="M16 90c2-20 16-30 32-30s30 10 32 30a48 48 0 0 1-64 0z" fill="#1B1B1B" />
-          </Svg>
+        <View style={styles.avatarWrap}>
+          <View style={styles.avatar}>
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} contentFit="cover" style={styles.avatarImage} />
+            ) : (
+              <Svg width={112} height={112} viewBox="0 0 96 96">
+                <Circle cx={48} cy={48} r={48} fill="#F4896B" />
+                <Circle cx={48} cy={38} r={15} fill="#1B1B1B" />
+                <Path d="M16 90c2-20 16-30 32-30s30 10 32 30a48 48 0 0 1-64 0z" fill="#1B1B1B" />
+              </Svg>
+            )}
+          </View>
+          <Pressable
+            onPress={handlePickPhoto}
+            accessibilityRole="button"
+            accessibilityLabel={strings.profile.changePhoto}
+            style={({ pressed }) => [styles.pencil, pressed ? styles.pressed : null]}
+          >
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+              <Path
+                d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4"
+                stroke={colors.white}
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </Svg>
+          </Pressable>
         </View>
         <Text style={styles.name}>{savedName || strings.profile.guest}</Text>
 
@@ -181,16 +238,36 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: 'center',
   },
+  avatarWrap: {
+    width: 112,
+    height: 112,
+  },
   avatar: {
     width: 112,
     height: 112,
-    borderWidth: 3,
-    borderColor: '#2B7BFF',
-    borderRadius: 4,
+    borderRadius: 56,
     backgroundColor: '#FFF3EC',
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: 112,
+    height: 112,
+  },
+  pencil: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: colors.primary,
+    borderWidth: 2,
+    borderColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
+  },
+  pressed: {
+    opacity: 0.8,
   },
   name: {
     marginTop: 12,

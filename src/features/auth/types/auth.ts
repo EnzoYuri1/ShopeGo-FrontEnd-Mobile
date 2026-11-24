@@ -21,6 +21,18 @@ export const forgotPasswordSchema = z.object({
 
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 
+export const newPasswordSchema = z
+  .object({
+    password: z.string().min(6, 'A senha deve ter ao menos 6 caracteres'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'As senhas não coincidem',
+    path: ['confirmPassword'],
+  });
+
+export type NewPasswordInput = z.infer<typeof newPasswordSchema>;
+
 export interface AuthUser {
   uid: string;
   email: string | null;

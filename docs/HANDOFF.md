@@ -47,7 +47,7 @@ Alias de import: `@/*` → `src/*` (ex.: `import { colors } from '@/constants'`)
 - Cada produto tem `cardColor` (cor pastel do card no Figma).
 - **Dados reais são proibidos**: o perfil do protótipo traz nome/cidade que parecem reais → usar pessoa fictícia nos mocks.
 - `.env` está no `.gitignore` (só `.env.example` é versionado).
-- Cores e tipografia atuais são **PROVISÓRIAS** (estimadas dos prints) — validar com o Figma.
+- Cores e tipografia vêm dos valores do Figma (`src/constants`).
 
 ## 5. Telas do protótipo (≈ 22)
 | Grupo | Telas | Idioma no Figma |
@@ -60,24 +60,14 @@ Alias de import: `@/*` → `src/*` (ex.: `import { colors } from '@/constants'`)
 
 Índice dos prints em `docs/design-refs/`: `01`–`04` logos/welcome/drawer antigos · `05`–`09` entrada e onboarding · `10`–`14` autenticação · `15`–`17` home e busca · `18`–`19` produto · `20`–`23` checkout · `24`–`26` ofertas, favoritos, perfil · `27`–`29` variações de drawer · `30` rastreio.
 
-## 6. Pendências (preciso de resposta)
-1. **Link do Figma** → extrair cores, fonte e medidas exatas e exportar ilustrações/ícones em boa resolução.
-2. **Qual drawer é o final?** (prints 27, 28, 29 e 03). Suposição: o **colorido (28)**, que tem "Meus Pedidos".
-3. **Usar só "ShopGo"?** Prints antigos ainda mostram "ShopEase" (01, 03, 04). Suposição: só ShopGo.
-4. **Rastreio de pedido (30) está no escopo?** Suposição: sim.
-5. **Fonte do protótipo.** Títulos parecem Poppins; botões "Get Started/Next" parecem serifada itálica (a confirmar).
+## 6. Decisões (resolvidas)
+- **Figma**: https://www.figma.com/design/uPkV2OGDVjQ3Qn2JoPRfau/ShopGo — tokens em `src/constants` (cor primária `#FD6406`).
+- **Drawer final**: o colorido. **Marca**: somente "ShopGo".
+- **Fontes**: Poppins (textos), Inter (onboarding) e Sansita extra-bold itálico (botões de destaque; aproxima a Sansita One do Figma, que não existe em `@expo-google-fonts`). Carregadas em `app/_layout.tsx`. Telas antigas (Home, drawer) ainda usam a fonte do sistema.
+- **Rastreio** está no escopo.
 
-## 7. Próximo passo — Etapa 02
-Construir as telas uma a uma, começando por **Welcome → Onboarding → Descubra seus itens**, depois autenticação, e assim por diante.
-Para cada tela: criar o componente em `src/features/<feature>/`, a rota fina em `app/`, textos em `strings.ts`, e reutilizar `src/components/ui`.
-Não implementar backend; manter tudo tipado e sem duplicação.
-
-## 8. Convenção de commits
-Formato `tipo: descrição` (minúsculo, em português):
-- `feat`: funcionalidade (implementação)
-- `fix`: conserto
-- `refactor`: refatoração
-- `docs`: documentação
-- `style`: estilização
-- `hotfix`: implementação, melhoria ou conserto urgente
-
+## 7. Andamento
+- **Fase 1 (feita)**: onboarding (3 slides) → "Descubra seus itens" → login/cadastro; Forgot Password, Verification (OTP) e Set New Password. A tela Welcome com logo (print 05) não tem frame identificado no Figma e não foi criada.
+- Recuperação de senha usa o e-mail do Firebase; OTP e nova senha são só UI até o backend existir.
+- **Próximas fases**: 2) busca, produto, carrinho · 3) checkout e pagamento · 4) ofertas, favoritos, perfil, rastreio e ligar o drawer às rotas.
+Para cada tela: componente em `src/features/<feature>/`, rota fina em `app/`, textos em `strings.ts`, reutilizar `src/components/ui`.

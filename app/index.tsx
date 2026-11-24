@@ -1,13 +1,20 @@
 import { Redirect } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { colors } from '@/constants';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { hasSeenOnboarding } from '@/features/onboarding/storage';
 
 export default function Index() {
   const { isAuthenticated, isLoading } = useAuth();
+  const [onboardingSeen, setOnboardingSeen] = useState<boolean | null>(null);
 
-  if (isLoading) {
+  useEffect(() => {
+    hasSeenOnboarding().then(setOnboardingSeen);
+  }, []);
+
+  if (isLoading || onboardingSeen === null) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color={colors.primary} />
@@ -15,7 +22,9 @@ export default function Index() {
     );
   }
 
-  return <Redirect href={isAuthenticated ? '/(drawer)' : '/(auth)/login'} />;
+  if (isAuthenticated) return <Redirect href="/(drawer)" />;
+
+  return <Redirect href={onboardingSeen ? '/(auth)/login' : '/onboarding'} />;
 }
 
 const styles = StyleSheet.create({

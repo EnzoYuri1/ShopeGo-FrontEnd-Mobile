@@ -7,12 +7,12 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  useWindowDimensions,
   View,
 } from 'react-native';
 
 import { BackButton, Button, OtpInput } from '@/components/ui';
 import { colors, fontFamily, strings } from '@/constants';
+import { useScreenWidth } from '@/hooks/useScreenWidth';
 
 const OTP_LENGTH = 6;
 
@@ -22,7 +22,7 @@ const images = {
 
 export function VerificationScreen() {
   const router = useRouter();
-  const { width } = useWindowDimensions();
+  const width = useScreenWidth();
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | undefined>();
 

@@ -1,7 +1,6 @@
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -12,7 +11,7 @@ import {
 } from 'react-native';
 
 import { AuthHeader, Button, Input } from '@/components/ui';
-import { colors, fontSize, fontWeight, spacing, strings } from '@/constants';
+import { colors, fontFamily, fontSize, spacing, strings } from '@/constants';
 import { SocialAuthButtons } from '@/features/auth/components/SocialAuthButtons';
 import { useSignIn } from '@/features/auth/hooks/useAuth';
 import { loginSchema } from '@/features/auth/types/auth';
@@ -25,6 +24,7 @@ interface FieldErrors {
 }
 
 export function LoginScreen() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -89,9 +89,7 @@ export function LoginScreen() {
 
             <Pressable
               style={styles.forgotLink}
-              onPress={() =>
-                Alert.alert(strings.common.soon, strings.auth.forgotPasswordUnavailable)
-              }
+              onPress={() => router.push('/(auth)/forgot-password')}
             >
               <Text style={styles.forgotText}>{strings.auth.forgotPassword}</Text>
             </Pressable>
@@ -134,9 +132,9 @@ const styles = StyleSheet.create({
     paddingTop: spacing.xl,
   },
   subtitle: {
+    fontFamily: fontFamily.semibold,
     fontSize: fontSize.md,
-    fontWeight: fontWeight.medium,
-    color: colors.text,
+    color: '#494848',
     textAlign: 'center',
     marginBottom: spacing.xl,
   },
@@ -147,9 +145,9 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
   forgotText: {
-    fontSize: fontSize.xs,
-    fontWeight: fontWeight.bold,
-    color: colors.text,
+    fontFamily: fontFamily.semibold,
+    fontSize: fontSize.sm,
+    color: colors.black,
   },
   formError: {
     fontSize: fontSize.sm,
@@ -164,8 +162,8 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   secondaryText: {
+    fontFamily: fontFamily.semibold,
     fontSize: fontSize.sm,
-    fontWeight: fontWeight.medium,
-    color: colors.textSecondary,
+    color: '#494949',
   },
 });

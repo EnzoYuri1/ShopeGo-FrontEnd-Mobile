@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -55,22 +54,28 @@ export function ProfileScreen() {
   }, [user]);
 
   async function handlePickPhoto() {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      setMessage({ text: strings.profile.photoDenied, error: true });
-      return;
+    try {
+      // Import tardio: se o app instalado não tiver o módulo nativo, só este botão falha (a tela abre).
+      const ImagePicker = await import('expo-image-picker');
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        setMessage({ text: strings.profile.photoDenied, error: true });
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+      const uri = result.assets?.[0]?.uri;
+      if (result.canceled || !uri) return;
+      setAvatarUri(uri);
+      setMessage(null);
+      if (user) void saveAvatarUri(user.uid, uri);
+    } catch {
+      setMessage({ text: strings.profile.photoUnavailable, error: true });
     }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.7,
-    });
-    const uri = result.assets?.[0]?.uri;
-    if (result.canceled || !uri) return;
-    setAvatarUri(uri);
-    setMessage(null);
-    if (user) void saveAvatarUri(user.uid, uri);
   }
 
   function handleBack() {

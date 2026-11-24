@@ -11,6 +11,7 @@ import {
   where,
 } from 'firebase/firestore';
 
+import { config } from '@/constants';
 import {
   createOrderSchema,
   orderSchema,
@@ -62,6 +63,12 @@ export async function getOrderById(orderId: string): Promise<Order | undefined> 
 
 export async function createOrder(userId: string, input: CreateOrderInput): Promise<string> {
   const payload = createOrderSchema.parse(input);
+
+  // Modo demonstração: não grava no Firestore (a coleção exige regras/backend prontos).
+  if (config.useMocks) {
+    return `mock-${Date.now()}`;
+  }
+
   const docRef = await addDoc(collection(db, ORDERS_COLLECTION), {
     ...payload,
     userId,

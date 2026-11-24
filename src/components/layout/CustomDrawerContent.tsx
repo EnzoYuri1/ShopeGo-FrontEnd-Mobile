@@ -1,8 +1,9 @@
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { colors, fontSize, fontWeight, radius, spacing, strings } from '@/constants';
+import { colors, fontSize, fontFamily, radius, spacing, strings } from '@/constants';
 import { useSignOut } from '@/features/auth/hooks/useAuth';
 import { useAppUpdate } from '@/hooks/useAppUpdate';
 
@@ -20,37 +21,22 @@ interface DrawerMenuItem {
 
 export function CustomDrawerContent({ navigation }: CustomDrawerContentProps) {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const signOutMutation = useSignOut();
   const { isChecking, checkForUpdates } = useAppUpdate();
 
-  function showSoon(title: string) {
+  function go(href: '/favorites' | '/cart' | '/orders' | '/profile' | '/offers') {
     navigation.closeDrawer();
-    Alert.alert(title, strings.common.soon);
+    router.push(href);
   }
 
   const menuItems: DrawerMenuItem[] = [
     { label: strings.drawer.home, color: '#2563EB', onPress: () => navigation.closeDrawer() },
-    {
-      label: strings.drawer.favourites,
-      color: '#E53935',
-      onPress: () => showSoon(strings.drawer.favourites),
-    },
-    { label: strings.drawer.cart, color: '#2DB67C', onPress: () => showSoon(strings.drawer.cart) },
-    {
-      label: strings.drawer.myOrders,
-      color: '#7C3AED',
-      onPress: () => showSoon(strings.drawer.myOrders),
-    },
-    {
-      label: strings.drawer.myProfile,
-      color: '#F59E0B',
-      onPress: () => showSoon(strings.drawer.myProfile),
-    },
-    {
-      label: strings.drawer.myOffers,
-      color: '#06B6D4',
-      onPress: () => showSoon(strings.drawer.myOffers),
-    },
+    { label: strings.drawer.favourites, color: '#E53935', onPress: () => go('/favorites') },
+    { label: strings.drawer.cart, color: '#2DB67C', onPress: () => go('/cart') },
+    { label: strings.drawer.myOrders, color: '#7C3AED', onPress: () => go('/orders') },
+    { label: strings.drawer.myProfile, color: '#F59E0B', onPress: () => go('/profile') },
+    { label: strings.drawer.myOffers, color: '#06B6D4', onPress: () => go('/offers') },
   ];
 
   function handleSignOut() {
@@ -165,7 +151,7 @@ const styles = StyleSheet.create({
   brand: {
     marginTop: spacing.xs,
     fontSize: fontSize.xl,
-    fontWeight: fontWeight.bold,
+    fontFamily: fontFamily.bold,
     color: colors.text,
   },
   brandHighlight: {
@@ -206,6 +192,6 @@ const styles = StyleSheet.create({
   menuText: {
     color: colors.white,
     fontSize: fontSize.sm,
-    fontWeight: fontWeight.bold,
+    fontFamily: fontFamily.bold,
   },
 });

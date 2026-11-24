@@ -1,4 +1,5 @@
 import { DrawerActions } from '@react-navigation/native';
+import { Image } from 'expo-image';
 import { useNavigation, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
@@ -19,6 +20,11 @@ import { ProductCard } from '@/features/products/components/ProductCard';
 import { useProducts } from '@/features/products/hooks/useProducts';
 import { useFavoritesStore } from '@/store';
 import type { Product } from '@/features/products/types/product';
+
+const images = {
+  hero: require('../../../../assets/images/products/watch-white.png'),
+  gift: require('../../../../assets/images/offers/gift.png'),
+};
 
 type SortMode = 'default' | 'asc' | 'desc';
 
@@ -128,6 +134,7 @@ export function HomeScreen() {
           <View style={styles.listHeader}>
             <View style={styles.heroBanner}>
               <View style={styles.heroAccentCircle} />
+              <Image source={images.hero} contentFit="contain" style={styles.heroImage} />
               <Text style={styles.heroTag}>{strings.home.newRelease}</Text>
               <Text style={styles.heroTitle}>{strings.home.heroTitle}</Text>
             </View>
@@ -191,6 +198,7 @@ export function HomeScreen() {
         ListFooterComponent={
           visibleProducts.length > 0 ? (
             <View style={styles.promoBanner}>
+              <Image source={images.gift} contentFit="contain" style={styles.promoImage} />
               <Text style={styles.promoTitle}>{strings.home.promoTitle}</Text>
               <Pressable style={styles.promoCta} onPress={() => setOnlyDiscount(true)}>
                 <Text style={styles.promoCtaText}>{strings.home.promoCta}</Text>
@@ -262,6 +270,13 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 75,
     backgroundColor: 'rgba(255, 106, 0, 0.25)',
+  },
+  heroImage: {
+    position: 'absolute',
+    left: spacing.md,
+    top: 8,
+    width: 120,
+    height: 116,
   },
   heroTag: {
     color: colors.primaryLight,
@@ -351,6 +366,13 @@ const styles = StyleSheet.create({
     minHeight: 112,
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+  },
+  promoImage: {
+    position: 'absolute',
+    right: -30,
+    top: -40,
+    width: 220,
+    height: 150,
   },
   promoTitle: {
     fontSize: fontSize.lg,

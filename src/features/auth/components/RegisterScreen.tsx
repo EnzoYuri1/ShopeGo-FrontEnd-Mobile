@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 
 import { AuthHeader, Button, Input } from '@/components/ui';
-import { colors, fontSize, fontWeight, spacing, strings } from '@/constants';
+import { colors, fontSize, fontFamily, spacing, strings } from '@/constants';
 import { SocialAuthButtons } from '@/features/auth/components/SocialAuthButtons';
 import { useSignUp } from '@/features/auth/hooks/useAuth';
 import { registerSchema } from '@/features/auth/types/auth';
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: fontSize.md,
-    fontWeight: fontWeight.medium,
+    fontFamily: fontFamily.medium,
     color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: spacing.lg,
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   },
   secondaryText: {
     fontSize: fontSize.sm,
-    fontWeight: fontWeight.medium,
+    fontFamily: fontFamily.medium,
     color: colors.textSecondary,
   },
 });

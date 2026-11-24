@@ -1,7 +1,7 @@
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { colors, fontSize, fontWeight, radius, spacing, strings } from '@/constants';
+import { colors, fontSize, fontFamily, radius, spacing, strings } from '@/constants';
 
 function showUnavailable() {
   Alert.alert(strings.common.soon, strings.auth.socialUnavailable);
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: fontSize.xs,
-    fontWeight: fontWeight.bold,
+    fontFamily: fontFamily.bold,
     color: colors.text,
     marginBottom: spacing.md,
   },

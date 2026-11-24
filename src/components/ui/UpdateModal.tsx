@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
-import { colors, fontSize, fontWeight, radius, spacing, strings } from '@/constants';
+import { colors, fontSize, fontFamily, radius, spacing, strings } from '@/constants';
 import { useAppUpdate } from '@/hooks/useAppUpdate';
 
 export function UpdateModal() {
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: fontSize.lg,
-    fontWeight: fontWeight.bold,
+    fontFamily: fontFamily.bold,
     color: colors.text,
     textAlign: 'center',
   },
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   },
   laterText: {
     fontSize: fontSize.sm,
-    fontWeight: fontWeight.medium,
+    fontFamily: fontFamily.medium,
     color: colors.textSecondary,
   },
 });

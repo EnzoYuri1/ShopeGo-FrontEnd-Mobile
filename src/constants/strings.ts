@@ -134,6 +134,7 @@ export const strings = {
     saveFailed: 'Não foi possível salvar o perfil.',
     guest: 'Visitante',
     changePhoto: 'Alterar foto de perfil',
+    photoUnavailable: 'Atualize o aplicativo para usar a galeria de fotos.',
     photoDenied: 'Permita o acesso às fotos para escolher uma imagem.',
   },
   orders: {

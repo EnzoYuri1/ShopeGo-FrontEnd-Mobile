@@ -18,6 +18,7 @@ import {
   type CreateOrderInput,
   type Order,
 } from '@/features/orders/types/order';
+import { mockOrders } from '@/mocks/orders';
 import { db } from '@/services/firebase';
 
 const ORDERS_COLLECTION = 'orders';
@@ -30,6 +31,10 @@ function normalizeCreatedAt(value: unknown): string | undefined {
 }
 
 export async function getOrdersByUser(userId: string): Promise<Order[]> {
+  if (config.useMocks) {
+    return mockOrders;
+  }
+
   const q = query(
     collection(db, ORDERS_COLLECTION),
     where('userId', '==', userId),
@@ -48,6 +53,10 @@ export async function getOrdersByUser(userId: string): Promise<Order[]> {
 }
 
 export async function getOrderById(orderId: string): Promise<Order | undefined> {
+  if (config.useMocks) {
+    return mockOrders.find((order) => order.id === orderId);
+  }
+
   const snapshot = await getDoc(doc(db, ORDERS_COLLECTION, orderId));
   if (!snapshot.exists()) {
     return undefined;

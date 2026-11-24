@@ -5,7 +5,6 @@ import {
   FlatList,
   StyleSheet,
   Text,
-  useWindowDimensions,
   View,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -15,6 +14,7 @@ import {
 
 import { Button, PagerDots } from '@/components/ui';
 import { colors, fontFamily, strings } from '@/constants';
+import { useScreenWidth } from '@/hooks/useScreenWidth';
 import { markOnboardingSeen } from '@/features/onboarding/storage';
 
 /** Largura do frame de referência no Figma (iPhone 16). Posições são escaladas a partir dela. */
@@ -43,7 +43,7 @@ type Scale = (box: Box) => StyleProp<ImageStyle>;
 
 export function OnboardingScreen() {
   const router = useRouter();
-  const { width } = useWindowDimensions();
+  const width = useScreenWidth();
   const [index, setIndex] = useState(0);
   const listRef = useRef<FlatList>(null);
 

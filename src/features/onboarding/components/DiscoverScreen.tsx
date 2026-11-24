@@ -1,9 +1,10 @@
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/ui';
 import { colors, fontFamily, strings } from '@/constants';
+import { useScreenWidth } from '@/hooks/useScreenWidth';
 import { markOnboardingSeen } from '@/features/onboarding/storage';
 
 const DESIGN_WIDTH = 393;
@@ -15,7 +16,7 @@ const images = {
 
 export function DiscoverScreen() {
   const router = useRouter();
-  const { width } = useWindowDimensions();
+  const width = useScreenWidth();
   const s = width / DESIGN_WIDTH;
 
   async function go(href: '/(auth)/login' | '/(auth)/register') {

@@ -7,3 +7,4 @@ export * from './OtpInput';
 export * from './PagerDots';
 export * from './QuantityStepper';
 export * from './UpdateModal';
+export * from './SelectField';

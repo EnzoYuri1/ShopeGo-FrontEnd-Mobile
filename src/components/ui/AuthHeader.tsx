@@ -1,14 +1,31 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
-import { colors, fontSize, fontWeight, spacing } from '@/constants';
+import { BackButton } from '@/components/ui/BackButton';
+import { colors, fontFamily, fontSize } from '@/constants';
 
 interface AuthHeaderProps {
   title: string;
+  /** Quando informado, mostra o botão de voltar no canto superior esquerdo. */
+  onBack?: () => void;
 }
 
-export function AuthHeader({ title }: AuthHeaderProps) {
+const HEADER_HEIGHT = 174;
+const ELLIPSE_WIDTH = 647;
+const ELLIPSE_HEIGHT = 572;
+
+/** Cabeçalho laranja com curva elíptica (frames de auth do Figma). */
+export function AuthHeader({ title, onBack }: AuthHeaderProps) {
+  const { width } = useWindowDimensions();
+
   return (
     <View style={styles.container}>
+      <View
+        style={[
+          styles.ellipse,
+          { left: (width - ELLIPSE_WIDTH) / 2, top: HEADER_HEIGHT - ELLIPSE_HEIGHT },
+        ]}
+      />
+      {onBack ? <BackButton onPress={onBack} style={styles.back} /> : null}
       <Text style={styles.title}>{title}</Text>
     </View>
   );
@@ -16,19 +33,27 @@ export function AuthHeader({ title }: AuthHeaderProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.primary,
-    paddingTop: spacing.xxl + spacing.lg,
-    paddingBottom: spacing.xl + spacing.sm,
-    paddingHorizontal: spacing.lg,
+    height: HEADER_HEIGHT,
+    overflow: 'hidden',
     alignItems: 'center',
-    justifyContent: 'center',
-    borderBottomLeftRadius: 160,
-    borderBottomRightRadius: 160,
-    marginHorizontal: -40,
+    justifyContent: 'flex-end',
+    paddingBottom: 32,
+  },
+  ellipse: {
+    position: 'absolute',
+    width: ELLIPSE_WIDTH,
+    height: ELLIPSE_HEIGHT,
+    borderRadius: ELLIPSE_HEIGHT,
+    backgroundColor: colors.primary,
+  },
+  back: {
+    position: 'absolute',
+    left: 14,
+    top: 30,
   },
   title: {
-    fontSize: fontSize.xl + 4,
-    fontWeight: fontWeight.bold,
+    fontFamily: fontFamily.bold,
+    fontSize: fontSize.xl + 6,
     color: colors.black,
     textAlign: 'center',
   },

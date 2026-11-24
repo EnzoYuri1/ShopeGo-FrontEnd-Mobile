@@ -69,5 +69,6 @@ Alias de import: `@/*` → `src/*` (ex.: `import { colors } from '@/constants'`)
 ## 7. Andamento
 - **Fase 1 (feita)**: onboarding (3 slides) → "Descubra seus itens" → login/cadastro; Forgot Password, Verification (OTP) e Set New Password. A tela Welcome com logo (print 05) não tem frame identificado no Figma e não foi criada.
 - Recuperação de senha usa o e-mail do Firebase; OTP e nova senha são só UI até o backend existir.
-- **Próximas fases**: 2) busca, produto, carrinho · 3) checkout e pagamento · 4) ofertas, favoritos, perfil, rastreio e ligar o drawer às rotas.
+- **Fase 2 (feita)**: detalhe do produto (`/product/[id]`), carrinho/Confirm Order (`/cart`, imposto 10%) e busca (`/search`, feita pelo print 17 porque o frame não foi lido — limite do MCP do Figma). Home abre busca, carrinho e detalhe. Imagens de demonstração em `assets/images/products` mapeadas em `src/features/products/productImages.ts`.
+- **Próximas fases**: 3) método de pagamento (sheet do frame 25:122), Payment Details e pagamento aprovado · 4) ofertas (frame 98:551), favoritos, perfil, rastreio e ligar o drawer às rotas.
 Para cada tela: componente em `src/features/<feature>/`, rota fina em `app/`, textos em `strings.ts`, reutilizar `src/components/ui`.

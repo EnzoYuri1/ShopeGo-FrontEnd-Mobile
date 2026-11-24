@@ -133,6 +133,8 @@ export const strings = {
     saved: 'Perfil atualizado!',
     saveFailed: 'Não foi possível salvar o perfil.',
     guest: 'Visitante',
+    changePhoto: 'Alterar foto de perfil',
+    photoDenied: 'Permita o acesso às fotos para escolher uma imagem.',
   },
   orders: {
     title: 'Meus pedidos',

@@ -13,10 +13,11 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { colors, fontSize, fontWeight, radius, spacing, strings } from '@/constants';
+import { colors, fontSize, fontFamily, radius, spacing, strings } from '@/constants';
 import { getEffectivePrice, useCart } from '@/features/cart/hooks/useCart';
 import { ProductCard } from '@/features/products/components/ProductCard';
 import { useProducts } from '@/features/products/hooks/useProducts';
+import { useFavoritesStore } from '@/store';
 import type { Product } from '@/features/products/types/product';
 
 type SortMode = 'default' | 'asc' | 'desc';
@@ -31,7 +32,8 @@ export function HomeScreen() {
 
   const [sortMode, setSortMode] = useState<SortMode>('default');
   const [onlyDiscount, setOnlyDiscount] = useState(false);
-  const [favorites, setFavorites] = useState<Record<string, boolean>>({});
+  const favoriteIds = useFavoritesStore((state) => state.ids);
+  const toggleFavorite = useFavoritesStore((state) => state.toggle);
 
   const visibleProducts = useMemo(() => {
     let list = products;
@@ -51,10 +53,6 @@ export function HomeScreen() {
 
   function cycleSortMode() {
     setSortMode((prev) => (prev === 'default' ? 'asc' : prev === 'asc' ? 'desc' : 'default'));
-  }
-
-  function toggleFavorite(productId: string) {
-    setFavorites((prev) => ({ ...prev, [productId]: !prev[productId] }));
   }
 
   function handleAddToCart(product: Product) {
@@ -203,7 +201,7 @@ export function HomeScreen() {
         renderItem={({ item }) => (
           <ProductCard
             product={item}
-            isFavorite={Boolean(favorites[item.id])}
+            isFavorite={favoriteIds.includes(item.id)}
             onToggleFavorite={toggleFavorite}
             onAddToCart={handleAddToCart}
             onPress={handleOpenProduct}
@@ -233,7 +231,7 @@ const styles = StyleSheet.create({
   },
   brandText: {
     fontSize: fontSize.md,
-    fontWeight: fontWeight.bold,
+    fontFamily: fontFamily.bold,
     color: colors.text,
   },
   listContent: {
@@ -268,13 +266,13 @@ const styles = StyleSheet.create({
   heroTag: {
     color: colors.primaryLight,
     fontSize: fontSize.sm,
-    fontWeight: fontWeight.bold,
+    fontFamily: fontFamily.bold,
   },
   heroTitle: {
     marginTop: 4,
     color: colors.white,
     fontSize: fontSize.xl,
-    fontWeight: fontWeight.bold,
+    fontFamily: fontFamily.bold,
   },
   actionBar: {
     flexDirection: 'row',
@@ -302,7 +300,7 @@ const styles = StyleSheet.create({
   pillText: {
     color: colors.white,
     fontSize: fontSize.xs,
-    fontWeight: fontWeight.medium,
+    fontFamily: fontFamily.medium,
   },
   cartPill: {
     backgroundColor: colors.primary,
@@ -326,7 +324,7 @@ const styles = StyleSheet.create({
   cartBadgeText: {
     color: colors.white,
     fontSize: 10,
-    fontWeight: fontWeight.bold,
+    fontFamily: fontFamily.bold,
   },
   searchButton: {
     backgroundColor: colors.black,
@@ -356,7 +354,7 @@ const styles = StyleSheet.create({
   },
   promoTitle: {
     fontSize: fontSize.lg,
-    fontWeight: fontWeight.bold,
+    fontFamily: fontFamily.bold,
     color: colors.white,
     maxWidth: '75%',
   },
@@ -370,6 +368,6 @@ const styles = StyleSheet.create({
   promoCtaText: {
     color: colors.white,
     fontSize: fontSize.xs,
-    fontWeight: fontWeight.bold,
+    fontFamily: fontFamily.bold,
   },
 });

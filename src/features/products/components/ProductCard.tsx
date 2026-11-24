@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { colors, fontSize, fontWeight, radius, spacing } from '@/constants';
+import { colors, fontSize, fontFamily, radius, spacing } from '@/constants';
 import { getEffectivePrice } from '@/features/cart/hooks/useCart';
 import { getCardImageSource } from '@/features/products/productImages';
 import type { Product } from '@/features/products/types/product';
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   badgeText: {
     color: colors.white,
     fontSize: 10,
-    fontWeight: fontWeight.bold,
+    fontFamily: fontFamily.bold,
   },
   imageContainer: {
     height: 92,
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: fontSize.xs,
-    fontWeight: fontWeight.bold,
+    fontFamily: fontFamily.bold,
     color: colors.text,
     lineHeight: 16,
     minHeight: 32,
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: fontSize.md,
-    fontWeight: fontWeight.bold,
+    fontFamily: fontFamily.bold,
     color: colors.text,
   },
   cartButton: {

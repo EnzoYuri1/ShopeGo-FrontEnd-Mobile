@@ -15,6 +15,7 @@ import Svg, { Path } from 'react-native-svg';
 import { BackButton, BrandLogo } from '@/components/ui';
 import { colors, fontFamily, spacing, strings } from '@/constants';
 import { useCart } from '@/features/cart/hooks/useCart';
+import { useFavoritesStore } from '@/store';
 import { ProductCard } from '@/features/products/components/ProductCard';
 import { useProducts } from '@/features/products/hooks/useProducts';
 
@@ -24,7 +25,8 @@ export function SearchScreen() {
   const { data: products = [], isLoading } = useProducts();
   const { addItem } = useCart();
   const [query, setQuery] = useState('');
-  const [favorites, setFavorites] = useState<Record<string, boolean>>({});
+  const favoriteIds = useFavoritesStore((state) => state.ids);
+  const toggleFavorite = useFavoritesStore((state) => state.toggle);
 
   const results = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -93,8 +95,8 @@ export function SearchScreen() {
         renderItem={({ item }) => (
           <ProductCard
             product={item}
-            isFavorite={Boolean(favorites[item.id])}
-            onToggleFavorite={(id) => setFavorites((prev) => ({ ...prev, [id]: !prev[id] }))}
+            isFavorite={favoriteIds.includes(item.id)}
+            onToggleFavorite={toggleFavorite}
             onAddToCart={(product) => addItem(product, 1)}
             onPress={(product) =>
               router.push({ pathname: '/product/[id]', params: { id: product.id } })

@@ -4,11 +4,13 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { UpdateModal } from '@/components/ui';
 import { appFonts } from '@/constants';
 import { AuthProvider } from '@/features/auth/providers/AuthProvider';
+import { MAX_APP_WIDTH } from '@/hooks/useScreenWidth';
 
 // Mantém a splash visível até as fontes carregarem (evita troca de fonte na tela).
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -38,14 +40,34 @@ export default function RootLayout() {
   if (!fontsReady) return null;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <StatusBar style="dark" />
-          <Stack screenOptions={{ headerShown: false }} />
-          <UpdateModal />
-        </AuthProvider>
-      </QueryClientProvider>
-    </GestureHandlerRootView>
+    <View style={styles.page}>
+      <View style={styles.frame}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              <StatusBar style="dark" />
+              <Stack screenOptions={{ headerShown: false }} />
+              <UpdateModal />
+            </AuthProvider>
+          </QueryClientProvider>
+        </GestureHandlerRootView>
+      </View>
+    </View>
   );
 }
+
+// No web o app fica numa moldura mobile centralizada (o layout segue o frame de 393 px do Figma).
+const styles = StyleSheet.create({
+  page: {
+    flex: 1,
+    backgroundColor: Platform.OS === 'web' ? '#E9E9EE' : 'transparent',
+  },
+  frame: {
+    flex: 1,
+    width: '100%',
+    maxWidth: Platform.OS === 'web' ? MAX_APP_WIDTH : undefined,
+    alignSelf: 'center',
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+  },
+});

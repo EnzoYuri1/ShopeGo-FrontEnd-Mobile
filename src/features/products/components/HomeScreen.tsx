@@ -1,5 +1,5 @@
 import { DrawerActions } from '@react-navigation/native';
-import { useNavigation } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -8,7 +8,6 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,14 +24,13 @@ type SortMode = 'default' | 'asc' | 'desc';
 export function HomeScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const router = useRouter();
 
   const { data: products = [], isLoading, isError, refetch, isRefetching } = useProducts();
-  const { itemCount, subtotal, addItem } = useCart();
+  const { itemCount, addItem } = useCart();
 
   const [sortMode, setSortMode] = useState<SortMode>('default');
   const [onlyDiscount, setOnlyDiscount] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
 
   const visibleProducts = useMemo(() => {
@@ -42,11 +40,6 @@ export function HomeScreen() {
       list = list.filter((item) => Boolean(item.discountPercent));
     }
 
-    const query = searchQuery.trim().toLowerCase();
-    if (query) {
-      list = list.filter((item) => item.name.toLowerCase().includes(query));
-    }
-
     if (sortMode === 'asc') {
       list = [...list].sort((a, b) => getEffectivePrice(a) - getEffectivePrice(b));
     } else if (sortMode === 'desc') {
@@ -54,7 +47,7 @@ export function HomeScreen() {
     }
 
     return list;
-  }, [products, onlyDiscount, searchQuery, sortMode]);
+  }, [products, onlyDiscount, sortMode]);
 
   function cycleSortMode() {
     setSortMode((prev) => (prev === 'default' ? 'asc' : prev === 'asc' ? 'desc' : 'default'));
@@ -69,15 +62,16 @@ export function HomeScreen() {
     Alert.alert(strings.app.name, `${product.name} ${strings.home.addedToCart}`);
   }
 
-  function handleOpenCartSummary() {
-    if (itemCount === 0) {
-      Alert.alert(strings.home.cartTitle, strings.home.cartEmpty);
-      return;
-    }
-    Alert.alert(
-      strings.home.cartTitle,
-      `${itemCount} ${itemCount === 1 ? 'item' : 'itens'} — Total: R$ ${subtotal.toFixed(2).replace('.', ',')}`,
-    );
+  function handleOpenCart() {
+    router.push('/cart');
+  }
+
+  function handleOpenSearch() {
+    router.push('/search');
+  }
+
+  function handleOpenProduct(product: Product) {
+    router.push({ pathname: '/product/[id]', params: { id: product.id } });
   }
 
   const sortLabel =
@@ -155,7 +149,7 @@ export function HomeScreen() {
                   </Text>
                 </Pressable>
 
-                <Pressable style={styles.cartPill} onPress={handleOpenCartSummary}>
+                <Pressable style={styles.cartPill} onPress={handleOpenCart}>
                   <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                     <Path
                       d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zM7.16 14.26l.03-.12L8.1 12h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0020 3H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44C4.52 14.37 5.48 16 7 16h12v-2H7.42c-.14 0-.25-.11-.26-.24z"
@@ -172,10 +166,7 @@ export function HomeScreen() {
 
               <Pressable
                 style={styles.searchButton}
-                onPress={() => {
-                  setSearchOpen((prev) => !prev);
-                  if (searchOpen) setSearchQuery('');
-                }}
+                onPress={handleOpenSearch}
                 accessibilityLabel="Buscar"
               >
                 <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
@@ -188,17 +179,6 @@ export function HomeScreen() {
                 </Svg>
               </Pressable>
             </View>
-
-            {searchOpen ? (
-              <TextInput
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder={strings.home.searchPlaceholder}
-                placeholderTextColor={colors.textSecondary}
-                style={styles.searchInput}
-                autoFocus
-              />
-            ) : null}
           </View>
         }
         ListEmptyComponent={
@@ -226,6 +206,7 @@ export function HomeScreen() {
             isFavorite={Boolean(favorites[item.id])}
             onToggleFavorite={toggleFavorite}
             onAddToCart={handleAddToCart}
+            onPress={handleOpenProduct}
           />
         )}
       />
@@ -354,16 +335,6 @@ const styles = StyleSheet.create({
     height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  searchInput: {
-    height: 44,
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    fontSize: fontSize.sm,
-    color: colors.text,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   emptyState: {
     marginTop: spacing.xl,

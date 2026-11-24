@@ -4,17 +4,17 @@ import Svg, { Path } from 'react-native-svg';
 
 import { colors, fontSize, fontWeight, radius, spacing } from '@/constants';
 import { getEffectivePrice } from '@/features/cart/hooks/useCart';
+import { getCardImageSource } from '@/features/products/productImages';
 import type { Product } from '@/features/products/types/product';
+import { formatPrice } from '@/utils/formatPrice';
 
 interface ProductCardProps {
   product: Product;
   isFavorite?: boolean;
   onToggleFavorite?: (productId: string) => void;
   onAddToCart: (product: Product) => void;
-}
-
-function formatPrice(value: number): string {
-  return `R$ ${value.toFixed(2).replace('.', ',')}`;
+  /** Toque no card (abre o detalhe do produto). */
+  onPress?: (product: Product) => void;
 }
 
 export function ProductCard({
@@ -22,11 +22,18 @@ export function ProductCard({
   isFavorite = false,
   onToggleFavorite,
   onAddToCart,
+  onPress,
 }: ProductCardProps) {
   const effectivePrice = getEffectivePrice(product);
+  const imageSource = getCardImageSource(product);
 
   return (
-    <View style={[styles.card, { backgroundColor: product.cardColor }]}>
+    <Pressable
+      onPress={() => onPress?.(product)}
+      accessibilityRole="button"
+      accessibilityLabel={product.name}
+      style={[styles.card, { backgroundColor: product.cardColor }]}
+    >
       <View style={styles.topRow}>
         <Pressable
           onPress={() => onToggleFavorite?.(product.id)}
@@ -51,8 +58,8 @@ export function ProductCard({
       </View>
 
       <View style={styles.imageContainer}>
-        {product.imageUrl ? (
-          <Image source={{ uri: product.imageUrl }} style={styles.image} contentFit="contain" />
+        {imageSource ? (
+          <Image source={imageSource} style={styles.image} contentFit="contain" />
         ) : (
           <Svg width={56} height={56} viewBox="0 0 24 24" fill="none">
             <Path
@@ -84,7 +91,7 @@ export function ProductCard({
           </Svg>
         </Pressable>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

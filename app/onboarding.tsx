@@ -1,5 +1,10 @@
+import { CenteredColumn } from '@/components/layout/CenteredColumn';
 import { OnboardingScreen } from '@/features/onboarding/components/OnboardingScreen';
 
 export default function OnboardingRoute() {
-  return <OnboardingScreen />;
+  return (
+    <CenteredColumn>
+      <OnboardingScreen />
+    </CenteredColumn>
+  );
 }

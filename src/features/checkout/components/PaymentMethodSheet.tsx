@@ -9,9 +9,9 @@ import { colors, fontFamily, strings } from '@/constants';
 import type { PaymentMethod } from '@/features/checkout/types/payment';
 
 const logos = {
-  visa: require('../../../../assets/images/payments/visa.png'),
-  mastercard: require('../../../../assets/images/payments/mastercard.png'),
-  other: require('../../../../assets/images/payments/other.png'),
+  visa: require('../../../../assets/images/payments/visa.webp'),
+  mastercard: require('../../../../assets/images/payments/mastercard.webp'),
+  other: require('../../../../assets/images/payments/other.webp'),
 };
 
 interface PaymentMethodSheetProps {

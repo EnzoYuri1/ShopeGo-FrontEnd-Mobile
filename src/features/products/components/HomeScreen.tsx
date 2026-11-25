@@ -23,8 +23,8 @@ import { useFavoritesStore } from '@/store';
 import type { Product } from '@/features/products/types/product';
 
 const images = {
-  hero: require('../../../../assets/images/products/watch-white.png'),
-  gift: require('../../../../assets/images/offers/gift.png'),
+  hero: require('../../../../assets/images/products/watch-white.webp'),
+  gift: require('../../../../assets/images/offers/gift.webp'),
 };
 
 type SortMode = 'default' | 'asc' | 'desc';

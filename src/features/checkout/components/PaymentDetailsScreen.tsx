@@ -25,8 +25,8 @@ import {
 import { formatPrice } from '@/utils/formatPrice';
 
 const logos = {
-  visa: require('../../../../assets/images/payments/visa.png'),
-  mastercard: require('../../../../assets/images/payments/mastercard.png'),
+  visa: require('../../../../assets/images/payments/visa.webp'),
+  mastercard: require('../../../../assets/images/payments/mastercard.webp'),
 };
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));

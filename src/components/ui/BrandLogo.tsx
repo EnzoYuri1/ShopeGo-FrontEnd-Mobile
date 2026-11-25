@@ -6,7 +6,7 @@ interface BrandLogoProps {
   style?: StyleProp<ImageStyle>;
 }
 
-const logo = require('../../../assets/images/logo-shopgo.png');
+const logo = require('../../../assets/images/logo-shopgo.webp');
 
 /** Logo ShopGo (sacola + nome) usado no canto superior direito das telas. */
 export function BrandLogo({ size = 85, style }: BrandLogoProps) {

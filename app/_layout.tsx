@@ -10,13 +10,14 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { UpdateModal } from '@/components/ui';
 import { appFonts } from '@/constants';
 import { AuthProvider } from '@/features/auth/providers/AuthProvider';
-import { MAX_APP_WIDTH } from '@/hooks/useScreenWidth';
+import { MAX_APP_WIDTH, useIsLandscape } from '@/hooks/useScreenWidth';
 
 // Mantém a splash visível até as fontes carregarem (evita troca de fonte na tela).
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts(appFonts);
+  const isLandscape = useIsLandscape();
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -41,7 +42,7 @@ export default function RootLayout() {
 
   return (
     <View style={styles.page}>
-      <View style={styles.frame}>
+      <View style={[styles.frame, isLandscape && styles.frameLandscape]}>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
@@ -69,5 +70,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     overflow: 'hidden',
     backgroundColor: '#FFFFFF',
+  },
+  // Em paisagem a moldura mobile é liberada para ocupar toda a largura.
+  frameLandscape: {
+    maxWidth: undefined,
   },
 });

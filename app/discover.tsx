@@ -1,5 +1,10 @@
+import { CenteredColumn } from '@/components/layout/CenteredColumn';
 import { DiscoverScreen } from '@/features/onboarding/components/DiscoverScreen';
 
 export default function DiscoverRoute() {
-  return <DiscoverScreen />;
+  return (
+    <CenteredColumn>
+      <DiscoverScreen />
+    </CenteredColumn>
+  );
 }

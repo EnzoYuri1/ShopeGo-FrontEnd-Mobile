@@ -19,6 +19,7 @@ import { colors, fontFamily, strings } from '@/constants';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { getAvatarUri, saveAvatarUri } from '@/features/profile/avatarStorage';
 import { useProfile, useUpdateProfile } from '@/features/profile/hooks/useProfile';
+import { compressImage } from '@/utils/compressImage';
 
 export function ProfileScreen() {
   const router = useRouter();
@@ -68,8 +69,10 @@ export function ProfileScreen() {
         aspect: [1, 1],
         quality: 0.7,
       });
-      const uri = result.assets?.[0]?.uri;
-      if (result.canceled || !uri) return;
+      const pickedUri = result.assets?.[0]?.uri;
+      if (result.canceled || !pickedUri) return;
+      // Comprime antes de guardar: o avatar não precisa de mais de 512 px.
+      const uri = await compressImage(pickedUri);
       setAvatarUri(uri);
       setMessage(null);
       if (user) void saveAvatarUri(user.uid, uri);

@@ -23,11 +23,11 @@ const SLIDE_COUNT = 3;
 
 const images = {
   slide1Ellipse: require('../../../../assets/images/onboarding/slide1-ellipse.svg'),
-  slide1Illustration: require('../../../../assets/images/onboarding/slide1-illustration.png'),
+  slide1Illustration: require('../../../../assets/images/onboarding/slide1-illustration.webp'),
   slide2Ellipse: require('../../../../assets/images/onboarding/slide2-ellipse.svg'),
-  slide2Illustration: require('../../../../assets/images/onboarding/slide2-illustration.png'),
+  slide2Illustration: require('../../../../assets/images/onboarding/slide2-illustration.webp'),
   slide3Ellipse: require('../../../../assets/images/onboarding/slide3-ellipse.svg'),
-  slide3Illustration: require('../../../../assets/images/onboarding/slide3-illustration.png'),
+  slide3Illustration: require('../../../../assets/images/onboarding/slide3-illustration.webp'),
   cartWhite: require('../../../../assets/images/onboarding/cart-white.svg'),
   cartOrange: require('../../../../assets/images/onboarding/cart-orange.svg'),
 };

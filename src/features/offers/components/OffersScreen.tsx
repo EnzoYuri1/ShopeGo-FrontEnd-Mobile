@@ -7,8 +7,8 @@ import { BackButton, BrandLogo } from '@/components/ui';
 import { colors, fontFamily, strings } from '@/constants';
 
 const images = {
-  gift: require('../../../../assets/images/offers/gift.png'),
-  freeTag: require('../../../../assets/images/offers/free-tag.png'),
+  gift: require('../../../../assets/images/offers/gift.webp'),
+  freeTag: require('../../../../assets/images/offers/free-tag.webp'),
 };
 
 export function OffersScreen() {

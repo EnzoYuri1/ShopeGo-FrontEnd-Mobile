@@ -16,17 +16,17 @@ interface ProductImageSet {
   variants: ImageSource[];
 }
 
-const watchWhite = require('../../../assets/images/products/watch-white.png');
-const watchBlack = require('../../../assets/images/products/watch-black.png');
-const tshirtBlack = require('../../../assets/images/products/tshirt-black.png');
-const tshirtGray = require('../../../assets/images/products/tshirt-gray.png');
-const speaker = require('../../../assets/images/products/speaker.png');
+const watchWhite = require('../../../assets/images/products/watch-white.webp');
+const watchBlack = require('../../../assets/images/products/watch-black.webp');
+const tshirtBlack = require('../../../assets/images/products/tshirt-black.webp');
+const tshirtGray = require('../../../assets/images/products/tshirt-gray.webp');
+const speaker = require('../../../assets/images/products/speaker.webp');
 
 const imageSets: Record<string, ProductImageSet> = {
   '1': { card: tshirtBlack, banner: tshirtBlack, variants: [tshirtBlack, tshirtGray] },
   '2': {
     card: watchWhite,
-    banner: require('../../../assets/images/products/watch-banner.png'),
+    banner: require('../../../assets/images/products/watch-banner.webp'),
     variants: [watchWhite, watchBlack],
   },
   '3': { card: speaker, banner: speaker, variants: [] },

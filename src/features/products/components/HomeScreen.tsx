@@ -17,6 +17,7 @@ import Svg, { Path } from 'react-native-svg';
 import { colors, fontSize, fontFamily, radius, spacing, strings } from '@/constants';
 import { getEffectivePrice, useCart } from '@/features/cart/hooks/useCart';
 import { ProductCard } from '@/features/products/components/ProductCard';
+import { useGridColumns } from '@/hooks/useScreenWidth';
 import { useProducts } from '@/features/products/hooks/useProducts';
 import { useFavoritesStore } from '@/store';
 import type { Product } from '@/features/products/types/product';
@@ -30,6 +31,7 @@ type SortMode = 'default' | 'asc' | 'desc';
 
 export function HomeScreen() {
   const insets = useSafeAreaInsets();
+  const columns = useGridColumns();
   const navigation = useNavigation();
   const router = useRouter();
 
@@ -124,7 +126,8 @@ export function HomeScreen() {
       <FlatList
         data={visibleProducts}
         keyExtractor={(item) => item.id}
-        numColumns={2}
+        key={columns}
+        numColumns={columns}
         refreshing={isRefetching}
         onRefresh={() => void refetch()}
         contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + spacing.lg }]}

@@ -17,11 +17,13 @@ import { colors, fontFamily, spacing, strings } from '@/constants';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useFavoritesStore } from '@/store';
 import { ProductCard } from '@/features/products/components/ProductCard';
+import { useGridColumns } from '@/hooks/useScreenWidth';
 import { useProducts } from '@/features/products/hooks/useProducts';
 
 export function SearchScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const columns = useGridColumns();
   const { data: products = [], isLoading } = useProducts();
   const { addItem } = useCart();
   const [query, setQuery] = useState('');
@@ -80,7 +82,8 @@ export function SearchScreen() {
       <FlatList
         data={results}
         keyExtractor={(item) => item.id}
-        numColumns={2}
+        key={columns}
+        numColumns={columns}
         columnWrapperStyle={styles.column}
         contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + spacing.lg }]}
         showsVerticalScrollIndicator={false}

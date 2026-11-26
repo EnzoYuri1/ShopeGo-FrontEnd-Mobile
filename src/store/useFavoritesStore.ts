@@ -32,6 +32,12 @@ export const useFavoritesStore = create<FavoritesState>()(
         })),
       remove: (productId) => set((state) => ({ ids: state.ids.filter((id) => id !== productId) })),
     }),
-    { name: 'shopgo-favorites', storage },
+    {
+      name: 'shopgo-favorites',
+      storage,
+      // v1: produtos agora vêm da API (ids novos); favoritos com ids de mock são descartados.
+      version: 1,
+      migrate: () => ({ ids: [] }),
+    },
   ),
 );

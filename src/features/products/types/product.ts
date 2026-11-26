@@ -6,6 +6,8 @@ export const productSchema = z.object({
   description: z.string().optional(),
   price: z.number().nonnegative(),
   imageUrl: z.string(),
+  /** Galeria de fotos (produtos vindos da API). */
+  images: z.array(z.string()).optional(),
   /** Cor pastel de fundo do card (cada produto tem a sua no protótipo). */
   cardColor: z.string().min(1),
   /** Percentual de desconto, quando houver. */

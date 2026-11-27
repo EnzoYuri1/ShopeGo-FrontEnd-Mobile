@@ -130,7 +130,7 @@ export function ProductDetailScreen({ productId }: ProductDetailScreenProps) {
     );
   }
 
-  if (isError) {
+  if (isError && !product) {
     return (
       <View style={styles.root}>
         {topBar}

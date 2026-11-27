@@ -9,7 +9,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { FeedbackHost } from '@/components/layout/FeedbackHost';
 import { UpdateModal } from '@/components/ui';
-import { appFonts } from '@/constants';
+import { appFonts, colors } from '@/constants';
 import { AuthProvider } from '@/features/auth/providers/AuthProvider';
 import { MAX_APP_WIDTH, useIsLandscape } from '@/hooks/useScreenWidth';
 
@@ -63,7 +63,7 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   page: {
     flex: 1,
-    backgroundColor: Platform.OS === 'web' ? '#E9E9EE' : 'transparent',
+    backgroundColor: Platform.OS === 'web' ? colors.surfaceBrandStrong : 'transparent',
   },
   frame: {
     flex: 1,
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     maxWidth: Platform.OS === 'web' ? MAX_APP_WIDTH : undefined,
     alignSelf: 'center',
     overflow: 'hidden',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   // Em paisagem a moldura mobile é liberada para ocupar toda a largura.
   frameLandscape: {

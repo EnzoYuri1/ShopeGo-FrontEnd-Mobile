@@ -4,13 +4,6 @@
   "main": "expo-router/entry",
   "dependencies": {
     "@expo-google-fonts/archivo": "^0.4.2",
-    "@expo-google-fonts/graduate": "^0.4.1",
-    "@expo-google-fonts/hammersmith-one": "^0.4.1",
-    "@expo-google-fonts/inria-sans": "^0.4.1",
-    "@expo-google-fonts/inter": "^0.4.2",
-    "@expo-google-fonts/irish-grover": "^0.4.0",
-    "@expo-google-fonts/poppins": "^0.4.1",
-    "@expo-google-fonts/sansita": "^0.4.1",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/drawer": "^7.14.5",
     "@tanstack/react-query": "^5.108.2",

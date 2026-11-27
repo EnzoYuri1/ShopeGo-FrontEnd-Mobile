@@ -69,7 +69,7 @@ export function CategoriesScreen() {
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <FlatList
         key={columns}
-        data={isLoading || isError ? [] : categories}
+        data={isLoading || (isError && categories.length === 0) ? [] : categories}
         keyExtractor={(item) => item.slug}
         numColumns={columns}
         columnWrapperStyle={styles.row}
@@ -97,7 +97,7 @@ export function CategoriesScreen() {
                 <Skeleton key={index} height={150} style={styles.skeleton} />
               ))}
             </View>
-          ) : isError ? (
+          ) : isError && categories.length === 0 ? (
             <ErrorState message={strings.home.loadError} onRetry={() => void refetch()} />
           ) : undefined
         }

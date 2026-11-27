@@ -66,15 +66,18 @@ export function ProductGrid({
   const favoriteIds = useFavoritesStore((state) => state.ids);
   const toggleFavorite = useFavoritesStore((state) => state.toggle);
 
+  // Erro só sem dados: se um refetch falhar, a lista em cache continua visível.
+  const showError = isError && products.length === 0;
+
   let emptyComponent: ReactElement;
   if (isLoading) emptyComponent = <GridSkeleton columns={columns} />;
-  else if (isError) emptyComponent = <ErrorState message={errorMessage} onRetry={onRetry} />;
+  else if (showError) emptyComponent = <ErrorState message={errorMessage} onRetry={onRetry} />;
   else emptyComponent = <EmptyState icon="search" {...empty} />;
 
   return (
     <FlatList
       key={columns}
-      data={isLoading || isError ? [] : fillLastRow(products, columns)}
+      data={isLoading || showError ? [] : fillLastRow(products, columns)}
       keyExtractor={(item, index) => item?.id ?? `spacer-${index}`}
       numColumns={columns}
       columnWrapperStyle={styles.row}

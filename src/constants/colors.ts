@@ -73,16 +73,13 @@ export const colors = {
   warningLight: palette.cautionTint,
 
   // Neutros absolutos
-  black: '#000000',
   white: palette.white,
+
+  /** Fundo escurecido atrás de modais e folhas (Azul Noite translúcido). */
+  scrim: 'rgba(18, 38, 75, 0.45)',
 
   /** Sombra: sempre tingida de Azul Noite, nunca preto puro. */
   shadow: palette.night,
-
-  // Legado (telas ainda não migradas; remover na Etapa 7)
-  otpBorder: '#FFDFDF',
-  socialButton: '#ECECEC',
-  buttonShadow: '#CBD6FF',
 } as const;
 
 export type ColorName = keyof typeof colors;

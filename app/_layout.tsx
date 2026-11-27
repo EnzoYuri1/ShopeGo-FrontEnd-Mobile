@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { FeedbackHost } from '@/components/layout/FeedbackHost';
 import { UpdateModal } from '@/components/ui';
 import { appFonts } from '@/constants';
 import { AuthProvider } from '@/features/auth/providers/AuthProvider';
@@ -48,6 +49,7 @@ export default function RootLayout() {
             <AuthProvider>
               <StatusBar style="dark" />
               <Stack screenOptions={{ headerShown: false }} />
+              <FeedbackHost />
               <UpdateModal />
             </AuthProvider>
           </QueryClientProvider>

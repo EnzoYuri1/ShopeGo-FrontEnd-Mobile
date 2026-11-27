@@ -18,6 +18,8 @@ export const productSchema = z.object({
   colorLabel: z.string().optional(),
   category: z.string().optional(),
   stock: z.number().int().nonnegative().optional(),
+  /** Nota média de 0 a 5 (vem da API). */
+  rating: z.number().min(0).max(5).optional(),
 });
 
 export type Product = z.infer<typeof productSchema>;

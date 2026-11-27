@@ -18,6 +18,7 @@ const apiProductSchema = z.object({
   discountPercentage: z.number().optional(),
   category: z.string().optional(),
   stock: z.number().optional(),
+  rating: z.number().optional(),
   thumbnail: z.string().optional(),
   images: z.array(z.string()).optional(),
 });
@@ -41,6 +42,7 @@ function toProduct(item: ApiProduct): Product {
     discountPercent: discount > 0 ? discount : undefined,
     category: item.category,
     stock: item.stock === undefined ? undefined : Math.max(0, Math.round(item.stock)),
+    rating: item.rating === undefined ? undefined : Math.min(5, Math.max(0, item.rating)),
   });
 }
 

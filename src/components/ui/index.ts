@@ -15,6 +15,7 @@ export * from './PagerDots';
 export * from './QuantityStepper';
 export * from './RouteLine';
 export * from './ScreenHeader';
+export * from './ScreenTopBar';
 export * from './SelectField';
 export * from './Skeleton';
 export * from './Snackbar';

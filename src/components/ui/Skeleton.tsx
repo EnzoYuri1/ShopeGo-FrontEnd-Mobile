@@ -5,7 +5,8 @@ import { colors, radius } from '@/constants';
 
 interface SkeletonProps {
   width?: DimensionValue;
-  height: DimensionValue;
+  /** Opcional quando o `style` define o tamanho (ex.: aspectRatio). */
+  height?: DimensionValue;
   rounded?: keyof typeof radius;
   style?: StyleProp<ViewStyle>;
 }

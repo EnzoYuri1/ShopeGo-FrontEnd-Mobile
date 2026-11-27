@@ -79,6 +79,8 @@ export function Button({
           {iconPosition === 'left' ? iconNode : null}
           <Text
             numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.85}
             style={[textVariants.button, display ? styles.displayText : null, { color: colors[look.fg] }]}
           >
             {title}

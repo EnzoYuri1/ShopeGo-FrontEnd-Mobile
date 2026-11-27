@@ -1,7 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import { Pressable, StyleSheet, View } from 'react-native';
 
-import { colors, fontFamily, strings } from '@/constants';
+import { AppText } from '@/components/ui/AppText';
+import { Icon } from '@/components/ui/Icon';
+import { colors, radius, strings } from '@/constants';
 
 interface QuantityStepperProps {
   value: number;
@@ -9,80 +10,94 @@ interface QuantityStepperProps {
   onDecrement: () => void;
   /** `lg` = tela de produto; `sm` = linha do carrinho. */
   size?: 'lg' | 'sm';
+  /** Menor valor permitido (o botão "−" fica desativado nele). */
+  min?: number;
 }
 
 const SIZES = {
-  lg: { box: 34, icon: 15, font: 32, gap: 6, textWidth: 34 },
-  sm: { box: 19, icon: 9, font: 16, gap: 8, textWidth: 18 },
+  lg: { box: 44, icon: 20, textWidth: 40 },
+  sm: { box: 32, icon: 16, textWidth: 28 },
 } as const;
 
-/** Controle "+ N −" do Figma (botões pretos arredondados). */
+/** Controle de quantidade "− N +" da marca: botões com contorno, valor no centro. */
 export function QuantityStepper({
   value,
   onIncrement,
   onDecrement,
   size = 'lg',
+  min = 1,
 }: QuantityStepperProps) {
   const s = SIZES[size];
+  const canDecrement = value > min;
 
   return (
-    <View style={[styles.row, { gap: s.gap }]}>
+    <View style={styles.row} accessibilityRole="adjustable" accessibilityValue={{ now: value }}>
       <StepButton
-        s={s}
+        box={s.box}
+        icon="minus"
+        iconSize={s.icon}
+        label={strings.cart.decrease}
+        onPress={onDecrement}
+        disabled={!canDecrement}
+      />
+      <AppText
+        variant={size === 'lg' ? 'subheading' : 'bodyStrong'}
+        align="center"
+        style={{ minWidth: s.textWidth }}
+      >
+        {value}
+      </AppText>
+      <StepButton
+        box={s.box}
+        icon="plus"
+        iconSize={s.icon}
         label={strings.cart.increase}
         onPress={onIncrement}
-        path="M12 5v14M5 12h14"
       />
-      <Text style={[styles.value, { fontSize: s.font, minWidth: s.textWidth }]}>{value}</Text>
-      <StepButton s={s} label={strings.cart.decrease} onPress={onDecrement} path="M5 12h14" />
     </View>
   );
 }
 
 interface StepButtonProps {
-  s: (typeof SIZES)[keyof typeof SIZES];
+  box: number;
+  icon: 'plus' | 'minus';
+  iconSize: number;
   label: string;
   onPress: () => void;
-  path: string;
+  disabled?: boolean;
 }
 
-function StepButton({ s, label, onPress, path }: StepButtonProps) {
+function StepButton({ box, icon, iconSize, label, onPress, disabled = false }: StepButtonProps) {
   return (
     <Pressable
       onPress={onPress}
-      hitSlop={8}
+      disabled={disabled}
+      hitSlop={6}
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityState={{ disabled }}
       style={({ pressed }) => [
         styles.button,
-        { width: s.box, height: s.box },
+        { width: box, height: box },
         pressed ? styles.pressed : null,
+        disabled ? styles.disabled : null,
       ]}
     >
-      <Svg width={s.icon} height={s.icon} viewBox="0 0 24 24" fill="none">
-        <Path d={path} stroke={colors.white} strokeWidth={3} strokeLinecap="round" />
-      </Svg>
+      <Icon name={icon} size={iconSize} color="brand" strokeWidth={2.5} />
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   button: {
-    backgroundColor: colors.black,
-    borderRadius: 6,
+    borderRadius: radius.sm,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  pressed: {
-    opacity: 0.7,
-  },
-  value: {
-    fontFamily: fontFamily.heading,
-    color: colors.black,
-    textAlign: 'center',
-  },
+  pressed: { backgroundColor: colors.surfaceBrand },
+  disabled: { opacity: 0.4 },
 });

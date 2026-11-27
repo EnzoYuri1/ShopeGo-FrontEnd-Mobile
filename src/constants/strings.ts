@@ -103,6 +103,7 @@ export const strings = {
     emptyMessage: 'Tire o filtro "Em oferta" ou escolha outra categoria.',
     clearFilters: 'Limpar filtros',
     emptyProducts: 'Nenhum produto encontrado.',
+    loadingMore: 'Carregando mais produtos...',
     loadError: 'Não foi possível carregar os produtos.',
   },
   tabs: {

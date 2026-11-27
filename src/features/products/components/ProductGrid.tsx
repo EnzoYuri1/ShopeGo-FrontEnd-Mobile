@@ -1,8 +1,8 @@
 import { useRouter } from 'expo-router';
-import type { ReactElement } from 'react';
-import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { useState, type ReactElement } from 'react';
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
-import { EmptyState, ErrorBanner, ErrorState, Skeleton } from '@/components/ui';
+import { AppText, EmptyState, ErrorBanner, ErrorState, Skeleton } from '@/components/ui';
 import { colors, spacing, strings } from '@/constants';
 import { useAddToCart } from '@/features/cart/hooks/useAddToCart';
 import { ProductCard } from '@/features/products/components/ProductCard';
@@ -25,6 +25,7 @@ interface ProductGridProps {
 }
 
 const SKELETON_COUNT = 6;
+const PAGE_SIZE = 12;
 
 /** Completa a última linha com espaços vazios, para o último card não esticar. */
 function fillLastRow(products: Product[], columns: number): (Product | null)[] {
@@ -65,6 +66,22 @@ export function ProductGrid({
   const addToCart = useAddToCart();
   const favoriteIds = useFavoritesStore((state) => state.ids);
   const toggleFavorite = useFavoritesStore((state) => state.toggle);
+  const [prevProducts, setPrevProducts] = useState(products);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  if (products !== prevProducts) {
+    setPrevProducts(products);
+    setVisibleCount(PAGE_SIZE);
+  }
+
+  const visibleProducts = products.slice(0, visibleCount);
+  const hasMore = visibleCount < products.length;
+
+  function handleLoadMore() {
+    if (hasMore) {
+      setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, products.length));
+    }
+  }
 
   // Erro em tela cheia só sem dados; com cache visível, mostra aviso no topo.
   const showError = isError && products.length === 0;
@@ -78,11 +95,13 @@ export function ProductGrid({
   return (
     <FlatList
       key={columns}
-      data={isLoading || showError ? [] : fillLastRow(products, columns)}
+      data={isLoading || showError ? [] : fillLastRow(visibleProducts, columns)}
       keyExtractor={(item, index) => item?.id ?? `spacer-${index}`}
       numColumns={columns}
       columnWrapperStyle={styles.row}
       contentContainerStyle={[styles.content, { paddingBottom: bottomInset + spacing.xl }]}
+      onEndReached={handleLoadMore}
+      onEndReachedThreshold={0.4}
       ListHeaderComponent={
         header || showRefreshError ? (
           <View style={styles.headerWrap}>
@@ -94,6 +113,16 @@ export function ProductGrid({
         ) : undefined
       }
       ListEmptyComponent={emptyComponent}
+      ListFooterComponent={
+        !isLoading && !showError && hasMore ? (
+          <View style={styles.footerLoader}>
+            <ActivityIndicator size="small" color={colors.primary} />
+            <AppText variant="caption" color="textSecondary">
+              {strings.home.loadingMore}
+            </AppText>
+          </View>
+        ) : undefined
+      }
       showsVerticalScrollIndicator={false}
       initialNumToRender={8}
       maxToRenderPerBatch={8}
@@ -145,4 +174,11 @@ const styles = StyleSheet.create({
   },
   skeletonCell: { paddingHorizontal: GAP / 2, gap: spacing.sm },
   skeletonMedia: { aspectRatio: 1 },
+  footerLoader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+  },
 });

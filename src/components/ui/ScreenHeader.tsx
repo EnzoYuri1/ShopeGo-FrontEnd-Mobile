@@ -23,7 +23,7 @@ export function ScreenHeader({ title, onBack }: ScreenHeaderProps) {
         <BackButton onPress={onBack} style={styles.back} />
         <Text style={styles.title}>{title}</Text>
       </View>
-      <BrandLogo style={{ top: insets.top - 2 }} />
+      <BrandLogo tone="onPrimary" style={{ top: insets.top - 2 }} />
     </View>
   );
 }

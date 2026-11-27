@@ -33,12 +33,13 @@ const imageSets: Record<string, ProductImageSet> = {
 };
 
 export function getProductImages(product: Product): ProductImageSet | undefined {
+  // Produto com foto remota (API) nunca usa o asset local: os ids '1'..'3' coincidem.
+  if (product.imageUrl) return undefined;
   return imageSets[product.id];
 }
 
 /** Fonte da imagem do card: asset local (demo) ou `imageUrl` remota; `undefined` = placeholder. */
 export function getCardImageSource(product: Product): ImageSource | undefined {
-  const local = imageSets[product.id]?.card;
-  if (local) return local;
-  return product.imageUrl ? { uri: product.imageUrl } : undefined;
+  if (product.imageUrl) return { uri: product.imageUrl };
+  return imageSets[product.id]?.card;
 }

@@ -12,7 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { BackButton, BrandLogo } from '@/components/ui';
+import { BackButton, BrandLogo, ErrorState } from '@/components/ui';
 import { colors, fontFamily, spacing, strings } from '@/constants';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useFavoritesStore } from '@/store';
@@ -24,7 +24,7 @@ export function SearchScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const columns = useGridColumns();
-  const { data: products = [], isLoading } = useProducts();
+  const { data: products = [], isLoading, isError, refetch } = useProducts();
   const { addItem } = useCart();
   const [query, setQuery] = useState('');
   const favoriteIds = useFavoritesStore((state) => state.ids);
@@ -91,6 +91,8 @@ export function SearchScreen() {
         ListEmptyComponent={
           isLoading ? (
             <ActivityIndicator size="large" color={colors.primary} style={styles.empty} />
+          ) : isError ? (
+            <ErrorState message={strings.home.loadError} onRetry={() => void refetch()} />
           ) : (
             <Text style={styles.emptyText}>{strings.search.empty}</Text>
           )

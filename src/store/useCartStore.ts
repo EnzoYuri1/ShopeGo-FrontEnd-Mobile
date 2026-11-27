@@ -67,6 +67,9 @@ export const useCartStore = create<CartState>()(
     {
       name: 'shopgo-cart',
       storage,
+      // v1: produtos agora vêm da API (ids novos); carrinho salvo com ids de mock é descartado.
+      version: 1,
+      migrate: () => ({ items: [] }),
     },
   ),
 );

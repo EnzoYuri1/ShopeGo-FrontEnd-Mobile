@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
+import { ErrorState } from '@/components/ui';
 import { colors, fontSize, fontFamily, radius, spacing, strings } from '@/constants';
 import { getEffectivePrice, useCart } from '@/features/cart/hooks/useCart';
 import { ProductCard } from '@/features/products/components/ProductCard';
@@ -193,9 +194,11 @@ export function HomeScreen() {
           isLoading ? (
             <ActivityIndicator size="large" color={colors.primary} style={styles.emptyState} />
           ) : (
-            <Text style={styles.emptyText}>
-              {isError ? strings.home.loadError : strings.home.emptyProducts}
-            </Text>
+            isError ? (
+              <ErrorState message={strings.home.loadError} onRetry={() => void refetch()} />
+            ) : (
+              <Text style={styles.emptyText}>{strings.home.emptyProducts}</Text>
+            )
           )
         }
         ListFooterComponent={

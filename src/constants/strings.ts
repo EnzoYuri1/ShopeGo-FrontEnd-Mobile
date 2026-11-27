@@ -86,6 +86,7 @@ export const strings = {
     loadError: 'Não foi possível carregar os produtos.',
   },
   product: {
+    loadError: 'Não foi possível carregar o produto.',
     off: 'OFF',
     availableOptions: 'Opções disponíveis',
     buyNow: 'Comprar agora',

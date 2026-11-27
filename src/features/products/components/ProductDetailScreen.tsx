@@ -1,13 +1,13 @@
-import { Image } from 'expo-image';
+import { Image, type ImageSource } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BackButton, BrandLogo, QuantityStepper } from '@/components/ui';
+import { BackButton, BrandLogo, ErrorState, QuantityStepper } from '@/components/ui';
 import { colors, fontFamily, strings } from '@/constants';
 import { getEffectivePrice, useCart } from '@/features/cart/hooks/useCart';
-import { getProductImages } from '@/features/products/productImages';
+import { getCardImageSource, getProductImages } from '@/features/products/productImages';
 import { useProduct } from '@/features/products/hooks/useProducts';
 import { formatPrice } from '@/utils/formatPrice';
 
@@ -18,7 +18,7 @@ interface ProductDetailScreenProps {
 export function ProductDetailScreen({ productId }: ProductDetailScreenProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { data: product, isLoading } = useProduct(productId);
+  const { data: product, isLoading, isError, refetch } = useProduct(productId);
   const { addItem } = useCart();
 
   const [quantity, setQuantity] = useState(1);
@@ -46,6 +46,15 @@ export function ProductDetailScreen({ productId }: ProductDetailScreenProps) {
     );
   }
 
+  if (isError) {
+    return (
+      <View style={[styles.center, { paddingTop: insets.top }]}>
+        <BackButton variant="close" onPress={handleClose} style={styles.floatingClose} />
+        <ErrorState message={strings.product.loadError} onRetry={() => void refetch()} />
+      </View>
+    );
+  }
+
   if (!product) {
     return (
       <View style={[styles.center, { paddingTop: insets.top }]}>
@@ -57,8 +66,14 @@ export function ProductDetailScreen({ productId }: ProductDetailScreenProps) {
 
   const accent = product.accentColor ?? colors.primary;
   const images = getProductImages(product);
-  const variants = images?.variants ?? [];
-  const bannerSource = variantIndex === 0 ? images?.banner : variants[variantIndex];
+  // Sem set local (produto da API), a galeria vem de `product.images`.
+  const remoteImages: ImageSource[] = (product.images ?? []).map((uri) => ({ uri }));
+  const variants: ImageSource[] = images?.variants ?? remoteImages;
+  const bannerSource = images
+    ? variantIndex === 0
+      ? images.banner
+      : variants[variantIndex]
+    : (variants[variantIndex] ?? getCardImageSource(product));
 
   function handleAdd() {
     if (!product) return;

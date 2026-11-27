@@ -4,7 +4,6 @@ import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
 
 interface FavoritesState {
-  /** IDs dos produtos favoritados. */
   ids: string[];
   toggle: (productId: string) => void;
   remove: (productId: string) => void;
@@ -35,7 +34,7 @@ export const useFavoritesStore = create<FavoritesState>()(
     {
       name: 'shopgo-favorites',
       storage,
-      // v1: produtos agora vêm da API (ids novos); favoritos com ids de mock são descartados.
+      // v1: produtos agora vêm da api (ids novos); favoritos com ids de mock são descartados
       version: 1,
       migrate: () => ({ ids: [] }),
     },

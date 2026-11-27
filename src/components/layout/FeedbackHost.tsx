@@ -8,10 +8,10 @@ import { spacing } from '@/constants';
 import { useFeedbackStore } from '@/store';
 
 const VISIBLE_MS = 3000;
-/** Altura aproximada da barra inferior, para o aviso aparecer acima dela. */
+// altura aproximada da barra inferior, para o aviso aparecer acima dela
 const TAB_BAR_CLEARANCE = 64;
 
-/** Mostra o aviso global na base da tela e o esconde sozinho após 3 s. */
+// mostra o aviso global na base da tela e o esconde sozinho após 3 s
 export function FeedbackHost() {
   const router = useRouter();
   const insets = useSafeAreaInsets();

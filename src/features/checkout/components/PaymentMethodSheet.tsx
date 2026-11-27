@@ -18,7 +18,7 @@ interface PaymentMethodSheetProps {
   onProceed: (method: PaymentMethod) => void;
 }
 
-/** Folha de escolha da forma de pagamento, sobre o carrinho. */
+// folha de escolha da forma de pagamento, sobre o carrinho
 export function PaymentMethodSheet({ onClose, onProceed }: PaymentMethodSheetProps) {
   const insets = useSafeAreaInsets();
   const [method, setMethod] = useState<PaymentMethod>('card');

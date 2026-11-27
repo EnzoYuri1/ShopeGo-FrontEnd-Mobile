@@ -42,7 +42,7 @@ const SLIDES = [
 
 const STOPS = SLIDES.map((slide) => ({ key: slide.key, label: slide.step }));
 
-/** Apresentação em 3 passos (Explore, Compre, Receba) com a linha de rota como progresso. */
+// apresentação em 3 passos (explore, compre, receba) com a linha de rota como progresso
 export function OnboardingScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();

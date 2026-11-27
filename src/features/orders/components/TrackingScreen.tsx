@@ -53,7 +53,7 @@ function InfoRow({ icon, label, value }: { icon: IconName; label: string; value:
   );
 }
 
-/** Acompanhar pedido: status real em linha do tempo, itens, endereço, pagamento e total. */
+// acompanhar pedido: status real em linha do tempo, itens, endereço, pagamento e total
 export function TrackingScreen({ orderId }: TrackingScreenProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();

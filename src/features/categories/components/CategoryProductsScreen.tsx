@@ -22,10 +22,7 @@ interface CategoryProductsScreenProps {
   slug: string;
 }
 
-/**
- * Produtos de uma categoria. O slug especial "ofertas" lista os produtos com desconto,
- * do maior para o menor (destino da campanha da Home).
- */
+// produtos de uma categoria
 export function CategoryProductsScreen({ slug }: CategoryProductsScreenProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();

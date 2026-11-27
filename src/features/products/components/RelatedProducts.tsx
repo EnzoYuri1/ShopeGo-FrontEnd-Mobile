@@ -18,11 +18,10 @@ const CARD_WIDTH = 156;
 
 interface RelatedProductsProps {
   product: Product;
-  /** Altura do aviso "Adicionado ao carrinho" (tela com rodapé fixo). */
   feedbackLift?: number;
 }
 
-/** "Mais em {categoria}": outros produtos da mesma categoria, os de melhor nota primeiro. */
+// "mais em {categoria}": outros produtos da mesma categoria, os de melhor nota primeiro
 export function RelatedProducts({ product, feedbackLift }: RelatedProductsProps) {
   const router = useRouter();
   const { data: products = [], isError, refetch } = useProducts();

@@ -21,10 +21,7 @@ import {
 } from '@/components/ui';
 import { colors, palette, radius, spacing, textVariants, type TextVariant } from '@/constants';
 
-/**
- * Catálogo interno do Design System "Rota" (tela de desenvolvimento, não aparece em produção).
- * Os textos aqui são exemplos de uso dos componentes.
- */
+// catálogo interno do design system "rota" (tela de desenvolvimento, não aparece em produção)
 const SWATCHES: { name: string; value: string }[] = [
   { name: 'Laranja Sinal', value: palette.signal },
   { name: 'Azul Noite', value: palette.night },

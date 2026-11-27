@@ -1,14 +1,9 @@
 export interface CompressOptions {
-  /** Maior lado da imagem final, em pixels. */
   maxSize?: number;
-  /** Qualidade de 0 a 1 (menor = arquivo menor). */
   quality?: number;
 }
 
-/**
- * Reduz e comprime uma imagem local em WebP. Se o módulo nativo não existir
- * no app instalado ou a compressão falhar, devolve a URI original.
- */
+// reduz e comprime uma imagem local em webp
 export async function compressImage(
   uri: string,
   { maxSize = 512, quality = 0.7 }: CompressOptions = {},

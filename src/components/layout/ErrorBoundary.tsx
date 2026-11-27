@@ -8,7 +8,7 @@ interface ErrorBoundaryState {
   hasError: boolean;
 }
 
-/** Captura erros inesperados de renderização para evitar que o app feche sozinho. */
+// captura erros inesperados de renderização para evitar que o app feche sozinho
 export class ErrorBoundary extends Component<PropsWithChildren, ErrorBoundaryState> {
   state: ErrorBoundaryState = { hasError: false };
 

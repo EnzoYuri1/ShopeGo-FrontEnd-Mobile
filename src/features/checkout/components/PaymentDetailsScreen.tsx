@@ -48,10 +48,7 @@ function formatCardNumber(raw: string): string {
     .replace(/(\d{4})(?=\d)/g, '$1 ');
 }
 
-/**
- * Dados do cartão. Os campos são validados com zod e NUNCA são salvos:
- * o pedido guarda só a bandeira (ex.: "card:visa").
- */
+// dados do cartão
 export function PaymentDetailsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -95,7 +92,7 @@ export function PaymentDetailsScreen() {
 
     setErrors({});
     setFormError(undefined);
-    // Só o tipo do cartão vai no pedido; número e CVV ficam apenas nesta tela.
+    // só o tipo do cartão vai no pedido; número e cvv ficam apenas nesta tela
     placeOrder(
       `card:${parsed.data.cardType}`,
       () => router.replace('/checkout/success'),

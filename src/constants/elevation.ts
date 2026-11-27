@@ -2,11 +2,7 @@ import type { ViewStyle } from 'react-native';
 
 import { colors } from './colors';
 
-/**
- * Sombras por função. A marca usa poucas sombras: separação vem de cor e linha.
- * - raised: elementos que flutuam sobre o conteúdo (barra inferior, aviso, folha).
- * - overlay: modais.
- */
+// sombras por função
 export const elevation = {
   none: {},
   raised: {

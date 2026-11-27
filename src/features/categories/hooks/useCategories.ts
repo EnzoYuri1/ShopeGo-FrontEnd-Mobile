@@ -8,21 +8,16 @@ export interface Category {
   slug: string;
   name: string;
   count: number;
-  /** Maior desconto da categoria (0 quando não há). */
   maxDiscount: number;
-  /** Produto usado como capa (o de melhor nota). */
   cover: Product;
 }
 
-/** Agrupa um produto pela categoria (ou "outros"). */
+// agrupa um produto pela categoria (ou "outros")
 export function categoryOf(product: Product): string {
   return product.category || OTHER_CATEGORY;
 }
 
-/**
- * Categorias derivadas dos produtos já carregados (sem requisição extra).
- * Ordenadas da maior para a menor.
- */
+// categorias derivadas dos produtos já carregados (sem requisição extra)
 export function useCategories() {
   const query = useProducts();
   const products = query.data;

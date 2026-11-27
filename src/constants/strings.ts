@@ -1,7 +1,4 @@
-/**
- * Textos da interface em português (pt-BR), centralizados.
- * Todo texto visível ao usuário deve vir daqui — não escreva strings soltas nas telas.
- */
+// textos da interface em português (pt-br), centralizados
 export const strings = {
   app: {
     name: 'ShopGo',

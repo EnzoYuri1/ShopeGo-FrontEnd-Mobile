@@ -8,9 +8,7 @@ interface QuantityStepperProps {
   value: number;
   onIncrement: () => void;
   onDecrement: () => void;
-  /** `lg` = tela de produto; `sm` = linha do carrinho. */
   size?: 'lg' | 'sm';
-  /** Menor valor permitido (o botão "−" fica desativado nele). */
   min?: number;
 }
 
@@ -19,7 +17,7 @@ const SIZES = {
   sm: { box: 32, icon: 16, textWidth: 28 },
 } as const;
 
-/** Controle de quantidade "− N +" da marca: botões com contorno, valor no centro. */
+// controle de quantidade "− n +" da marca: botões com contorno, valor no centro
 export function QuantityStepper({
   value,
   onIncrement,

@@ -11,10 +11,7 @@ interface SnackbarProps {
   onAction?: () => void;
 }
 
-/**
- * Aviso curto na base da tela (ex.: "Adicionado ao carrinho" + "Ver carrinho").
- * Quem usa controla posição e tempo de exibição.
- */
+// aviso curto na base da tela (ex.: "adicionado ao carrinho" + "ver carrinho")
 export function Snackbar({ message, icon = 'check', actionLabel, onAction }: SnackbarProps) {
   return (
     <View style={styles.bar} accessibilityRole="alert" accessibilityLiveRegion="polite">

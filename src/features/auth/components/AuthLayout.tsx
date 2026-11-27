@@ -8,15 +8,11 @@ import { colors, radius, spacing, strings } from '@/constants';
 interface AuthLayoutProps {
   title: string;
   subtitle?: string;
-  /** Mostra o voltar no cabeçalho (telas internas do fluxo). */
   onBack?: () => void;
   children: ReactNode;
 }
 
-/**
- * Estrutura das telas de entrada e senha: faixa Azul Noite com o símbolo e o título,
- * e o formulário numa folha branca. Cuida do teclado e da área segura.
- */
+// estrutura das telas de entrada e senha: faixa azul noite com o símbolo e o título, e o formulário numa folh...
 export function AuthLayout({ title, subtitle, onBack, children }: AuthLayoutProps) {
   const insets = useSafeAreaInsets();
 

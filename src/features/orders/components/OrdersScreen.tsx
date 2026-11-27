@@ -19,7 +19,7 @@ import { formatDate, getStatusLabel, getStatusTone } from '@/features/orders/uti
 import { fillTemplate } from '@/utils/fillTemplate';
 import { formatPrice } from '@/utils/formatPrice';
 
-/** Meus pedidos: status, data, itens e total; toque abre o rastreio. */
+// meus pedidos: status, data, itens e total; toque abre o rastreio
 export function OrdersScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();

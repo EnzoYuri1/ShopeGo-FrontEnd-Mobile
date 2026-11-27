@@ -11,12 +11,12 @@ import { ProductGrid } from '@/features/products/components/ProductGrid';
 import { useProducts } from '@/features/products/hooks/useProducts';
 import { fillTemplate } from '@/utils/fillTemplate';
 
-/** Minúsculas e sem acentos, para "perfume" achar "Perfumes" e "relogio" achar "Relógios". */
+// minúsculas e sem acentos, para "perfume" achar "perfumes" e "relogio" achar "relógios"
 function normalize(text: string): string {
   return text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 }
 
-/** Aba Buscar: procura no nome do produto e no nome da categoria em português. */
+// aba buscar: procura no nome do produto e no nome da categoria em português
 export function SearchScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();

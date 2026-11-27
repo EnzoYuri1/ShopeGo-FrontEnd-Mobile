@@ -20,10 +20,7 @@ interface MenuItem {
   onPress: () => void;
 }
 
-/**
- * Menu lateral: destinos secundários (os principais estão na barra inferior),
- * buscar atualizações e sair.
- */
+// menu lateral: destinos secundários (os principais estão na barra inferior), buscar atualizações e sair
 export function CustomDrawerContent({ navigation }: CustomDrawerContentProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();

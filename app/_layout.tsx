@@ -14,7 +14,7 @@ import { appFonts, colors } from '@/constants';
 import { AuthProvider } from '@/features/auth/providers/AuthProvider';
 import { MAX_APP_WIDTH, useIsLandscape } from '@/hooks/useScreenWidth';
 
-// Mantém a splash visível até as fontes carregarem (evita troca de fonte na tela).
+// mantém a splash visível até as fontes carregarem (evita troca de fonte na tela)
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function RootLayout() {
@@ -62,7 +62,7 @@ export default function RootLayout() {
   );
 }
 
-// No web o app fica numa moldura mobile centralizada (o layout segue o frame de 393 px do Figma).
+// no web o app fica numa moldura mobile centralizada (o layout segue o frame de 393 px do figma)
 const styles = StyleSheet.create({
   page: {
     flex: 1,
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: colors.background,
   },
-  // Em paisagem a moldura mobile é liberada para ocupar toda a largura.
+  // em paisagem a moldura mobile é liberada para ocupar toda a largura
   frameLandscape: {
     maxWidth: undefined,
   },

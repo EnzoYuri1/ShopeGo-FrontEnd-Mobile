@@ -1,11 +1,4 @@
-/**
- * Tipografia do ShopGo — identidade "Rota".
- *
- * Fonte única da marca: Archivo (contraste por peso, não por família).
- * - Use `textVariants` (via componente `AppText`) em vez de fontFamily/fontSize soltos.
- * - Preços usam `price`/`priceLarge`, com números de largura fixa (tabular).
- * Fontes carregadas com expo-font em app/_layout.tsx (veja `appFonts`).
- */
+// tipografia do shopgo — identidade "rota"
 import {
   Archivo_400Regular,
   Archivo_500Medium,
@@ -23,7 +16,7 @@ export const fontFamily = {
   brandHeavy: 'Archivo_800ExtraBold',
 } as const;
 
-/** Mapa passado para `useFonts` no layout raiz. */
+// mapa passado para `usefonts` no layout raiz
 export const appFonts = {
   Archivo_400Regular,
   Archivo_500Medium,
@@ -32,10 +25,7 @@ export const appFonts = {
   Archivo_800ExtraBold,
 };
 
-/**
- * Escala tipográfica da marca. Cada variante define família, tamanho, entrelinha
- * e espaçamento. Tamanhos: 12, 13, 15, 16, 17, 20, 24, 28, 32.
- */
+// escala tipográfica da marca
 export const textVariants = {
   display: { fontFamily: fontFamily.brandHeavy, fontSize: 32, lineHeight: 36, letterSpacing: -0.8 },
   title: { fontFamily: fontFamily.brandHeavy, fontSize: 24, lineHeight: 28, letterSpacing: -0.5 },

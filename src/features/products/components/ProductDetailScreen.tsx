@@ -30,16 +30,16 @@ import { useFavoritesStore } from '@/store';
 import { fillTemplate } from '@/utils/fillTemplate';
 import { formatPrice } from '@/utils/formatPrice';
 
-/** Altura do rodapé fixo; o aviso "Adicionado ao carrinho" aparece acima dele. */
+// altura do rodapé fixo; o aviso "adicionado ao carrinho" aparece acima dele
 const FOOTER_LIFT = 88;
-/** A partir de quantas unidades o estoque deixa de ser "últimas unidades". */
+// a partir de quantas unidades o estoque deixa de ser "últimas unidades"
 const LOW_STOCK = 10;
 
 interface ProductDetailScreenProps {
   productId: string;
 }
 
-/** Fotos do produto: assets locais (mocks) ou a galeria da API; no mínimo a foto do card. */
+// fotos do produto: assets locais (mocks) ou a galeria da api; no mínimo a foto do card
 function getGallery(product: Product): ImageSource[] {
   const local = getProductImages(product);
   if (local) {

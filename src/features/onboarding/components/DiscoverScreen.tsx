@@ -9,7 +9,7 @@ import { markOnboardingSeen } from '@/features/onboarding/storage';
 
 const illustration = require('../../../../assets/images/onboarding/discover-illustration.svg');
 
-/** Fim da apresentação: escolher entre entrar e criar conta. */
+// fim da apresentação: escolher entre entrar e criar conta
 export function DiscoverScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();

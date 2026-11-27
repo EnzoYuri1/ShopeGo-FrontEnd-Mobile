@@ -18,10 +18,7 @@ const r = (x: number, y: number, width: number, height: number, rx = 0): Shape =
   rx,
 });
 
-/**
- * Ícones do ShopGo: grade 24 px, traço 2 px, pontas arredondadas.
- * Ícones marcados em `FILLABLE` aceitam `filled` (estado ativo/selecionado).
- */
+// ícones do shopgo: grade 24 px, traço 2 px, pontas arredondadas
 const ICONS = {
   home: [p('M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z')],
   grid: [r(4, 4, 7, 7, 1.5), r(13, 4, 7, 7, 1.5), r(4, 13, 7, 7, 1.5), r(13, 13, 7, 7, 1.5)],
@@ -62,7 +59,6 @@ interface IconProps {
   name: IconName;
   size?: number;
   color?: ColorName;
-  /** Preenche o ícone (só para heart, star, home, bag, tag). */
   filled?: boolean;
   strokeWidth?: number;
 }

@@ -1,7 +1,7 @@
 import { strings } from '@/constants';
 import type { OrderStatus } from '@/features/orders/types/order';
 
-/** Etapas da linha do tempo de entrega, na ordem. */
+// etapas da linha do tempo de entrega, na ordem
 export const TRACKING_STEPS = [
   { title: strings.tracking.stepConfirmed, subtitle: strings.tracking.stepConfirmedSub },
   { title: strings.tracking.stepPreparing, subtitle: strings.tracking.stepPreparingSub },
@@ -9,10 +9,7 @@ export const TRACKING_STEPS = [
   { title: strings.tracking.stepDelivered, subtitle: strings.tracking.stepDeliveredSub },
 ] as const;
 
-/**
- * Índice da etapa atual por status. Etapas anteriores ficam concluídas e as seguintes pendentes.
- * `delivered` devolve o tamanho da lista: todas concluídas. `cancelled` não tem linha do tempo.
- */
+// índice da etapa atual por status
 export function getCurrentStep(status: OrderStatus): number {
   switch (status) {
     case 'pending':
@@ -51,7 +48,7 @@ export function formatDate(iso?: string, addDays = 0): string {
   return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' });
 }
 
-/** Cor do selo de status (tons do Badge da marca). */
+// cor do selo de status (tons do badge da marca)
 export function getStatusTone(
   status: OrderStatus,
 ): 'warning' | 'neutral' | 'signal' | 'success' | 'danger' {
@@ -69,7 +66,7 @@ export function getStatusTone(
   }
 }
 
-/** Forma de pagamento salva no pedido ("card:visa", "other") em texto para o usuário. */
+// forma de pagamento salva no pedido ("card:visa", "other") em texto para o usuário
 export function getPaymentLabel(method: string): string {
   if (method.startsWith('card:')) {
     const brand = method.slice('card:'.length);

@@ -9,12 +9,11 @@ interface EmptyStateProps {
   icon: IconName;
   title: string;
   message?: string;
-  /** Ação que resolve o vazio (ex.: "Explorar categorias"). */
   actionLabel?: string;
   onAction?: () => void;
 }
 
-/** Tela/lista vazia: diz o que falta e oferece o próximo passo. */
+// tela/lista vazia: diz o que falta e oferece o próximo passo
 export function EmptyState({ icon, title, message, actionLabel, onAction }: EmptyStateProps) {
   return (
     <View style={styles.container}>

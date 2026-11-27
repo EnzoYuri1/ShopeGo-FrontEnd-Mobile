@@ -4,10 +4,10 @@ import { config } from '@/constants';
 import { productSchema, type Product } from '@/features/products/types/product';
 import { ApiError, apiGet } from '@/services/api/client';
 
-/** `limit=0` faz a API devolver o catálogo inteiro (194 itens), para a busca cobrir tudo. */
+// `limit=0` faz a api devolver o catálogo inteiro (194 itens), para a busca cobrir tudo
 const PRODUCTS_LIMIT = 0;
 
-/** Cores pastel dos cards, repetidas em rotação (a API não fornece cor). */
+// cores pastel dos cards, repetidas em rotação (a api não fornece cor)
 const CARD_COLORS = ['#CFF5D3', '#E3DEFF', '#F5F6C2', '#FFD4D2', '#D6EBFF', '#FFE6C7'];
 
 const apiProductSchema = z.object({

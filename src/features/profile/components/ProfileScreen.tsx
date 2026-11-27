@@ -27,7 +27,7 @@ const SHORTCUTS: Shortcut[] = [
   { icon: 'tag', label: strings.profile.offers, href: '/offers' },
 ];
 
-/** Aba Conta: foto, dados pessoais editáveis, atalhos e sair. */
+// aba conta: foto, dados pessoais editáveis, atalhos e sair
 export function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -42,7 +42,7 @@ export function ProfileScreen() {
   const savedAddress = profile?.address ?? '';
   const email = profile?.email ?? user?.email ?? '';
 
-  // `draft` só existe durante a edição; fora dela os campos mostram o perfil salvo.
+  // `draft` só existe durante a edição; fora dela os campos mostram o perfil salvo
   const [draft, setDraft] = useState<{ name: string; phone: string; address: string } | null>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
@@ -65,7 +65,7 @@ export function ProfileScreen() {
 
   async function handlePickPhoto() {
     try {
-      // Import tardio: se o app instalado não tiver o módulo nativo, só este botão falha (a tela abre).
+      // import tardio: se o app instalado não tiver o módulo nativo, só este botão falha (a tela abre)
       const ImagePicker = await import('expo-image-picker');
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permission.granted) {
@@ -80,7 +80,7 @@ export function ProfileScreen() {
       });
       const pickedUri = result.assets?.[0]?.uri;
       if (result.canceled || !pickedUri) return;
-      // Comprime antes de guardar: o avatar não precisa de mais de 512 px.
+      // comprime antes de guardar: o avatar não precisa de mais de 512 px
       const uri = await compressImage(pickedUri);
       setAvatarUri(uri);
       setMessage(null);

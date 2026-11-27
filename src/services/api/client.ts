@@ -4,7 +4,7 @@ const DEFAULT_TIMEOUT_MS = 10000;
 
 export type ApiErrorKind = 'network' | 'timeout' | 'http' | 'parse';
 
-/** Erro padronizado das chamadas à API (rede, tempo esgotado, HTTP ou resposta inválida). */
+// erro padronizado das chamadas à api (rede, tempo esgotado, http ou resposta inválida)
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -16,7 +16,7 @@ export class ApiError extends Error {
   }
 }
 
-/** GET em `config.apiUrl + path`, com tempo limite. Devolve o JSON sem validar. */
+// get em `config.apiurl + path`, com tempo limite. devolve o json sem validar
 export async function apiGet(path: string, timeoutMs = DEFAULT_TIMEOUT_MS): Promise<unknown> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);

@@ -25,7 +25,7 @@ function createAuth(): firebaseAuth.Auth {
     return getAuth(app);
   }
 
-  // @firebase/auth expoe getReactNativePersistence no bundle RN (dist/rn), mas nao em auth-public.d.ts
+  // @firebase/auth expoe getreactnativepersistence no bundle rn (dist/rn), mas nao em auth-public.d.ts
   const getReactNativePersistence = (
     firebaseAuth as unknown as { getReactNativePersistence?: ReactNativePersistenceFactory }
   ).getReactNativePersistence;
@@ -38,7 +38,7 @@ function createAuth(): firebaseAuth.Auth {
     }
     return getAuth(app);
   } catch {
-    // Hot Reload pode reexecutar o modulo quando o Auth ja foi inicializado no app
+    // hot reload pode reexecutar o modulo quando o auth ja foi inicializado no app
     return getAuth(app);
   }
 }

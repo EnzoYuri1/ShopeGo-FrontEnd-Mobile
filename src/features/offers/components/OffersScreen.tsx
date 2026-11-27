@@ -16,7 +16,7 @@ const images = {
   freeTag: require('../../../../assets/images/offers/free-tag.webp'),
 };
 
-/** Quantas ofertas mostrar aqui; o restante fica em "Ver todas". */
+// quantas ofertas mostrar aqui; o restante fica em "ver todas"
 const TOP_DEALS = 12;
 
 interface CouponProps {
@@ -52,7 +52,7 @@ function Coupon({ title, text, image, tone, onAccept }: CouponProps) {
   );
 }
 
-/** Ofertas: os cupons existentes e os maiores descontos reais do catálogo. */
+// ofertas: os cupons existentes e os maiores descontos reais do catálogo
 export function OffersScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -73,7 +73,7 @@ export function OffersScreen() {
     else router.replace('/(drawer)/(tabs)');
   }
 
-  // Comportamento mantido: aceitar o cupom leva de volta às compras.
+  // comportamento mantido: aceitar o cupom leva de volta às compras
   function handleAccept() {
     router.replace('/(drawer)/(tabs)');
   }

@@ -15,19 +15,11 @@ type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
 interface ButtonProps extends Omit<PressableProps, 'children'> {
   title: string;
   loading?: boolean;
-  /**
-   * - primary: Laranja Sinal, ação principal da tela (uma por tela).
-   * - secondary: Azul Noite, ação forte alternativa.
-   * - outline: contorno Azul Noite, ação secundária.
-   * - ghost: só texto, ação terciária.
-   */
   variant?: ButtonVariant;
   size?: 'md' | 'lg';
   icon?: IconName;
   iconPosition?: 'left' | 'right';
-  /** Ocupa toda a largura disponível (padrão). */
   fullWidth?: boolean;
-  /** Legado (onboarding): texto maior e mais pesado. */
   display?: boolean;
 }
 

@@ -2,17 +2,10 @@ import type { ImageSource } from 'expo-image';
 
 import type { Product } from '@/features/products/types/product';
 
-/**
- * Imagens locais dos produtos de demonstração (extraídas do Figma).
- * Ficam fora do `Product` porque o carrinho é persistido em JSON e um `require()`
- * não é estável entre builds. Produtos reais usam `imageUrl`.
- */
+// imagens locais dos produtos de demonstração (extraídas do figma)
 interface ProductImageSet {
-  /** Imagem do card na Home/Busca. */
   card: ImageSource;
-  /** Imagem do banner na tela de detalhe. */
   banner: ImageSource;
-  /** Variações de cor mostradas em "Opções disponíveis". */
   variants: ImageSource[];
 }
 
@@ -33,12 +26,12 @@ const imageSets: Record<string, ProductImageSet> = {
 };
 
 export function getProductImages(product: Product): ProductImageSet | undefined {
-  // Produto com foto remota (API) nunca usa o asset local: os ids '1'..'3' coincidem.
+  // produto com foto remota (api) nunca usa o asset local: os ids '1'..'3' coincidem
   if (product.imageUrl) return undefined;
   return imageSets[product.id];
 }
 
-/** Fonte da imagem do card: asset local (demo) ou `imageUrl` remota; `undefined` = placeholder. */
+// fonte da imagem do card: asset local (demo) ou `imageurl` remota; `undefined` = placeholder
 export function getCardImageSource(product: Product): ImageSource | undefined {
   if (product.imageUrl) return { uri: product.imageUrl };
   return imageSets[product.id]?.card;

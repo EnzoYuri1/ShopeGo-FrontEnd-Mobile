@@ -4,10 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { colors } from '@/constants';
 import { MAX_APP_WIDTH } from '@/hooks/useScreenWidth';
 
-/**
- * Centraliza telas desenhadas para largura de celular (login, onboarding...).
- * Em paisagem o conteúdo fica numa coluna de MAX_APP_WIDTH, sem colar à esquerda.
- */
+// centraliza telas desenhadas para largura de celular (login, onboarding...)
 export function CenteredColumn({ children }: { children: ReactNode }) {
   return (
     <View style={styles.outer}>

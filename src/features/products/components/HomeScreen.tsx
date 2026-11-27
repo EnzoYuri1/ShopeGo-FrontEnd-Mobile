@@ -20,7 +20,7 @@ import { fillTemplate } from '@/utils/fillTemplate';
 
 type SortMode = 'relevance' | 'asc' | 'desc';
 
-/** Quantas categorias aparecem como paradas na rota da Home (além de "Tudo"). */
+// quantas categorias aparecem como paradas na rota da home (além de "tudo")
 const ROUTE_CATEGORIES = 4;
 
 export function HomeScreen() {

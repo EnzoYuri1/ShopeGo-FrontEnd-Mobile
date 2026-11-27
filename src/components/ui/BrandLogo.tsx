@@ -8,7 +8,6 @@ type MarkTone = 'color' | 'onBrand' | 'onPrimary';
 
 interface BrandMarkProps {
   size?: number;
-  /** color: fundo claro. onBrand: sobre Azul Noite. onPrimary: sobre Laranja Sinal. */
   tone?: MarkTone;
 }
 
@@ -18,10 +17,7 @@ const TONES: Record<MarkTone, { bag: string; handle: string }> = {
   onPrimary: { bag: colors.white, handle: colors.brand },
 };
 
-/**
- * Símbolo ShopGo "Rota": sacola cuja alça termina numa seta para a frente
- * (comprar e já seguir).
- */
+// símbolo shopgo "rota": sacola cuja alça termina numa seta para a frente (comprar e já seguir)
 export function BrandMark({ size = 32, tone = 'color' }: BrandMarkProps) {
   const t = TONES[tone];
   return (
@@ -47,21 +43,14 @@ export function BrandMark({ size = 32, tone = 'color' }: BrandMarkProps) {
 }
 
 interface BrandLogoProps {
-  /** Altura do símbolo; o nome acompanha a proporção. */
   size?: number;
-  /** full: símbolo + nome. mark: só o símbolo. */
   variant?: 'full' | 'mark';
-  /** color: fundo claro. onPrimary: sobre Laranja Sinal (sacola branca). onBrand: sobre Azul Noite. */
   tone?: MarkTone;
-  /**
-   * Legado: posiciona no canto superior direito (telas ainda não migradas).
-   * Nas telas novas use `floating={false}` dentro do cabeçalho.
-   */
   floating?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
-/** Logo ShopGo: símbolo + nome em Archivo ExtraBold, em caixa baixa. */
+// logo shopgo: símbolo + nome em archivo extrabold, em caixa baixa
 export function BrandLogo({
   size = 28,
   variant = 'full',

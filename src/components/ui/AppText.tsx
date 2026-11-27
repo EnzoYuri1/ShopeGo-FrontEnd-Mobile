@@ -8,7 +8,7 @@ interface AppTextProps extends TextProps {
   align?: 'left' | 'center' | 'right';
 }
 
-/** Texto da marca: aplica a escala tipográfica (`textVariants`) e as cores por função. */
+// texto da marca: aplica a escala tipográfica (`textvariants`) e as cores por função
 export function AppText({
   variant = 'body',
   color = 'text',

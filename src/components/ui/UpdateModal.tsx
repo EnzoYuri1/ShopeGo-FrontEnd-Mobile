@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { colors, elevation, radius, spacing, strings } from '@/constants';
 import { useAppUpdate } from '@/hooks/useAppUpdate';
 
-/** Aviso de nova versão do app (EAS Update), com "Atualizar agora" e "Depois". */
+// aviso de nova versão do app (eas update), com "atualizar agora" e "depois"
 export function UpdateModal() {
   const { isModalVisible, isDownloading, error, checkForUpdates, applyUpdate, dismissModal } =
     useAppUpdate();

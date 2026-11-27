@@ -25,7 +25,7 @@ import { getCardImageSource } from '@/features/products/productImages';
 import { fillTemplate } from '@/utils/fillTemplate';
 import { formatPrice } from '@/utils/formatPrice';
 
-/** Aba Carrinho: itens, resumo (subtotal, imposto de 10%, total) e escolha do pagamento. */
+// aba carrinho: itens, resumo (subtotal, imposto de 10%, total) e escolha do pagamento
 export function CartScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -41,7 +41,7 @@ export function CartScreen() {
       router.push('/checkout/payment');
       return;
     }
-    // "Outro": conclui o pedido direto, sem formulário de cartão.
+    // "outro": conclui o pedido direto, sem formulário de cartão
     setOrderError(false);
     placeOrder(
       'other',

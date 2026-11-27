@@ -6,18 +6,15 @@ import { colors, radius, touchTarget, type ColorName } from '@/constants';
 
 interface IconButtonProps {
   icon: IconName;
-  /** Obrigatório: descreve a ação para leitores de tela (ex.: "Abrir carrinho"). */
   accessibilityLabel: string;
   onPress?: () => void;
   variant?: 'plain' | 'filled';
-  /** Contador no canto (ex.: itens no carrinho). Oculto quando 0. */
   badgeCount?: number;
   filled?: boolean;
-  /** Cor do ícone (ex.: 'onBrand' sobre fundo Azul Noite). */
   color?: ColorName;
 }
 
-/** Botão só com ícone, com área de toque de 44 px. */
+// botão só com ícone, com área de toque de 44 px
 export function IconButton({
   icon,
   accessibilityLabel,

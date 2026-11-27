@@ -16,7 +16,6 @@ interface ProductGridProps {
   isError: boolean;
   onRetry: () => void;
   errorMessage: string;
-  /** Conteúdo acima da grade (rola junto). */
   header?: ReactElement;
   empty: { title: string; message?: string; actionLabel?: string; onAction?: () => void };
   refreshing?: boolean;
@@ -27,7 +26,7 @@ interface ProductGridProps {
 const SKELETON_COUNT = 6;
 const PAGE_SIZE = 12;
 
-/** Completa a última linha com espaços vazios, para o último card não esticar. */
+// completa a última linha com espaços vazios, para o último card não esticar
 function fillLastRow(products: Product[], columns: number): (Product | null)[] {
   const remainder = products.length % columns;
   if (remainder === 0) return products;

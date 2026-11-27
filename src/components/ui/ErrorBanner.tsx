@@ -9,7 +9,7 @@ interface ErrorBannerProps {
   onRetry?: () => void;
 }
 
-/** Aviso inline de erro com opção opcional de tentar novamente. */
+// aviso inline de erro com opção opcional de tentar novamente
 export function ErrorBanner({ message, onRetry }: ErrorBannerProps) {
   return (
     <View style={styles.container} accessibilityRole="alert">

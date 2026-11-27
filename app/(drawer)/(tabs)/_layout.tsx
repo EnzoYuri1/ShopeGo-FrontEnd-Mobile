@@ -20,7 +20,7 @@ function tabIcon(name: IconName) {
   return TabIcon;
 }
 
-/** Barra inferior: os 5 destinos principais. O menu lateral fica para Pedidos, Ofertas e Sair. */
+// barra inferior: os 5 destinos principais. o menu lateral fica para pedidos, ofertas e sair
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const { itemCount } = useCart();

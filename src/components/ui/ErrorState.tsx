@@ -10,7 +10,7 @@ interface ErrorStateProps {
   onRetry: () => void;
 }
 
-/** Falha ao carregar: diz o que aconteceu e oferece "Tentar novamente". */
+// falha ao carregar: diz o que aconteceu e oferece "tentar novamente"
 export function ErrorState({ message, onRetry }: ErrorStateProps) {
   return (
     <View style={styles.container} accessibilityRole="alert">

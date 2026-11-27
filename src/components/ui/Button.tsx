@@ -1,93 +1,106 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, type PressableProps } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View, type PressableProps } from 'react-native';
 
-import { colors, fontFamily, radius } from '@/constants';
+import { Icon, type IconName } from '@/components/ui/Icon';
+import { colors, radius, spacing, textVariants, type ColorName } from '@/constants';
+
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
 
 interface ButtonProps extends Omit<PressableProps, 'children'> {
   title: string;
   loading?: boolean;
-  /** `primary` = preto (padrão); `outline` = branco com texto escuro. */
-  variant?: 'primary' | 'outline';
-  /** Usa a fonte de destaque (Sansita) dos botões do onboarding. */
+  /**
+   * - primary: Laranja Sinal, ação principal da tela (uma por tela).
+   * - secondary: Azul Noite, ação forte alternativa.
+   * - outline: contorno Azul Noite, ação secundária.
+   * - ghost: só texto, ação terciária.
+   */
+  variant?: ButtonVariant;
+  size?: 'md' | 'lg';
+  icon?: IconName;
+  iconPosition?: 'left' | 'right';
+  /** Ocupa toda a largura disponível (padrão). */
+  fullWidth?: boolean;
+  /** Legado (onboarding): texto maior e mais pesado. */
   display?: boolean;
 }
+
+const VARIANTS: Record<ButtonVariant, { bg: string; fg: ColorName; border?: string }> = {
+  primary: { bg: colors.primary, fg: 'onPrimary' },
+  secondary: { bg: colors.brand, fg: 'onBrand' },
+  outline: { bg: 'transparent', fg: 'brand', border: colors.brand },
+  ghost: { bg: 'transparent', fg: 'brand' },
+};
+
+const PRESSED_BG: Record<ButtonVariant, string> = {
+  primary: colors.primaryPressed,
+  secondary: colors.brandSoft,
+  outline: colors.surfaceBrand,
+  ghost: colors.surfaceBrand,
+};
 
 export function Button({
   title,
   loading = false,
   variant = 'primary',
+  size = 'lg',
+  icon,
+  iconPosition = 'left',
+  fullWidth = true,
   display = false,
   disabled,
   style,
   ...props
 }: ButtonProps) {
   const isDisabled = disabled || loading;
-  const isOutline = variant === 'outline';
+  const look = VARIANTS[variant];
+  const iconNode = icon ? <Icon name={icon} size={20} color={look.fg} /> : null;
 
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ disabled: isDisabled, busy: loading }}
       disabled={isDisabled}
       style={(state) => [
-        styles.button,
-        isOutline ? styles.outline : styles.primary,
+        styles.base,
+        size === 'lg' ? styles.lg : styles.md,
+        fullWidth ? styles.full : null,
+        { backgroundColor: look.bg },
+        look.border ? { borderWidth: 1.5, borderColor: look.border } : null,
+        state.pressed && !isDisabled ? { backgroundColor: PRESSED_BG[variant] } : null,
         isDisabled ? styles.disabled : null,
-        state.pressed && !isDisabled ? styles.pressed : null,
         typeof style === 'function' ? style(state) : style,
       ]}
       {...props}
     >
       {loading ? (
-        <ActivityIndicator color={isOutline ? colors.black : colors.white} />
+        <ActivityIndicator color={colors[look.fg]} />
       ) : (
-        <Text
-          style={[
-            styles.text,
-            display ? styles.displayText : null,
-            isOutline ? styles.outlineText : null,
-          ]}
-        >
-          {title}
-        </Text>
+        <View style={styles.content}>
+          {iconPosition === 'left' ? iconNode : null}
+          <Text
+            numberOfLines={1}
+            style={[textVariants.button, display ? styles.displayText : null, { color: colors[look.fg] }]}
+          >
+            {title}
+          </Text>
+          {iconPosition === 'right' ? iconNode : null}
+        </View>
       )}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
-    width: '100%',
-    minHeight: 54,
-    paddingVertical: 12,
-    borderRadius: radius.md - 2,
+  base: {
+    borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: spacing.ml,
   },
-  primary: {
-    backgroundColor: colors.black,
-    shadowColor: colors.buttonShadow,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 6,
-  },
-  outline: {
-    backgroundColor: colors.white,
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-  disabled: {
-    opacity: 0.6,
-  },
-  text: {
-    color: colors.white,
-    fontFamily: fontFamily.semibold,
-    fontSize: 20,
-  },
-  outlineText: {
-    color: colors.black,
-  },
-  displayText: {
-    fontFamily: fontFamily.display,
-    fontSize: 24,
-  },
+  lg: { minHeight: 56 },
+  md: { minHeight: 44 },
+  full: { width: '100%' },
+  content: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  disabled: { opacity: 0.5 },
+  displayText: { fontFamily: 'Archivo_800ExtraBold', fontSize: 20, lineHeight: 24 },
 });

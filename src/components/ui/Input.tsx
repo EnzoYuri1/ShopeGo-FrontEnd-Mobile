@@ -1,48 +1,69 @@
-import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
+import { useState } from 'react';
+import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 
-import { colors, fontFamily, fontSize, radius, spacing } from '@/constants';
+import { AppText } from '@/components/ui/AppText';
+import { colors, radius, spacing, textVariants } from '@/constants';
 
 interface InputProps extends TextInputProps {
+  /** Rótulo visível acima do campo. */
+  label?: string;
   error?: string;
 }
 
-export function Input({ error, style, ...props }: InputProps) {
+/** Campo de texto da marca: fundo Céu, borda Azul Noite no foco, vermelho no erro. */
+export function Input({ label, error, style, onFocus, onBlur, ...props }: InputProps) {
+  const [focused, setFocused] = useState(false);
+
   return (
     <View style={styles.wrapper}>
+      {label ? (
+        <AppText variant="label" color="textSecondary">
+          {label}
+        </AppText>
+      ) : null}
       <TextInput
         placeholderTextColor={colors.textSecondary}
-        style={[styles.input, error ? styles.inputError : null, style]}
+        accessibilityLabel={label ?? props.placeholder}
+        onFocus={(event) => {
+          setFocused(true);
+          onFocus?.(event);
+        }}
+        onBlur={(event) => {
+          setFocused(false);
+          onBlur?.(event);
+        }}
+        style={[
+          styles.input,
+          focused ? styles.focused : null,
+          error ? styles.inputError : null,
+          style,
+        ]}
         {...props}
       />
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? (
+        <AppText variant="caption" color="danger">
+          {error}
+        </AppText>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    width: '100%',
-  },
+  wrapper: { width: '100%', gap: spacing.xs + 2 },
   input: {
     width: '100%',
-    height: 64,
-    backgroundColor: colors.primaryLight,
-    borderRadius: radius.md - 2,
-    paddingHorizontal: 20,
-    fontFamily: fontFamily.medium,
-    fontSize: fontSize.md,
-    color: colors.text,
-    borderWidth: 1,
+    minHeight: 52,
+    backgroundColor: colors.surfaceBrand,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    borderWidth: 1.5,
     borderColor: 'transparent',
+    color: colors.text,
+    // Sem lineHeight: no Android ele desalinha o texto dentro do TextInput.
+    fontFamily: textVariants.body.fontFamily,
+    fontSize: textVariants.body.fontSize,
   },
-  inputError: {
-    borderColor: colors.danger,
-  },
-  error: {
-    marginTop: spacing.xs,
-    marginLeft: spacing.xs,
-    fontFamily: fontFamily.regular,
-    fontSize: fontSize.xs,
-    color: colors.danger,
-  },
+  focused: { borderColor: colors.brand, backgroundColor: colors.background },
+  inputError: { borderColor: colors.danger },
 });

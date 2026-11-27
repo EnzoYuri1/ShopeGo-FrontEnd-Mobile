@@ -52,7 +52,7 @@ export function CartScreen() {
           <BackButton onPress={handleBack} style={styles.back} />
           <Text style={styles.title}>{strings.cart.title}</Text>
         </View>
-        <BrandLogo style={{ top: insets.top - 2 }} />
+        <BrandLogo tone="onPrimary" style={{ top: insets.top - 2 }} />
       </View>
 
       <FlatList

@@ -37,10 +37,34 @@ const SWATCHES: { name: string; value: string }[] = [
 ];
 
 const ICON_NAMES: IconName[] = [
-  'home', 'grid', 'search', 'bag', 'user', 'heart', 'star', 'bell', 'menu', 'close',
-  'chevronLeft', 'chevronRight', 'chevronDown', 'arrowRight', 'plus', 'minus', 'check',
-  'filter', 'trash', 'tag', 'percent', 'truck', 'package', 'creditCard', 'mapPin',
-  'camera', 'alert', 'logout',
+  'home',
+  'grid',
+  'search',
+  'bag',
+  'user',
+  'heart',
+  'star',
+  'bell',
+  'menu',
+  'close',
+  'chevronLeft',
+  'chevronRight',
+  'chevronDown',
+  'arrowRight',
+  'plus',
+  'minus',
+  'check',
+  'filter',
+  'trash',
+  'tag',
+  'percent',
+  'truck',
+  'package',
+  'creditCard',
+  'mapPin',
+  'camera',
+  'alert',
+  'logout',
 ];
 
 const CATEGORY_STOPS = [
@@ -76,7 +100,10 @@ export function DesignSystemScreen() {
   return (
     <ScrollView
       style={styles.root}
-      contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + spacing.xxl }]}
+      contentContainerStyle={[
+        styles.content,
+        { paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + spacing.xxl },
+      ]}
     >
       <BrandLogo floating={false} size={36} />
       <AppText variant="body" color="textSecondary">
@@ -85,7 +112,12 @@ export function DesignSystemScreen() {
 
       <Section title="Marca">
         <View style={styles.row}>
-          <View style={[styles.markBox, { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border }]}>
+          <View
+            style={[
+              styles.markBox,
+              { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border },
+            ]}
+          >
             <BrandMark size={44} />
           </View>
           <View style={[styles.markBox, { backgroundColor: colors.brand }]}>
@@ -141,7 +173,12 @@ export function DesignSystemScreen() {
           {ICON_NAMES.map((name) => (
             <View key={name} style={styles.iconCell}>
               <Icon name={name} size={24} />
-              <AppText variant="caption" color="textSecondary" numberOfLines={1} style={styles.iconName}>
+              <AppText
+                variant="caption"
+                color="textSecondary"
+                numberOfLines={1}
+                style={styles.iconName}
+              >
                 {name}
               </AppText>
             </View>
@@ -172,7 +209,11 @@ export function DesignSystemScreen() {
 
       <Section title="Chips e selos">
         <View style={styles.row}>
-          <Chip label="Relevância" selected={chip === 'relevancia'} onPress={() => setChip('relevancia')} />
+          <Chip
+            label="Relevância"
+            selected={chip === 'relevancia'}
+            onPress={() => setChip('relevancia')}
+          />
           <Chip label="Menor preço" selected={chip === 'preco'} onPress={() => setChip('preco')} />
           <Chip label="Filtros" icon="filter" />
         </View>
@@ -187,8 +228,18 @@ export function DesignSystemScreen() {
       </Section>
 
       <Section title="Campos">
-        <Input label="E-mail" placeholder="voce@exemplo.com" keyboardType="email-address" autoCapitalize="none" />
-        <Input label="Senha" placeholder="Mínimo de 6 caracteres" secureTextEntry error="A senha precisa ter pelo menos 6 caracteres." />
+        <Input
+          label="E-mail"
+          placeholder="voce@exemplo.com"
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <Input
+          label="Senha"
+          placeholder="Mínimo de 6 caracteres"
+          secureTextEntry
+          error="A senha precisa ter pelo menos 6 caracteres."
+        />
       </Section>
 
       <Section title="Carregamento">
@@ -228,12 +279,29 @@ export function DesignSystemScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
   content: { paddingHorizontal: spacing.md, gap: spacing.md },
-  section: { gap: spacing.ms, paddingTop: spacing.lg, borderTopWidth: 1, borderTopColor: colors.border },
+  section: {
+    gap: spacing.ms,
+    paddingTop: spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, alignItems: 'center' },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.ms },
-  markBox: { width: 88, height: 88, borderRadius: radius.lg, alignItems: 'center', justifyContent: 'center' },
+  markBox: {
+    width: 88,
+    height: 88,
+    borderRadius: radius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   swatch: { width: 76, gap: 2 },
-  swatchColor: { height: 48, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, marginBottom: spacing.xs },
+  swatchColor: {
+    height: 48,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: spacing.xs,
+  },
   typeRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
   typeName: { width: 84 },
   typeSample: { flex: 1 },

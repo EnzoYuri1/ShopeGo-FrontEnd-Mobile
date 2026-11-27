@@ -30,14 +30,25 @@ export function EmptyState({ icon, title, message, actionLabel, onAction }: Empt
         </AppText>
       ) : null}
       {actionLabel && onAction ? (
-        <Button title={actionLabel} variant="outline" size="md" fullWidth={false} onPress={onAction} />
+        <Button
+          title={actionLabel}
+          variant="outline"
+          size="md"
+          fullWidth={false}
+          onPress={onAction}
+        />
       ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { alignItems: 'center', gap: spacing.ms, paddingVertical: spacing.xl, paddingHorizontal: spacing.lg },
+  container: {
+    alignItems: 'center',
+    gap: spacing.ms,
+    paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.lg,
+  },
   iconWrap: {
     width: 64,
     height: 64,

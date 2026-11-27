@@ -11,7 +11,15 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppText, Button, Icon, Input, ScreenTopBar, SelectField } from '@/components/ui';
+import {
+  AppText,
+  Button,
+  ErrorBanner,
+  Icon,
+  Input,
+  ScreenTopBar,
+  SelectField,
+} from '@/components/ui';
 import { colors, radius, spacing, strings } from '@/constants';
 import { CheckoutSteps } from '@/features/checkout/components/CheckoutSteps';
 import { usePlaceOrder } from '@/features/checkout/hooks/usePlaceOrder';
@@ -206,11 +214,7 @@ export function PaymentDetailsScreen() {
           </AppText>
           <AppText variant="priceLarge">{formatPrice(total)}</AppText>
         </View>
-        {formError ? (
-          <AppText variant="caption" color="danger" accessibilityRole="alert">
-            {formError}
-          </AppText>
-        ) : null}
+        {formError ? <ErrorBanner message={formError} onRetry={handleConfirm} /> : null}
         <View style={styles.actions}>
           <Button
             title={strings.checkout.cancel}

@@ -2,8 +2,8 @@ import { useRouter } from 'expo-router';
 import type { ReactElement } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
-import { EmptyState, ErrorState, Skeleton } from '@/components/ui';
-import { colors, spacing } from '@/constants';
+import { EmptyState, ErrorBanner, ErrorState, Skeleton } from '@/components/ui';
+import { colors, spacing, strings } from '@/constants';
 import { useAddToCart } from '@/features/cart/hooks/useAddToCart';
 import { ProductCard } from '@/features/products/components/ProductCard';
 import type { Product } from '@/features/products/types/product';
@@ -66,8 +66,9 @@ export function ProductGrid({
   const favoriteIds = useFavoritesStore((state) => state.ids);
   const toggleFavorite = useFavoritesStore((state) => state.toggle);
 
-  // Erro só sem dados: se um refetch falhar, a lista em cache continua visível.
+  // Erro em tela cheia só sem dados; com cache visível, mostra aviso no topo.
   const showError = isError && products.length === 0;
+  const showRefreshError = isError && products.length > 0;
 
   let emptyComponent: ReactElement;
   if (isLoading) emptyComponent = <GridSkeleton columns={columns} />;
@@ -82,7 +83,16 @@ export function ProductGrid({
       numColumns={columns}
       columnWrapperStyle={styles.row}
       contentContainerStyle={[styles.content, { paddingBottom: bottomInset + spacing.xl }]}
-      ListHeaderComponent={header}
+      ListHeaderComponent={
+        header || showRefreshError ? (
+          <View style={styles.headerWrap}>
+            {header}
+            {showRefreshError ? (
+              <ErrorBanner message={strings.errors.refreshFailed} onRetry={onRetry} />
+            ) : null}
+          </View>
+        ) : undefined
+      }
       ListEmptyComponent={emptyComponent}
       showsVerticalScrollIndicator={false}
       initialNumToRender={8}
@@ -124,6 +134,7 @@ const GAP = spacing.ms;
 
 const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.md, gap: spacing.ml },
+  headerWrap: { gap: spacing.md },
   row: { gap: GAP },
   cell: { flex: 1 },
   skeletonGrid: {

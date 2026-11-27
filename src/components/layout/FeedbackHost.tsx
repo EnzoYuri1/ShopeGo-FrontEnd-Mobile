@@ -30,7 +30,10 @@ export function FeedbackHost() {
   return (
     <View
       pointerEvents="box-none"
-      style={[styles.host, { bottom: insets.bottom + (current.lift ?? TAB_BAR_CLEARANCE) + spacing.sm }]}
+      style={[
+        styles.host,
+        { bottom: insets.bottom + (current.lift ?? TAB_BAR_CLEARANCE) + spacing.sm },
+      ]}
     >
       <Snackbar
         key={current.id}

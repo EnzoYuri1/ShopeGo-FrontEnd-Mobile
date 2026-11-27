@@ -4,7 +4,15 @@ import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppText, Button, EmptyState, Icon, IconButton, QuantityStepper } from '@/components/ui';
+import {
+  AppText,
+  Button,
+  EmptyState,
+  ErrorBanner,
+  Icon,
+  IconButton,
+  QuantityStepper,
+} from '@/components/ui';
 import { colors, elevation, radius, spacing, strings } from '@/constants';
 import { getEffectivePrice, useCart } from '@/features/cart/hooks/useCart';
 import { useCartTotals } from '@/features/cart/hooks/useCartTotals';
@@ -100,9 +108,10 @@ export function CartScreen() {
             <AppText variant="priceLarge">{formatPrice(total)}</AppText>
           </View>
           {orderError ? (
-            <AppText variant="caption" color="danger" accessibilityRole="alert">
-              {strings.checkout.orderFailed}
-            </AppText>
+            <ErrorBanner
+              message={strings.checkout.orderFailed}
+              onRetry={() => handleProceed('other')}
+            />
           ) : null}
           <Button
             title={strings.cart.choosePayment}

@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
-import { AccessibilityInfo, Animated, type DimensionValue, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  AccessibilityInfo,
+  Animated,
+  type DimensionValue,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 
 import { colors, radius } from '@/constants';
 
@@ -46,7 +52,13 @@ export function Skeleton({ width = '100%', height, rounded = 'md', style }: Skel
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       style={[
-        { width, height, borderRadius: radius[rounded], backgroundColor: colors.surfaceBrand, opacity },
+        {
+          width,
+          height,
+          borderRadius: radius[rounded],
+          backgroundColor: colors.surfaceBrand,
+          opacity,
+        },
         style,
       ]}
     />

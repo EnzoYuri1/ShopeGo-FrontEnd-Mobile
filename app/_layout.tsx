@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { ErrorBoundary } from '@/components/layout/ErrorBoundary';
 import { FeedbackHost } from '@/components/layout/FeedbackHost';
 import { UpdateModal } from '@/components/ui';
 import { appFonts, colors } from '@/constants';
@@ -45,14 +46,16 @@ export default function RootLayout() {
     <View style={styles.page}>
       <View style={[styles.frame, isLandscape && styles.frameLandscape]}>
         <GestureHandlerRootView style={{ flex: 1 }}>
-          <QueryClientProvider client={queryClient}>
-            <AuthProvider>
-              <StatusBar style="dark" />
-              <Stack screenOptions={{ headerShown: false }} />
-              <FeedbackHost />
-              <UpdateModal />
-            </AuthProvider>
-          </QueryClientProvider>
+          <ErrorBoundary>
+            <QueryClientProvider client={queryClient}>
+              <AuthProvider>
+                <StatusBar style="dark" />
+                <Stack screenOptions={{ headerShown: false }} />
+                <FeedbackHost />
+                <UpdateModal />
+              </AuthProvider>
+            </QueryClientProvider>
+          </ErrorBoundary>
         </GestureHandlerRootView>
       </View>
     </View>

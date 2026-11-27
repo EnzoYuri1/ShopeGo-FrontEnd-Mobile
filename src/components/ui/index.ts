@@ -4,6 +4,7 @@ export * from './BrandLogo';
 export * from './Button';
 export * from './Chip';
 export * from './EmptyState';
+export * from './ErrorBanner';
 export * from './ErrorState';
 export * from './Icon';
 export * from './IconButton';

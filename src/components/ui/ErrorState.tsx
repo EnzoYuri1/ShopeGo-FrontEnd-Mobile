@@ -32,7 +32,12 @@ export function ErrorState({ message, onRetry }: ErrorStateProps) {
 }
 
 const styles = StyleSheet.create({
-  container: { alignItems: 'center', gap: spacing.ms, paddingVertical: spacing.xl, paddingHorizontal: spacing.lg },
+  container: {
+    alignItems: 'center',
+    gap: spacing.ms,
+    paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.lg,
+  },
   iconWrap: {
     width: 64,
     height: 64,

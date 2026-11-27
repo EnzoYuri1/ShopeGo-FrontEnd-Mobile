@@ -18,7 +18,12 @@ export function AppText({
 }: AppTextProps) {
   return (
     <Text
-      style={[textVariants[variant], { color: colors[color] }, align ? { textAlign: align } : null, style]}
+      style={[
+        textVariants[variant],
+        { color: colors[color] },
+        align ? { textAlign: align } : null,
+        style,
+      ]}
       {...props}
     />
   );

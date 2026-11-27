@@ -20,12 +20,10 @@ export async function getProducts(): Promise<Product[]> {
   const q = query(collection(db, PRODUCTS_COLLECTION), orderBy('name'));
   const snapshot = await getDocs(q);
 
-  return snapshot.docs.map((item) =>
-    productSchema.parse({
-      id: item.id,
-      ...item.data(),
-    }),
-  );
+  return snapshot.docs.flatMap((item) => {
+    const parsed = productSchema.safeParse({ id: item.id, ...item.data() });
+    return parsed.success ? [parsed.data] : [];
+  });
 }
 
 export async function getProductById(id: string): Promise<Product | undefined> {

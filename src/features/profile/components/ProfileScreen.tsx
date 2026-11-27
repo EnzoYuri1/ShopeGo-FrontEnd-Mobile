@@ -11,11 +11,12 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppText, Button, Icon, Input, type IconName } from '@/components/ui';
+import { AppText, Button, ErrorBanner, Icon, Input, type IconName } from '@/components/ui';
 import { colors, radius, spacing, strings } from '@/constants';
 import { useAuth, useSignOut } from '@/features/auth/hooks/useAuth';
 import { getAvatarUri, saveAvatarUri } from '@/features/profile/avatarStorage';
 import { useProfile, useUpdateProfile } from '@/features/profile/hooks/useProfile';
+import { useFeedbackStore } from '@/store';
 import { compressImage } from '@/utils/compressImage';
 
 type Shortcut = { icon: IconName; label: string; href: '/orders' | '/favorites' | '/offers' };
@@ -31,9 +32,10 @@ export function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const { data: profile } = useProfile();
+  const { data: profile, isError: profileError, refetch: refetchProfile } = useProfile();
   const updateProfile = useUpdateProfile();
   const signOut = useSignOut();
+  const showFeedback = useFeedbackStore((state) => state.show);
 
   const savedName = profile?.name ?? user?.displayName ?? '';
   const savedPhone = profile?.phone ?? '';
@@ -157,6 +159,13 @@ export function ProfileScreen() {
           </View>
         </View>
 
+        {profileError ? (
+          <ErrorBanner
+            message={strings.errors.profileLoadFailed}
+            onRetry={() => void refetchProfile()}
+          />
+        ) : null}
+
         {message ? (
           <View style={[styles.message, message.error ? styles.messageError : styles.messageOk]}>
             <Icon
@@ -259,7 +268,11 @@ export function ProfileScreen() {
           title={strings.profile.signOut}
           variant="ghost"
           icon="logout"
-          onPress={() => signOut.mutate()}
+          onPress={() =>
+            signOut.mutate(undefined, {
+              onError: () => showFeedback({ message: strings.errors.signOutFailed }),
+            })
+          }
           loading={signOut.isPending}
         />
       </ScrollView>

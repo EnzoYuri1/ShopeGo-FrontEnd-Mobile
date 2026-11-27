@@ -1,4 +1,11 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, View, type PressableProps } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type PressableProps,
+} from 'react-native';
 
 import { Icon, type IconName } from '@/components/ui/Icon';
 import { colors, radius, spacing, textVariants, type ColorName } from '@/constants';
@@ -81,7 +88,11 @@ export function Button({
             numberOfLines={1}
             adjustsFontSizeToFit
             minimumFontScale={0.85}
-            style={[textVariants.button, display ? styles.displayText : null, { color: colors[look.fg] }]}
+            style={[
+              textVariants.button,
+              display ? styles.displayText : null,
+              { color: colors[look.fg] },
+            ]}
           >
             {title}
           </Text>

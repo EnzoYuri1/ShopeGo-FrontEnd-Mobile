@@ -27,7 +27,13 @@ export function BrandMark({ size = 32, tone = 'color' }: BrandMarkProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 34 34" accessible={false}>
       <Path d="M6 13h22l-2 16a3 3 0 0 1-3 2.6H11A3 3 0 0 1 8 29z" fill={t.bag} />
-      <Path d="M11 13c0-5 2.6-8 6-8s6 3 6 7" fill="none" stroke={t.handle} strokeWidth={2.6} strokeLinecap="round" />
+      <Path
+        d="M11 13c0-5 2.6-8 6-8s6 3 6 7"
+        fill="none"
+        stroke={t.handle}
+        strokeWidth={2.6}
+        strokeLinecap="round"
+      />
       <Path
         d="M20.4 9.6 23 12.2l2.8-2.4"
         fill="none"

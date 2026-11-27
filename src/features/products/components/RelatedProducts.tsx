@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 
-import { AppText } from '@/components/ui';
+import { AppText, ErrorBanner } from '@/components/ui';
 import { spacing, strings } from '@/constants';
 import { useAddToCart } from '@/features/cart/hooks/useAddToCart';
 import { getCategoryName } from '@/features/categories/categoryName';
@@ -25,7 +25,7 @@ interface RelatedProductsProps {
 /** "Mais em {categoria}": outros produtos da mesma categoria, os de melhor nota primeiro. */
 export function RelatedProducts({ product, feedbackLift }: RelatedProductsProps) {
   const router = useRouter();
-  const { data: products = [] } = useProducts();
+  const { data: products = [], isError, refetch } = useProducts();
   const addToCart = useAddToCart(feedbackLift);
   const favoriteIds = useFavoritesStore((state) => state.ids);
   const toggleFavorite = useFavoritesStore((state) => state.toggle);
@@ -39,6 +39,16 @@ export function RelatedProducts({ product, feedbackLift }: RelatedProductsProps)
         .slice(0, MAX_RELATED),
     [products, product.id, category],
   );
+
+  if (isError && products.length === 0) {
+    return (
+      <View style={styles.section}>
+        <View style={styles.errorWrap}>
+          <ErrorBanner message={strings.errors.relatedLoadFailed} onRetry={() => void refetch()} />
+        </View>
+      </View>
+    );
+  }
 
   if (related.length === 0) return null;
 
@@ -76,4 +86,5 @@ const styles = StyleSheet.create({
   title: { paddingHorizontal: spacing.md },
   list: { gap: spacing.ms, paddingHorizontal: spacing.md },
   cell: { width: CARD_WIDTH },
+  errorWrap: { paddingHorizontal: spacing.md },
 });

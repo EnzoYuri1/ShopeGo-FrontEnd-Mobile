@@ -7,7 +7,7 @@ export default function AuthLayout() {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (!isLoading && isAuthenticated) {
-    return <Redirect href="/(drawer)" />;
+    return <Redirect href="/(drawer)/(tabs)" />;
   }
 
   return (

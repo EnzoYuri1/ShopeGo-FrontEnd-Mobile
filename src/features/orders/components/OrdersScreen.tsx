@@ -16,7 +16,7 @@ export function OrdersScreen() {
 
   function handleBack() {
     if (router.canGoBack()) router.back();
-    else router.replace('/(drawer)');
+    else router.replace('/(drawer)/(tabs)');
   }
 
   return (

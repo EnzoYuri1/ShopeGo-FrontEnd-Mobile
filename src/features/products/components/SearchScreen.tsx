@@ -1,170 +1,131 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
 
-import { BackButton, BrandLogo, ErrorState } from '@/components/ui';
-import { colors, fontFamily, spacing, strings } from '@/constants';
-import { useCart } from '@/features/cart/hooks/useCart';
-import { useFavoritesStore } from '@/store';
-import { ProductCard } from '@/features/products/components/ProductCard';
-import { useGridColumns } from '@/hooks/useScreenWidth';
+import { AppText, Icon } from '@/components/ui';
+import { colors, radius, spacing, strings, textVariants } from '@/constants';
+import { getCategoryName } from '@/features/categories/categoryName';
+import { categoryOf } from '@/features/categories/hooks/useCategories';
+import { ProductGrid } from '@/features/products/components/ProductGrid';
 import { useProducts } from '@/features/products/hooks/useProducts';
+import { fillTemplate } from '@/utils/fillTemplate';
 
+/** Minúsculas e sem acentos, para "perfume" achar "Perfumes" e "relogio" achar "Relógios". */
+function normalize(text: string): string {
+  return text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+/** Aba Buscar: procura no nome do produto e no nome da categoria em português. */
 export function SearchScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const columns = useGridColumns();
   const { data: products = [], isLoading, isError, refetch } = useProducts();
-  const { addItem } = useCart();
   const [query, setQuery] = useState('');
-  const favoriteIds = useFavoritesStore((state) => state.ids);
-  const toggleFavorite = useFavoritesStore((state) => state.toggle);
+  const [focused, setFocused] = useState(false);
+
+  const term = normalize(query.trim());
 
   const results = useMemo(() => {
-    const term = query.trim().toLowerCase();
     if (!term) return products;
-    return products.filter((item) => item.name.toLowerCase().includes(term));
-  }, [products, query]);
+    return products.filter(
+      (item) =>
+        normalize(item.name).includes(term) ||
+        normalize(getCategoryName(categoryOf(item))).includes(term),
+    );
+  }, [products, term]);
 
-  function handleClose() {
-    if (router.canGoBack()) router.back();
-    else router.replace('/(drawer)');
+  let countLabel = fillTemplate(strings.search.allProducts, { n: results.length });
+  if (term) {
+    countLabel =
+      results.length === 1
+        ? strings.search.resultsOne
+        : fillTemplate(strings.search.results, { n: results.length });
   }
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
-      <View style={styles.topBar}>
-        <BackButton variant="close" onPress={handleClose} />
-        <BrandLogo />
-      </View>
-
-      <View style={styles.searchBar}>
-        <TextInput
-          value={query}
-          onChangeText={setQuery}
-          placeholder={strings.search.placeholder}
-          placeholderTextColor="rgba(255,255,255,0.6)"
-          style={styles.input}
-          autoFocus
-          returnKeyType="search"
-          autoCapitalize="none"
-        />
-        {query ? (
-          <Pressable
-            onPress={() => setQuery('')}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel={strings.search.clear}
-            style={styles.clear}
-          >
-            <Svg width={10} height={10} viewBox="0 0 24 24" fill="none">
-              <Path
-                d="M5 5l14 14M19 5L5 19"
-                stroke={colors.black}
-                strokeWidth={3.5}
-                strokeLinecap="round"
-              />
-            </Svg>
-          </Pressable>
+    <View style={[styles.root, { paddingTop: insets.top + spacing.sm }]}>
+      <View style={styles.top}>
+        <View style={[styles.field, focused ? styles.fieldFocused : null]}>
+          <Icon name="search" size={20} color={focused ? 'text' : 'textSecondary'} />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder={strings.search.placeholder}
+            placeholderTextColor={colors.textSecondary}
+            accessibilityLabel={strings.search.placeholder}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            style={styles.input}
+            autoFocus
+            returnKeyType="search"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          {query ? (
+            <Pressable
+              onPress={() => setQuery('')}
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel={strings.search.clear}
+              style={styles.clear}
+            >
+              <Icon name="close" size={16} color="text" strokeWidth={2.5} />
+            </Pressable>
+          ) : null}
+        </View>
+        {!isLoading && !isError ? (
+          <AppText variant="caption" color="textSecondary" accessibilityLiveRegion="polite">
+            {countLabel}
+          </AppText>
         ) : null}
       </View>
 
-      <FlatList
-        data={results}
-        keyExtractor={(item) => item.id}
-        key={columns}
-        numColumns={columns}
-        columnWrapperStyle={styles.column}
-        contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + spacing.lg }]}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        ListEmptyComponent={
-          isLoading ? (
-            <ActivityIndicator size="large" color={colors.primary} style={styles.empty} />
-          ) : isError ? (
-            <ErrorState message={strings.home.loadError} onRetry={() => void refetch()} />
-          ) : (
-            <Text style={styles.emptyText}>{strings.search.empty}</Text>
-          )
-        }
-        renderItem={({ item }) => (
-          <ProductCard
-            product={item}
-            isFavorite={favoriteIds.includes(item.id)}
-            onToggleFavorite={toggleFavorite}
-            onAddToCart={(product) => addItem(product, 1)}
-            onPress={(product) =>
-              router.push({ pathname: '/product/[id]', params: { id: product.id } })
-            }
-          />
-        )}
+      <ProductGrid
+        products={results}
+        isLoading={isLoading}
+        isError={isError}
+        onRetry={() => void refetch()}
+        errorMessage={strings.home.loadError}
+        empty={{
+          title: fillTemplate(strings.search.emptyTitle, { q: query.trim() }),
+          message: strings.search.emptyMessage,
+          actionLabel: strings.search.exploreCategories,
+          onAction: () => router.push('/categories'),
+        }}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  topBar: {
-    height: 64,
-    paddingHorizontal: 10,
-    justifyContent: 'center',
-  },
-  searchBar: {
-    marginHorizontal: 17,
-    marginBottom: 16,
-    height: 46,
-    borderRadius: 10,
-    backgroundColor: colors.black,
+  root: { flex: 1, backgroundColor: colors.background },
+  top: { paddingHorizontal: spacing.md, gap: spacing.sm, paddingBottom: spacing.md },
+  field: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingLeft: 20,
-    paddingRight: 10,
+    gap: spacing.sm,
+    minHeight: 52,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+    backgroundColor: colors.surfaceBrand,
   },
+  fieldFocused: { borderColor: colors.brand, backgroundColor: colors.background },
   input: {
     flex: 1,
-    height: '100%',
-    fontFamily: fontFamily.medium,
-    fontSize: 16,
-    color: colors.white,
-    outlineStyle: 'none',
-  } as object,
+    paddingVertical: spacing.sm,
+    color: colors.text,
+    fontFamily: textVariants.body.fontFamily,
+    fontSize: textVariants.body.fontSize,
+  },
   clear: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255,255,255,0.85)',
+    width: 28,
+    height: 28,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surfaceBrandStrong,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  list: {
-    paddingHorizontal: 17,
-    gap: 12,
-  },
-  column: {
-    gap: 12,
-  },
-  empty: {
-    marginTop: spacing.xl,
-  },
-  emptyText: {
-    marginTop: spacing.xl,
-    textAlign: 'center',
-    fontFamily: fontFamily.medium,
-    fontSize: 14,
-    color: colors.textSecondary,
   },
 });

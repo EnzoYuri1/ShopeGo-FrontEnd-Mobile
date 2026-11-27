@@ -22,7 +22,7 @@ export default function Index() {
     );
   }
 
-  if (isAuthenticated) return <Redirect href="/(drawer)" />;
+  if (isAuthenticated) return <Redirect href="/(drawer)/(tabs)" />;
 
   return <Redirect href={onboardingSeen ? '/(auth)/login' : '/onboarding'} />;
 }

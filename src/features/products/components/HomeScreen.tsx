@@ -1,401 +1,261 @@
 import { DrawerActions } from '@react-navigation/native';
-import { Image } from 'expo-image';
 import { useNavigation, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 
-import { ErrorState } from '@/components/ui';
-import { colors, fontSize, fontFamily, radius, spacing, strings } from '@/constants';
-import { getEffectivePrice, useCart } from '@/features/cart/hooks/useCart';
-import { ProductCard } from '@/features/products/components/ProductCard';
-import { useGridColumns } from '@/hooks/useScreenWidth';
-import { useProducts } from '@/features/products/hooks/useProducts';
-import { useFavoritesStore } from '@/store';
-import type { Product } from '@/features/products/types/product';
+import { AppText, BrandLogo, Button, Chip, Icon, IconButton, RouteLine } from '@/components/ui';
+import { colors, radius, spacing, strings } from '@/constants';
+import { getEffectivePrice } from '@/features/cart/hooks/useCart';
+import {
+  DEALS_CATEGORY,
+  DEAL_MIN_DISCOUNT,
+  getCategoryName,
+  isDeal,
+} from '@/features/categories/categoryName';
+import { categoryOf, useCategories } from '@/features/categories/hooks/useCategories';
+import { ProductGrid } from '@/features/products/components/ProductGrid';
+import { fillTemplate } from '@/utils/fillTemplate';
 
-const images = {
-  hero: require('../../../../assets/images/products/watch-white.webp'),
-  gift: require('../../../../assets/images/offers/gift.webp'),
-};
+type SortMode = 'relevance' | 'asc' | 'desc';
 
-type SortMode = 'default' | 'asc' | 'desc';
+/** Quantas categorias aparecem como paradas na rota da Home (além de "Tudo"). */
+const ROUTE_CATEGORIES = 4;
 
 export function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const columns = useGridColumns();
   const navigation = useNavigation();
   const router = useRouter();
 
-  const { data: products = [], isLoading, isError, refetch, isRefetching } = useProducts();
-  const { itemCount, addItem } = useCart();
+  const {
+    data: products = [],
+    categories,
+    isLoading,
+    isError,
+    refetch,
+    isRefetching,
+  } = useCategories();
 
-  const [sortMode, setSortMode] = useState<SortMode>('default');
+  const [stopIndex, setStopIndex] = useState(0);
+  const [sortMode, setSortMode] = useState<SortMode>('relevance');
   const [onlyDiscount, setOnlyDiscount] = useState(false);
-  const favoriteIds = useFavoritesStore((state) => state.ids);
-  const toggleFavorite = useFavoritesStore((state) => state.toggle);
+
+  const routeCategories = categories.slice(0, ROUTE_CATEGORIES);
+  const stops = [
+    { key: 'all', label: strings.home.all },
+    ...routeCategories.map((category) => ({ key: category.slug, label: category.name })),
+  ];
+  const selectedSlug = stopIndex > 0 ? routeCategories[stopIndex - 1]?.slug : undefined;
+
+  const deals = useMemo(() => products.filter(isDeal), [products]);
+  const topDeal = useMemo(
+    () =>
+      deals.reduce<(typeof deals)[number] | undefined>(
+        (best, item) => ((item.discountPercent ?? 0) > (best?.discountPercent ?? 0) ? item : best),
+        undefined,
+      ),
+    [deals],
+  );
 
   const visibleProducts = useMemo(() => {
     let list = products;
-
-    if (onlyDiscount) {
-      list = list.filter((item) => Boolean(item.discountPercent));
-    }
-
-    if (sortMode === 'asc') {
+    if (selectedSlug) list = list.filter((product) => categoryOf(product) === selectedSlug);
+    if (onlyDiscount) list = list.filter(isDeal);
+    if (sortMode === 'asc')
       list = [...list].sort((a, b) => getEffectivePrice(a) - getEffectivePrice(b));
-    } else if (sortMode === 'desc') {
+    if (sortMode === 'desc')
       list = [...list].sort((a, b) => getEffectivePrice(b) - getEffectivePrice(a));
-    }
-
     return list;
-  }, [products, onlyDiscount, sortMode]);
+  }, [products, selectedSlug, onlyDiscount, sortMode]);
 
-  function cycleSortMode() {
-    setSortMode((prev) => (prev === 'default' ? 'asc' : prev === 'asc' ? 'desc' : 'default'));
+  function clearFilters() {
+    setStopIndex(0);
+    setSortMode('relevance');
+    setOnlyDiscount(false);
   }
 
-  function handleAddToCart(product: Product) {
-    addItem(product, 1);
-    Alert.alert(strings.app.name, `${product.name} ${strings.home.addedToCart}`);
-  }
+  const header = (
+    <View style={styles.header}>
+      <Pressable
+        onPress={() => router.push('/search')}
+        accessibilityRole="search"
+        accessibilityLabel={fillTemplate(strings.home.searchIn, { n: products.length })}
+        style={({ pressed }) => [styles.search, pressed ? styles.searchPressed : null]}
+      >
+        <Icon name="search" size={20} color="textSecondary" />
+        <AppText variant="body" color="textSecondary">
+          {products.length > 0
+            ? fillTemplate(strings.home.searchIn, { n: products.length })
+            : strings.search.placeholder}
+        </AppText>
+      </Pressable>
 
-  function handleOpenCart() {
-    router.push('/cart');
-  }
+      {routeCategories.length > 0 ? (
+        <View style={styles.section}>
+          <View style={styles.sectionHead}>
+            <AppText variant="subheading">{strings.home.exploreTitle}</AppText>
+            <Pressable
+              onPress={() => router.push('/categories')}
+              hitSlop={8}
+              accessibilityRole="link"
+            >
+              <AppText variant="bodyStrong" color="primaryText">
+                {strings.home.seeAll}
+              </AppText>
+            </Pressable>
+          </View>
+          <RouteLine stops={stops} activeIndex={stopIndex} onSelect={setStopIndex} />
+        </View>
+      ) : null}
 
-  function handleOpenSearch() {
-    router.push('/search');
-  }
+      {topDeal ? (
+        <View style={styles.campaign}>
+          <Svg
+            width={120}
+            height={96}
+            viewBox="0 0 120 96"
+            style={styles.campaignRoute}
+            accessible={false}
+          >
+            <Path
+              d="M4 92 C 40 92, 50 30, 112 22"
+              fill="none"
+              stroke={colors.primary}
+              strokeWidth={3}
+              strokeDasharray="2 8"
+              strokeLinecap="round"
+            />
+            <Circle cx={112} cy={22} r={6} fill={colors.primary} />
+          </Svg>
+          <AppText variant="title" color="onBrand" style={styles.campaignTitle}>
+            {fillTemplate(strings.home.dealsCount, { n: deals.length, min: DEAL_MIN_DISCOUNT })}
+          </AppText>
+          <AppText variant="body" color="onBrand" style={styles.campaignText}>
+            {fillTemplate(strings.home.dealsUpTo, {
+              p: topDeal.discountPercent ?? 0,
+              c: getCategoryName(categoryOf(topDeal)).toLowerCase(),
+            })}
+          </AppText>
+          <Button
+            title={strings.home.dealsCta}
+            size="md"
+            fullWidth={false}
+            icon="arrowRight"
+            iconPosition="right"
+            onPress={() =>
+              router.push({ pathname: '/category/[slug]', params: { slug: DEALS_CATEGORY } })
+            }
+            style={styles.campaignCta}
+          />
+        </View>
+      ) : null}
 
-  function handleOpenProduct(product: Product) {
-    router.push({ pathname: '/product/[id]', params: { id: product.id } });
-  }
-
-  const sortLabel =
-    sortMode === 'asc'
-      ? strings.home.sortAsc
-      : sortMode === 'desc'
-        ? strings.home.sortDesc
-        : `${strings.home.sortBy} ▾`;
+      <View style={styles.section}>
+        <AppText variant="heading">
+          {selectedSlug
+            ? fillTemplate(strings.home.showcaseIn, { c: getCategoryName(selectedSlug) })
+            : strings.home.showcaseAll}
+        </AppText>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chips}
+        >
+          <Chip
+            label={strings.home.sortRelevance}
+            selected={sortMode === 'relevance'}
+            onPress={() => setSortMode('relevance')}
+          />
+          <Chip
+            label={strings.home.sortAsc}
+            selected={sortMode === 'asc'}
+            onPress={() => setSortMode('asc')}
+          />
+          <Chip
+            label={strings.home.sortDesc}
+            selected={sortMode === 'desc'}
+            onPress={() => setSortMode('desc')}
+          />
+          <Chip
+            label={strings.home.filterDiscount}
+            icon="percent"
+            selected={onlyDiscount}
+            onPress={() => setOnlyDiscount((value) => !value)}
+          />
+        </ScrollView>
+      </View>
+    </View>
+  );
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
-        <Pressable
+      <View style={styles.topBar}>
+        <IconButton
+          icon="menu"
+          accessibilityLabel={strings.home.openMenu}
           onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-          hitSlop={10}
-          accessibilityLabel="Abrir menu"
-        >
-          <Svg width={26} height={26} viewBox="0 0 24 24" fill="none">
-            <Path
-              d="M3 6h18M3 12h18M3 18h18"
-              stroke={colors.text}
-              strokeWidth={2}
-              strokeLinecap="round"
-            />
-          </Svg>
-        </Pressable>
-
-        <View style={styles.brand}>
-          <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-            <Path
-              d="M6 7V6a6 6 0 1112 0v1h2a1 1 0 011 1v12a2 2 0 01-2 2H5a2 2 0 01-2-2V8a1 1 0 011-1h2zm2 0h8V6a4 4 0 10-8 0v1z"
-              fill={colors.primary}
-            />
-            <Path
-              d="M9.5 14l2 2 4-4"
-              stroke={colors.white}
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </Svg>
-          <Text style={styles.brandText}>{strings.app.name}</Text>
-        </View>
+        />
+        <BrandLogo floating={false} size={26} style={styles.logo} />
+        <IconButton
+          icon="heart"
+          accessibilityLabel={strings.home.openFavorites}
+          onPress={() => router.push('/favorites')}
+        />
       </View>
 
-      <FlatList
-        data={visibleProducts}
-        keyExtractor={(item) => item.id}
-        key={columns}
-        numColumns={columns}
+      <ProductGrid
+        products={visibleProducts}
+        isLoading={isLoading}
+        isError={isError}
+        onRetry={() => void refetch()}
+        errorMessage={strings.home.loadError}
+        header={header}
         refreshing={isRefetching}
         onRefresh={() => void refetch()}
-        contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + spacing.lg }]}
-        columnWrapperStyle={styles.columnWrapper}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <View style={styles.listHeader}>
-            <View style={styles.heroBanner}>
-              <View style={styles.heroAccentCircle} />
-              <Image source={images.hero} contentFit="contain" style={styles.heroImage} />
-              <Text style={styles.heroTag}>{strings.home.newRelease}</Text>
-              <Text style={styles.heroTitle}>{strings.home.heroTitle}</Text>
-            </View>
-
-            <View style={styles.actionBar}>
-              <View style={styles.actionLeft}>
-                <Pressable style={styles.pillButton} onPress={cycleSortMode}>
-                  <Text style={styles.pillText}>{sortLabel}</Text>
-                </Pressable>
-
-                <Pressable
-                  style={[styles.pillButton, onlyDiscount ? styles.pillActive : null]}
-                  onPress={() => setOnlyDiscount((prev) => !prev)}
-                >
-                  <Text style={styles.pillText}>
-                    {onlyDiscount ? strings.home.filterDiscount : strings.home.filter}
-                  </Text>
-                </Pressable>
-
-                <Pressable style={styles.cartPill} onPress={handleOpenCart}>
-                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                    <Path
-                      d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zM7.16 14.26l.03-.12L8.1 12h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0020 3H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44C4.52 14.37 5.48 16 7 16h12v-2H7.42c-.14 0-.25-.11-.26-.24z"
-                      fill={colors.white}
-                    />
-                  </Svg>
-                  {itemCount > 0 ? (
-                    <View style={styles.cartBadge}>
-                      <Text style={styles.cartBadgeText}>{itemCount}</Text>
-                    </View>
-                  ) : null}
-                </Pressable>
-              </View>
-
-              <Pressable
-                style={styles.searchButton}
-                onPress={handleOpenSearch}
-                accessibilityLabel="Buscar"
-              >
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M11 19a8 8 0 100-16 8 8 0 000 16zm10 2l-4.35-4.35"
-                    stroke={colors.white}
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                  />
-                </Svg>
-              </Pressable>
-            </View>
-          </View>
-        }
-        ListEmptyComponent={
-          isLoading ? (
-            <ActivityIndicator size="large" color={colors.primary} style={styles.emptyState} />
-          ) : (
-            isError ? (
-              <ErrorState message={strings.home.loadError} onRetry={() => void refetch()} />
-            ) : (
-              <Text style={styles.emptyText}>{strings.home.emptyProducts}</Text>
-            )
-          )
-        }
-        ListFooterComponent={
-          visibleProducts.length > 0 ? (
-            <View style={styles.promoBanner}>
-              <Image source={images.gift} contentFit="contain" style={styles.promoImage} />
-              <Text style={styles.promoTitle}>{strings.home.promoTitle}</Text>
-              <Pressable style={styles.promoCta} onPress={() => setOnlyDiscount(true)}>
-                <Text style={styles.promoCtaText}>{strings.home.promoCta}</Text>
-              </Pressable>
-            </View>
-          ) : undefined
-        }
-        renderItem={({ item }) => (
-          <ProductCard
-            product={item}
-            isFavorite={favoriteIds.includes(item.id)}
-            onToggleFavorite={toggleFavorite}
-            onAddToCart={handleAddToCart}
-            onPress={handleOpenProduct}
-          />
-        )}
+        empty={{
+          title: strings.home.emptyTitle,
+          message: strings.home.emptyMessage,
+          actionLabel: strings.home.clearFilters,
+          onAction: clearFilters,
+        }}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
+  root: { flex: 1, backgroundColor: colors.background },
+  topBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
   },
-  brand: {
+  logo: { flex: 1, marginLeft: spacing.xs },
+  header: { gap: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.xs },
+  search: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-  },
-  brandText: {
-    fontSize: fontSize.md,
-    fontFamily: fontFamily.bold,
-    color: colors.text,
-  },
-  listContent: {
+    gap: spacing.sm,
+    minHeight: 48,
     paddingHorizontal: spacing.md,
-    gap: spacing.sm + 4,
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceBrand,
   },
-  columnWrapper: {
-    gap: spacing.sm + 4,
-  },
-  listHeader: {
-    gap: spacing.md,
-    marginBottom: spacing.xs,
-  },
-  heroBanner: {
-    backgroundColor: colors.black,
+  searchPressed: { backgroundColor: colors.surfaceBrandStrong },
+  section: { gap: spacing.ms },
+  sectionHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  campaign: {
+    backgroundColor: colors.brand,
     borderRadius: radius.lg,
-    padding: spacing.lg,
-    minHeight: 132,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
+    padding: spacing.ml,
+    gap: spacing.sm,
     overflow: 'hidden',
   },
-  heroAccentCircle: {
-    position: 'absolute',
-    left: -24,
-    bottom: -32,
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    backgroundColor: 'rgba(255, 106, 0, 0.25)',
-  },
-  heroImage: {
-    position: 'absolute',
-    left: spacing.md,
-    top: 8,
-    width: 120,
-    height: 116,
-  },
-  heroTag: {
-    color: colors.primaryLight,
-    fontSize: fontSize.sm,
-    fontFamily: fontFamily.bold,
-  },
-  heroTitle: {
-    marginTop: 4,
-    color: colors.white,
-    fontSize: fontSize.xl,
-    fontFamily: fontFamily.bold,
-  },
-  actionBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.xs,
-  },
-  actionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs + 2,
-    flex: 1,
-  },
-  pillButton: {
-    backgroundColor: '#3A3A3C',
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.sm + 4,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pillActive: {
-    backgroundColor: colors.primary,
-  },
-  pillText: {
-    color: colors.white,
-    fontSize: fontSize.xs,
-    fontFamily: fontFamily.medium,
-  },
-  cartPill: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.md,
-    height: 36,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  cartBadge: {
-    backgroundColor: colors.black,
-    borderRadius: radius.pill,
-    minWidth: 18,
-    height: 18,
-    paddingHorizontal: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cartBadgeText: {
-    color: colors.white,
-    fontSize: 10,
-    fontFamily: fontFamily.bold,
-  },
-  searchButton: {
-    backgroundColor: colors.black,
-    borderRadius: radius.sm,
-    width: 44,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyState: {
-    marginTop: spacing.xl,
-  },
-  emptyText: {
-    marginTop: spacing.xl,
-    textAlign: 'center',
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-  },
-  promoBanner: {
-    marginTop: spacing.sm,
-    backgroundColor: '#FF8A4C',
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    minHeight: 112,
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  promoImage: {
-    position: 'absolute',
-    right: -30,
-    top: -40,
-    width: 220,
-    height: 150,
-  },
-  promoTitle: {
-    fontSize: fontSize.lg,
-    fontFamily: fontFamily.bold,
-    color: colors.white,
-    maxWidth: '75%',
-  },
-  promoCta: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#1E1B4B',
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs + 4,
-  },
-  promoCtaText: {
-    color: colors.white,
-    fontSize: fontSize.xs,
-    fontFamily: fontFamily.bold,
-  },
+  campaignRoute: { position: 'absolute', right: -8, bottom: -4 },
+  campaignTitle: { maxWidth: '80%' },
+  campaignText: { maxWidth: '75%', opacity: 0.9 },
+  campaignCta: { alignSelf: 'flex-start', marginTop: spacing.xs },
+  chips: { gap: spacing.sm, paddingRight: spacing.md },
 });

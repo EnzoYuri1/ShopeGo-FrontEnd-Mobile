@@ -34,7 +34,7 @@ export function PaymentSuccessScreen() {
 
       <Button
         title={strings.checkout.backHome}
-        onPress={() => router.replace('/(drawer)')}
+        onPress={() => router.replace('/(drawer)/(tabs)')}
         style={styles.button}
       />
     </View>

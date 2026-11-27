@@ -1,151 +1,164 @@
-import { Image } from 'expo-image';
+import { Image, type ImageSource } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useMemo } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BackButton, BrandLogo } from '@/components/ui';
-import { colors, fontFamily, strings } from '@/constants';
+import { AppText, Button, ScreenTopBar } from '@/components/ui';
+import { colors, radius, spacing, strings } from '@/constants';
+import { DEALS_CATEGORY, isDeal } from '@/features/categories/categoryName';
+import { ProductGrid } from '@/features/products/components/ProductGrid';
+import { useProducts } from '@/features/products/hooks/useProducts';
+import { useIsLandscape } from '@/hooks/useScreenWidth';
 
 const images = {
   gift: require('../../../../assets/images/offers/gift.webp'),
   freeTag: require('../../../../assets/images/offers/free-tag.webp'),
 };
 
-export function OffersScreen() {
-  const router = useRouter();
-  const insets = useSafeAreaInsets();
+/** Quantas ofertas mostrar aqui; o restante fica em "Ver todas". */
+const TOP_DEALS = 12;
 
-  function handleBack() {
-    if (router.canGoBack()) router.back();
-    else router.replace('/(drawer)');
-  }
+interface CouponProps {
+  title: string;
+  text: string;
+  image: ImageSource;
+  tone: 'brand' | 'tint';
+  onAccept: () => void;
+}
 
-  function handleAccept() {
-    router.replace('/(drawer)');
-  }
-
+function Coupon({ title, text, image, tone, onAccept }: CouponProps) {
+  const isBrand = tone === 'brand';
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
-      <View style={styles.topBar}>
-        <BackButton variant="close" onPress={handleBack} />
-        <BrandLogo />
+    <View style={[styles.coupon, isBrand ? styles.couponBrand : styles.couponTint]}>
+      <View style={styles.couponText}>
+        <AppText variant="heading" color={isBrand ? 'onBrand' : 'text'}>
+          {title}
+        </AppText>
+        <AppText variant="caption" color={isBrand ? 'onBrand' : 'textSecondary'}>
+          {text}
+        </AppText>
+        <Button
+          title={strings.offers.accept}
+          size="md"
+          fullWidth={false}
+          variant={isBrand ? 'primary' : 'secondary'}
+          onPress={onAccept}
+          style={styles.couponCta}
+        />
       </View>
-
-      <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 24 }]}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text style={styles.title}>{strings.offers.title}</Text>
-        <Text style={styles.subtitle}>{strings.offers.subtitle}</Text>
-
-        <View style={[styles.banner, { backgroundColor: '#FF8B4C' }]}>
-          <Image source={images.gift} contentFit="contain" style={styles.giftImage} />
-          <Text style={[styles.bannerText, { color: colors.white }]}>
-            {strings.offers.freeDelivery}
-          </Text>
-          <AcceptButton onPress={handleAccept} />
-        </View>
-
-        <View style={[styles.banner, { backgroundColor: '#D5E2C8' }]}>
-          <Image source={images.freeTag} contentFit="contain" style={styles.tagImage} />
-          <Text style={[styles.bannerText, styles.bannerTextBottom, { color: '#141414' }]}>
-            {strings.offers.firstFree}
-          </Text>
-          <AcceptButton onPress={handleAccept} />
-        </View>
-      </ScrollView>
+      <Image source={image} contentFit="contain" style={styles.couponImage} accessible={false} />
     </View>
   );
 }
 
-function AcceptButton({ onPress }: { onPress: () => void }) {
+/** Ofertas: os cupons existentes e os maiores descontos reais do catálogo. */
+export function OffersScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const landscape = useIsLandscape();
+  const { data: products = [], isLoading, isError, refetch } = useProducts();
+
+  const topDeals = useMemo(
+    () =>
+      products
+        .filter(isDeal)
+        .sort((a, b) => (b.discountPercent ?? 0) - (a.discountPercent ?? 0))
+        .slice(0, TOP_DEALS),
+    [products],
+  );
+
+  function handleBack() {
+    if (router.canGoBack()) router.back();
+    else router.replace('/(drawer)/(tabs)');
+  }
+
+  // Comportamento mantido: aceitar o cupom leva de volta às compras.
+  function handleAccept() {
+    router.replace('/(drawer)/(tabs)');
+  }
+
+  const header = (
+    <View style={styles.header}>
+      <View style={styles.titleBlock}>
+        <AppText variant="title" accessibilityRole="header">
+          {strings.offers.screenTitle}
+        </AppText>
+        <AppText variant="body" color="textSecondary">
+          {strings.offers.intro}
+        </AppText>
+      </View>
+
+      <View style={[styles.coupons, landscape ? styles.couponsRow : null]}>
+        <Coupon
+          title={strings.offers.couponFreeDelivery}
+          text={strings.offers.couponFreeDeliveryText}
+          image={images.gift}
+          tone="brand"
+          onAccept={handleAccept}
+        />
+        <Coupon
+          title={strings.offers.couponFirstFree}
+          text={strings.offers.couponFirstFreeText}
+          image={images.freeTag}
+          tone="tint"
+          onAccept={handleAccept}
+        />
+      </View>
+
+      <View style={styles.sectionHead}>
+        <AppText variant="heading">{strings.offers.topDeals}</AppText>
+        <Pressable
+          onPress={() =>
+            router.push({ pathname: '/category/[slug]', params: { slug: DEALS_CATEGORY } })
+          }
+          hitSlop={8}
+          accessibilityRole="link"
+        >
+          <AppText variant="bodyStrong" color="primaryText">
+            {strings.offers.seeAllDeals}
+          </AppText>
+        </Pressable>
+      </View>
+    </View>
+  );
+
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [styles.accept, pressed ? styles.pressed : null]}
-    >
-      <Text style={styles.acceptText}>{strings.offers.accept}</Text>
-    </Pressable>
+    <View style={styles.root}>
+      <ScreenTopBar onBack={handleBack} />
+      <ProductGrid
+        products={topDeals}
+        isLoading={isLoading}
+        isError={isError}
+        onRetry={() => void refetch()}
+        errorMessage={strings.home.loadError}
+        header={header}
+        bottomInset={insets.bottom}
+        empty={{ title: strings.home.emptyProducts }}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
+  root: { flex: 1, backgroundColor: colors.background },
+  header: { gap: spacing.lg, paddingBottom: spacing.xs },
+  titleBlock: { gap: spacing.xs },
+  coupons: { gap: spacing.ms },
+  couponsRow: { flexDirection: 'row' },
+  coupon: {
     flex: 1,
-    backgroundColor: colors.background,
-  },
-  topBar: {
-    height: 64,
-    paddingHorizontal: 10,
-    justifyContent: 'center',
-  },
-  scroll: {
-    paddingHorizontal: 17,
-    gap: 18,
-  },
-  title: {
-    marginTop: 4,
-    marginLeft: 2,
-    fontFamily: fontFamily.inriaBold,
-    fontSize: 24,
-    color: colors.black,
-  },
-  subtitle: {
-    marginLeft: 2,
-    marginTop: -8,
-    fontFamily: fontFamily.inriaBold,
-    fontSize: 15,
-    lineHeight: 20,
-    color: 'rgba(0,0,0,0.58)',
-  },
-  banner: {
-    height: 185,
-    borderRadius: 10,
-    overflow: 'hidden',
-    padding: 24,
-  },
-  giftImage: {
-    position: 'absolute',
-    right: -20,
-    top: -66,
-    width: 357,
-    height: 238,
-  },
-  tagImage: {
-    position: 'absolute',
-    right: 8,
-    top: 0,
-    width: 222,
-    height: 133,
-  },
-  bannerText: {
-    fontFamily: fontFamily.inriaBold,
-    fontSize: 24,
-    lineHeight: 30,
-    width: 188,
-  },
-  bannerTextBottom: {
-    position: 'absolute',
-    left: 17,
-    bottom: 20,
-  },
-  accept: {
-    position: 'absolute',
-    right: 8,
-    bottom: 8,
-    height: 38,
-    paddingHorizontal: 14,
-    borderRadius: 10,
-    backgroundColor: '#03003E',
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: spacing.sm,
+    padding: spacing.ml,
+    borderRadius: radius.lg,
+    overflow: 'hidden',
   },
-  acceptText: {
-    fontFamily: fontFamily.inriaBold,
-    fontSize: 15,
-    color: colors.white,
-  },
-  pressed: {
-    opacity: 0.8,
-  },
+  couponBrand: { backgroundColor: colors.brand },
+  couponTint: { backgroundColor: colors.primaryLight },
+  couponText: { flex: 1, gap: spacing.xs },
+  couponCta: { alignSelf: 'flex-start', marginTop: spacing.sm },
+  couponImage: { width: 96, height: 96 },
+  sectionHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
 });

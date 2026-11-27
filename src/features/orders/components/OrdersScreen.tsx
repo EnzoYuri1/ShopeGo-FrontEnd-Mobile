@@ -1,44 +1,82 @@
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ScreenHeader } from '@/components/ui';
-import { colors, fontFamily, strings } from '@/constants';
+import {
+  AppText,
+  Badge,
+  EmptyState,
+  ErrorState,
+  Icon,
+  ScreenTopBar,
+  Skeleton,
+} from '@/components/ui';
+import { colors, radius, spacing, strings } from '@/constants';
 import { useOrders } from '@/features/orders/hooks/useOrders';
 import type { Order } from '@/features/orders/types/order';
-import { formatDate, getStatusLabel } from '@/features/orders/utils/orderStatus';
+import { formatDate, getStatusLabel, getStatusTone } from '@/features/orders/utils/orderStatus';
+import { fillTemplate } from '@/utils/fillTemplate';
 import { formatPrice } from '@/utils/formatPrice';
 
+/** Meus pedidos: status, data, itens e total; toque abre o rastreio. */
 export function OrdersScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { data: orders = [], isLoading, isError } = useOrders();
+  const { data: orders = [], isLoading, isError, refetch } = useOrders();
 
   function handleBack() {
     if (router.canGoBack()) router.back();
     else router.replace('/(drawer)/(tabs)');
   }
 
+  let empty;
+  if (isLoading) {
+    empty = (
+      <View style={styles.skeletons}>
+        {Array.from({ length: 3 }, (_, index) => (
+          <Skeleton key={index} height={112} />
+        ))}
+      </View>
+    );
+  } else if (isError && orders.length === 0) {
+    empty = <ErrorState message={strings.orders.loadError} onRetry={() => void refetch()} />;
+  } else {
+    empty = (
+      <EmptyState
+        icon="package"
+        title={strings.orders.emptyTitle}
+        message={strings.orders.emptyMessage}
+        actionLabel={strings.orders.startShopping}
+        onAction={() => router.replace('/(drawer)/(tabs)')}
+      />
+    );
+  }
+
   return (
     <View style={styles.root}>
-      <ScreenHeader title={strings.orders.title} onBack={handleBack} />
-
+      <ScreenTopBar onBack={handleBack} />
       <FlatList
-        data={orders}
+        data={isLoading || (isError && orders.length === 0) ? [] : orders}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 24 }]}
+        contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + spacing.xl }]}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          isLoading ? (
-            <ActivityIndicator size="large" color={colors.primary} style={styles.empty} />
-          ) : (
-            <Text style={styles.emptyText}>
-              {isError ? strings.orders.loadError : strings.orders.empty}
-            </Text>
-          )
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <AppText variant="title" accessibilityRole="header">
+              {strings.orders.title}
+            </AppText>
+            {orders.length > 0 ? (
+              <AppText variant="body" color="textSecondary">
+                {orders.length === 1
+                  ? strings.orders.countOne
+                  : fillTemplate(strings.orders.count, { n: orders.length })}
+              </AppText>
+            ) : null}
+          </View>
         }
+        ListEmptyComponent={empty}
         renderItem={({ item }) => (
-          <OrderRow
+          <OrderCard
             order={item}
             onPress={() => router.push({ pathname: '/tracking/[id]', params: { id: item.id } })}
           />
@@ -48,88 +86,65 @@ export function OrdersScreen() {
   );
 }
 
-function OrderRow({ order, onPress }: { order: Order; onPress: () => void }) {
+function OrderCard({ order, onPress }: { order: Order; onPress: () => void }) {
   const first = order.items[0];
   const extra = order.items.length - 1;
 
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
-      <View style={styles.rowTop}>
-        <Text style={styles.name} numberOfLines={1}>
-          {first?.name}
-          {extra > 0 ? ` +${extra}` : ''}
-        </Text>
-        <Text style={styles.status}>{getStatusLabel(order.status)}</Text>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      style={({ pressed }) => [styles.card, pressed ? styles.cardPressed : null]}
+    >
+      <View style={styles.cardTop}>
+        <AppText variant="label" color="textSecondary">
+          {fillTemplate(strings.orders.number, { id: order.id.slice(0, 8).toUpperCase() })}
+        </AppText>
+        <Badge label={getStatusLabel(order.status)} tone={getStatusTone(order.status)} />
       </View>
-      <View style={styles.rowBottom}>
-        <Text style={styles.meta}>{formatDate(order.createdAt)}</Text>
-        <Text style={styles.total}>{formatPrice(order.total)}</Text>
+      <AppText variant="bodyStrong" numberOfLines={1}>
+        {first?.name}
+      </AppText>
+      {extra > 0 ? (
+        <AppText variant="caption" color="textSecondary">
+          {extra === 1
+            ? strings.orders.moreItemsOne
+            : fillTemplate(strings.orders.moreItems, { n: extra })}
+        </AppText>
+      ) : null}
+      <View style={styles.cardBottom}>
+        <AppText variant="caption" color="textSecondary">
+          {formatDate(order.createdAt)}
+        </AppText>
+        <View style={styles.total}>
+          <AppText variant="price">{formatPrice(order.total)}</AppText>
+          <Icon name="chevronRight" size={18} color="textSecondary" />
+        </View>
       </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
+  root: { flex: 1, backgroundColor: colors.background },
+  list: { paddingHorizontal: spacing.md, gap: spacing.ms },
+  header: { gap: spacing.xs, paddingBottom: spacing.sm },
+  skeletons: { gap: spacing.ms },
+  card: {
+    gap: spacing.xs,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
     backgroundColor: colors.background,
   },
-  list: {
-    paddingHorizontal: 19,
-    paddingTop: 28,
-    gap: 14,
-  },
-  empty: {
-    marginTop: 60,
-  },
-  emptyText: {
-    marginTop: 60,
-    textAlign: 'center',
-    fontFamily: fontFamily.medium,
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
-  row: {
-    borderRadius: 12,
-    backgroundColor: '#EBE8FE',
-    borderWidth: 0.5,
-    borderColor: 'rgba(0,0,0,0.35)',
-    padding: 16,
-    gap: 10,
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-  rowTop: {
+  cardPressed: { backgroundColor: colors.surface },
+  cardTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  cardBottom: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 8,
-  },
-  rowBottom: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    marginTop: spacing.xs,
   },
-  name: {
-    flex: 1,
-    fontFamily: fontFamily.heading,
-    fontSize: 15,
-    color: colors.black,
-  },
-  status: {
-    fontFamily: fontFamily.semibold,
-    fontSize: 12,
-    color: colors.primary,
-  },
-  meta: {
-    fontFamily: fontFamily.regular,
-    fontSize: 12,
-    color: colors.textMuted,
-  },
-  total: {
-    fontFamily: fontFamily.inriaBold,
-    fontSize: 16,
-    color: 'rgba(0,0,0,0.75)',
-  },
+  total: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
 });

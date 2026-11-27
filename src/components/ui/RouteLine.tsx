@@ -18,6 +18,8 @@ interface RouteLineProps {
   orientation?: 'horizontal' | 'vertical';
   /** Torna as paradas tocáveis (ex.: categorias). */
   onSelect?: (index: number) => void;
+  /** Horizontal como progresso (ex.: etapas do checkout): paradas anteriores aparecem concluídas. */
+  progress?: boolean;
 }
 
 /**
@@ -25,7 +27,13 @@ interface RouteLineProps {
  * Use só onde existe sequência ou percurso real: categorias, etapas do checkout,
  * status do pedido. Nunca como enfeite.
  */
-export function RouteLine({ stops, activeIndex, orientation = 'horizontal', onSelect }: RouteLineProps) {
+export function RouteLine({
+  stops,
+  activeIndex,
+  orientation = 'horizontal',
+  onSelect,
+  progress = false,
+}: RouteLineProps) {
   if (orientation === 'vertical') {
     return (
       <View accessibilityRole="list">
@@ -42,7 +50,10 @@ export function RouteLine({ stops, activeIndex, orientation = 'horizontal', onSe
                 {!last ? <View style={[styles.vLine, done && styles.lineDone]} /> : null}
               </View>
               <View style={styles.vText}>
-                <AppText variant={current ? 'bodyStrong' : 'body'} color={index > activeIndex ? 'textSecondary' : 'text'}>
+                <AppText
+                  variant={current ? 'bodyStrong' : 'body'}
+                  color={index > activeIndex ? 'textSecondary' : 'text'}
+                >
                   {stop.label}
                 </AppText>
                 {stop.description ? (
@@ -58,22 +69,40 @@ export function RouteLine({ stops, activeIndex, orientation = 'horizontal', onSe
     );
   }
 
+  const interactive = Boolean(onSelect);
+  const currentStop = stops[activeIndex];
+
   return (
-    <View style={styles.hWrap} accessibilityRole="tablist">
+    <View
+      style={styles.hWrap}
+      // Sem onSelect é só um indicador: lido como progresso, não como abas.
+      accessible={!interactive}
+      accessibilityRole={interactive ? 'tablist' : 'progressbar'}
+      accessibilityLabel={!interactive && currentStop ? currentStop.label : undefined}
+      accessibilityValue={
+        !interactive ? { min: 1, max: stops.length, now: activeIndex + 1 } : undefined
+      }
+    >
       <View style={styles.hLine} />
       {stops.map((stop, index) => {
         const current = index === activeIndex;
         return (
           <Pressable
             key={stop.key}
-            disabled={!onSelect}
+            disabled={!interactive}
             onPress={() => onSelect?.(index)}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: current }}
+            accessibilityRole={interactive ? 'tab' : undefined}
+            accessibilityState={interactive ? { selected: current } : undefined}
             hitSlop={8}
             style={styles.hStop}
           >
-            <View style={[styles.hDot, current && styles.dotCurrent]} />
+            <View
+              style={[
+                styles.hDot,
+                progress && index < activeIndex && styles.dotDone,
+                current && styles.dotCurrent,
+              ]}
+            />
             <AppText variant="label" color={current ? 'text' : 'textSecondary'} numberOfLines={1}>
               {stop.label}
             </AppText>

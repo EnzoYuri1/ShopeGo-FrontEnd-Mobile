@@ -1,33 +1,31 @@
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BackButton, BrandLogo, Button, QuantityStepper } from '@/components/ui';
-import { colors, fontFamily, strings } from '@/constants';
+import { AppText, Button, EmptyState, Icon, IconButton, QuantityStepper } from '@/components/ui';
+import { colors, elevation, radius, spacing, strings } from '@/constants';
 import { getEffectivePrice, useCart } from '@/features/cart/hooks/useCart';
 import { useCartTotals } from '@/features/cart/hooks/useCartTotals';
 import type { CartItem } from '@/features/cart/types/cart';
+import { CheckoutSteps } from '@/features/checkout/components/CheckoutSteps';
 import { PaymentMethodSheet } from '@/features/checkout/components/PaymentMethodSheet';
-import type { PaymentMethod } from '@/features/checkout/types/payment';
 import { usePlaceOrder } from '@/features/checkout/hooks/usePlaceOrder';
+import type { PaymentMethod } from '@/features/checkout/types/payment';
 import { getCardImageSource } from '@/features/products/productImages';
+import { fillTemplate } from '@/utils/fillTemplate';
 import { formatPrice } from '@/utils/formatPrice';
 
+/** Aba Carrinho: itens, resumo (subtotal, imposto de 10%, total) e escolha do pagamento. */
 export function CartScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { items, updateQuantity } = useCart();
-  const { tax, total } = useCartTotals();
+  const { items, itemCount, updateQuantity, removeItem } = useCart();
+  const { subtotal, tax, total } = useCartTotals();
   const { placeOrder, isPlacing } = usePlaceOrder();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [orderError, setOrderError] = useState(false);
-
-  function handleBack() {
-    if (router.canGoBack()) router.back();
-    else router.replace('/(drawer)/(tabs)');
-  }
 
   function handleProceed(method: PaymentMethod) {
     setSheetOpen(false);
@@ -44,47 +42,77 @@ export function CartScreen() {
     );
   }
 
-  return (
-    <View style={styles.root}>
-      <View style={styles.header}>
-        <View style={styles.ellipse} />
-        <View style={[styles.headerContent, { paddingTop: insets.top }]}>
-          <BackButton onPress={handleBack} style={styles.back} />
-          <Text style={styles.title}>{strings.cart.title}</Text>
-        </View>
-        <BrandLogo tone="onPrimary" style={{ top: insets.top - 2 }} />
-      </View>
+  const countLabel =
+    itemCount === 1
+      ? strings.cart.itemsCountOne
+      : fillTemplate(strings.cart.itemsCount, { n: itemCount });
 
+  return (
+    <View style={[styles.root, { paddingTop: insets.top }]}>
       <FlatList
         data={items}
         keyExtractor={(item) => item.product.id}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={<Text style={styles.empty}>{strings.cart.empty}</Text>}
-        renderItem={({ item }) => (
-          <CartRow item={item} onChange={(qty) => updateQuantity(item.product.id, qty)} />
-        )}
-        ListFooterComponent={
-          items.length > 0 ? (
-            <View style={styles.summary}>
-              <Text style={styles.paymentTitle}>{strings.cart.payment}</Text>
-              <SummaryLine label={strings.cart.tax} value={formatPrice(tax)} muted />
-              <SummaryLine label={strings.cart.total} value={formatPrice(total)} />
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <View style={styles.titleBlock}>
+              <AppText variant="title" accessibilityRole="header">
+                {strings.cart.screenTitle}
+              </AppText>
+              {items.length > 0 ? (
+                <AppText variant="body" color="textSecondary">
+                  {countLabel}
+                </AppText>
+              ) : null}
             </View>
-          ) : undefined
+            {items.length > 0 ? <CheckoutSteps step={0} /> : null}
+          </View>
         }
+        ListEmptyComponent={
+          <EmptyState
+            icon="bag"
+            title={strings.cart.emptyTitle}
+            message={strings.cart.emptyMessage}
+            actionLabel={strings.cart.explore}
+            onAction={() => router.push('/categories')}
+          />
+        }
+        renderItem={({ item }) => (
+          <CartRow
+            item={item}
+            onOpen={() =>
+              router.push({ pathname: '/product/[id]', params: { id: item.product.id } })
+            }
+            onChange={(quantity) => updateQuantity(item.product.id, quantity)}
+            onRemove={() => removeItem(item.product.id)}
+          />
+        )}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
 
-      {orderError ? <Text style={styles.orderError}>{strings.checkout.orderFailed}</Text> : null}
-      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-        <Button
-          title={strings.cart.confirm}
-          onPress={() => setSheetOpen(true)}
-          loading={isPlacing}
-          disabled={items.length === 0}
-          style={styles.confirm}
-        />
-      </View>
+      {items.length > 0 ? (
+        <View style={styles.summary}>
+          <SummaryLine label={strings.cart.subtotal} value={formatPrice(subtotal)} />
+          <SummaryLine label={strings.cart.taxLabel} value={formatPrice(tax)} />
+          <View style={styles.totalRow}>
+            <AppText variant="subheading">{strings.cart.totalLabel}</AppText>
+            <AppText variant="priceLarge">{formatPrice(total)}</AppText>
+          </View>
+          {orderError ? (
+            <AppText variant="caption" color="danger" accessibilityRole="alert">
+              {strings.checkout.orderFailed}
+            </AppText>
+          ) : null}
+          <Button
+            title={strings.cart.choosePayment}
+            icon="creditCard"
+            onPress={() => setSheetOpen(true)}
+            loading={isPlacing}
+          />
+        </View>
+      ) : null}
+
       {sheetOpen ? (
         <PaymentMethodSheet onClose={() => setSheetOpen(false)} onProceed={handleProceed} />
       ) : null}
@@ -94,26 +122,45 @@ export function CartScreen() {
 
 interface CartRowProps {
   item: CartItem;
+  onOpen: () => void;
   onChange: (quantity: number) => void;
+  onRemove: () => void;
 }
 
-function CartRow({ item, onChange }: CartRowProps) {
+function CartRow({ item, onOpen, onChange, onRemove }: CartRowProps) {
   const { product, quantity } = item;
   const unitPrice = getEffectivePrice(product);
   const source = getCardImageSource(product);
 
   return (
     <View style={styles.row}>
-      <View style={styles.thumb}>
-        {source ? <Image source={source} contentFit="contain" style={styles.thumbImage} /> : null}
-      </View>
+      <Pressable
+        onPress={onOpen}
+        accessibilityRole="button"
+        accessibilityLabel={product.name}
+        style={styles.thumb}
+      >
+        {source ? (
+          <Image source={source} contentFit="contain" style={styles.thumbImage} />
+        ) : (
+          <Icon name="bag" size={28} color="textDisabled" />
+        )}
+      </Pressable>
 
       <View style={styles.rowInfo}>
-        <Text style={styles.rowName} numberOfLines={2}>
-          {product.name}
-        </Text>
-        <Text style={styles.unitPrice}>{formatPrice(unitPrice)}</Text>
-        <View style={styles.rowDivider} />
+        <View style={styles.rowTop}>
+          <AppText variant="bodyStrong" numberOfLines={2} style={styles.rowName}>
+            {product.name}
+          </AppText>
+          <IconButton
+            icon="trash"
+            accessibilityLabel={fillTemplate(strings.cart.remove, { name: product.name })}
+            onPress={onRemove}
+          />
+        </View>
+        <AppText variant="caption" color="textSecondary">
+          {fillTemplate(strings.cart.unitPrice, { p: formatPrice(unitPrice) })}
+        </AppText>
         <View style={styles.rowBottom}>
           <QuantityStepper
             size="sm"
@@ -121,173 +168,67 @@ function CartRow({ item, onChange }: CartRowProps) {
             onIncrement={() => onChange(quantity + 1)}
             onDecrement={() => onChange(quantity - 1)}
           />
-          <Text style={styles.lineTotal}>{formatPrice(unitPrice * quantity)}</Text>
+          <AppText variant="price">{formatPrice(unitPrice * quantity)}</AppText>
         </View>
       </View>
     </View>
   );
 }
 
-interface SummaryLineProps {
-  label: string;
-  value: string;
-  muted?: boolean;
-}
-
-function SummaryLine({ label, value, muted }: SummaryLineProps) {
+function SummaryLine({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.summaryLine}>
-      <Text style={[styles.summaryLabel, muted ? null : styles.summaryLabelStrong]}>{label}</Text>
-      <Text style={styles.summaryValue}>{value}</Text>
+      <AppText variant="body" color="textSecondary">
+        {label}
+      </AppText>
+      <AppText variant="bodyStrong">{value}</AppText>
     </View>
   );
 }
 
-const HEADER_HEIGHT = 113;
-
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    overflow: 'hidden',
-  },
-  ellipse: {
-    position: 'absolute',
-    left: '50%',
-    marginLeft: -232,
-    top: HEADER_HEIGHT - 465,
-    width: 465,
-    height: 465,
-    borderRadius: 233,
-    backgroundColor: colors.primary,
-  },
-  headerContent: {
-    minHeight: HEADER_HEIGHT,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingBottom: 12,
-  },
-  back: {
-    position: 'absolute',
-    left: 10,
-    top: 36,
-  },
-  title: {
-    marginTop: 8,
-    fontFamily: fontFamily.interSemibold,
-    fontSize: 28,
-    color: colors.black,
-  },
-  list: {
-    paddingHorizontal: 19,
-    paddingTop: 36,
-    paddingBottom: 24,
-    gap: 13,
-  },
-  empty: {
-    marginTop: 60,
-    textAlign: 'center',
-    fontFamily: fontFamily.medium,
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 24,
-    padding: 16,
-    backgroundColor: '#EBE8FE',
-    borderWidth: 0.3,
-    borderColor: colors.black,
-    borderRadius: 9,
-  },
+  root: { flex: 1, backgroundColor: colors.background },
+  list: { paddingHorizontal: spacing.md, paddingBottom: spacing.lg },
+  header: { gap: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.lg },
+  titleBlock: { gap: spacing.xs },
+  separator: { height: 1, backgroundColor: colors.border, marginVertical: spacing.ms },
+  row: { flexDirection: 'row', gap: spacing.ms },
   thumb: {
-    width: 91,
-    height: 91,
-    borderWidth: 1,
-    borderColor: 'rgba(6,6,6,0.12)',
-    borderRadius: 11,
+    width: 84,
+    height: 84,
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceBrand,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  thumbImage: {
-    width: 80,
-    height: 80,
-  },
-  rowInfo: {
-    flex: 1,
-  },
-  rowName: {
-    fontFamily: fontFamily.heading,
-    fontSize: 16,
-    lineHeight: 20,
-    color: colors.black,
-  },
-  unitPrice: {
-    marginTop: 6,
-    alignSelf: 'flex-end',
-    fontFamily: fontFamily.inriaBold,
-    fontSize: 12,
-    color: 'rgba(0,0,0,0.67)',
-  },
-  rowDivider: {
-    height: 1,
-    marginVertical: 4,
-    backgroundColor: 'rgba(0,0,0,0.15)',
-  },
+  thumbImage: { width: '80%', height: '80%' },
+  rowInfo: { flex: 1, gap: spacing.xs },
+  rowTop: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.xs },
+  rowName: { flex: 1, paddingTop: spacing.xs },
   rowBottom: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  lineTotal: {
-    fontFamily: fontFamily.inriaBold,
-    fontSize: 16,
-    color: 'rgba(0,0,0,0.67)',
+    marginTop: spacing.xs,
   },
   summary: {
-    marginTop: 28,
-    gap: 18,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    backgroundColor: colors.background,
+    ...elevation.raised,
   },
-  paymentTitle: {
-    marginLeft: 3,
-    fontFamily: fontFamily.interSemibold,
-    fontSize: 24,
-    color: 'rgba(0,0,0,0.63)',
-  },
-  summaryLine: {
+  summaryLine: { flexDirection: 'row', justifyContent: 'space-between' },
+  totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-  },
-  summaryLabel: {
-    fontFamily: fontFamily.interSemibold,
-    fontSize: 20,
-    color: 'rgba(0,0,0,0.68)',
-  },
-  summaryLabelStrong: {
-    color: 'rgba(0,0,0,0.68)',
-  },
-  summaryValue: {
-    fontFamily: fontFamily.interSemibold,
-    fontSize: 20,
-    color: colors.black,
-  },
-  orderError: {
-    textAlign: 'center',
-    fontFamily: fontFamily.medium,
-    fontSize: 13,
-    color: colors.danger,
-  },
-  footer: {
-    paddingHorizontal: 24,
-    paddingTop: 8,
-  },
-  confirm: {
-    backgroundColor: colors.primary,
-    shadowOpacity: 0,
-    elevation: 0,
+    alignItems: 'baseline',
+    paddingTop: spacing.sm,
+    marginBottom: spacing.xs,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
 });

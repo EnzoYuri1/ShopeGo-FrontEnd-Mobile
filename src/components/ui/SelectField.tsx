@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import { FlatList, Modal, Pressable, StyleSheet, View } from 'react-native';
 
-import { colors, fontFamily } from '@/constants';
+import { AppText } from '@/components/ui/AppText';
+import { Icon } from '@/components/ui/Icon';
+import { colors, elevation, radius, spacing } from '@/constants';
 
 interface SelectFieldProps {
   value: string;
@@ -10,10 +11,19 @@ interface SelectFieldProps {
   options: string[];
   onChange: (value: string) => void;
   error?: boolean;
+  /** Descreve o campo para leitores de tela (ex.: "Mês de validade"). */
+  accessibilityLabel?: string;
 }
 
-/** Campo de seleção (lista em modal) que funciona igual no nativo e no web. */
-export function SelectField({ value, placeholder, options, onChange, error }: SelectFieldProps) {
+/** Campo de seleção da marca (lista em modal), igual no nativo e no web. */
+export function SelectField({
+  value,
+  placeholder,
+  options,
+  onChange,
+  error,
+  accessibilityLabel,
+}: SelectFieldProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -21,18 +31,14 @@ export function SelectField({ value, placeholder, options, onChange, error }: Se
       <Pressable
         onPress={() => setOpen(true)}
         accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel ?? placeholder}
+        accessibilityValue={value ? { text: value } : undefined}
         style={[styles.field, error ? styles.fieldError : null]}
       >
-        <Text style={[styles.text, value ? null : styles.placeholder]}>{value || placeholder}</Text>
-        <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-          <Path
-            d="M5 9l7 7 7-7"
-            stroke={colors.black}
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </Svg>
+        <AppText variant="body" color={value ? 'text' : 'textSecondary'}>
+          {value || placeholder}
+        </AppText>
+        <Icon name="chevronDown" size={18} color="textSecondary" />
       </Pressable>
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
@@ -41,17 +47,29 @@ export function SelectField({ value, placeholder, options, onChange, error }: Se
             <FlatList
               data={options}
               keyExtractor={(item) => item}
-              renderItem={({ item }) => (
-                <Pressable
-                  onPress={() => {
-                    onChange(item);
-                    setOpen(false);
-                  }}
-                  style={[styles.option, item === value ? styles.optionOn : null]}
-                >
-                  <Text style={styles.optionText}>{item}</Text>
-                </Pressable>
-              )}
+              renderItem={({ item }) => {
+                const selected = item === value;
+                return (
+                  <Pressable
+                    onPress={() => {
+                      onChange(item);
+                      setOpen(false);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected }}
+                    style={({ pressed }) => [
+                      styles.option,
+                      selected ? styles.optionOn : null,
+                      pressed ? styles.optionPressed : null,
+                    ]}
+                  >
+                    <AppText variant={selected ? 'bodyStrong' : 'body'}>{item}</AppText>
+                    {selected ? (
+                      <Icon name="check" size={18} color="brand" strokeWidth={2.5} />
+                    ) : null}
+                  </Pressable>
+                );
+              }}
             />
           </View>
         </Pressable>
@@ -63,49 +81,37 @@ export function SelectField({ value, placeholder, options, onChange, error }: Se
 const styles = StyleSheet.create({
   field: {
     flex: 1,
-    height: 36,
-    borderRadius: 6,
-    backgroundColor: '#C9C9C9',
-    paddingHorizontal: 12,
+    minHeight: 52,
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceBrand,
+    paddingHorizontal: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: 'transparent',
   },
-  fieldError: {
-    borderColor: colors.danger,
-  },
-  text: {
-    fontFamily: fontFamily.medium,
-    fontSize: 13,
-    color: colors.black,
-  },
-  placeholder: {
-    color: 'rgba(0,0,0,0.55)',
-  },
+  fieldError: { borderColor: colors.danger },
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: colors.scrim,
     justifyContent: 'center',
-    padding: 40,
+    padding: spacing.xl,
   },
   sheet: {
-    maxHeight: 320,
-    borderRadius: 12,
-    backgroundColor: colors.white,
+    maxHeight: 360,
+    borderRadius: radius.lg,
+    backgroundColor: colors.background,
     overflow: 'hidden',
+    ...elevation.overlay,
   },
   option: {
-    paddingVertical: 14,
-    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 48,
+    paddingHorizontal: spacing.ml,
   },
-  optionOn: {
-    backgroundColor: colors.primaryLight,
-  },
-  optionText: {
-    fontFamily: fontFamily.medium,
-    fontSize: 15,
-    color: colors.black,
-  },
+  optionOn: { backgroundColor: colors.surfaceBrand },
+  optionPressed: { backgroundColor: colors.surfaceBrandStrong },
 });

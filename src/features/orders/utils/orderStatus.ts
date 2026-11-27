@@ -50,3 +50,36 @@ export function formatDate(iso?: string, addDays = 0): string {
   date.setDate(date.getDate() + addDays);
   return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' });
 }
+
+/** Cor do selo de status (tons do Badge da marca). */
+export function getStatusTone(
+  status: OrderStatus,
+): 'warning' | 'neutral' | 'signal' | 'success' | 'danger' {
+  switch (status) {
+    case 'pending':
+      return 'warning';
+    case 'confirmed':
+      return 'neutral';
+    case 'shipped':
+      return 'signal';
+    case 'delivered':
+      return 'success';
+    case 'cancelled':
+      return 'danger';
+  }
+}
+
+/** Forma de pagamento salva no pedido ("card:visa", "other") em texto para o usuário. */
+export function getPaymentLabel(method: string): string {
+  if (method.startsWith('card:')) {
+    const brand = method.slice('card:'.length);
+    const name =
+      brand === 'visa'
+        ? strings.checkout.visa
+        : brand === 'mastercard'
+          ? strings.checkout.mastercard
+          : brand;
+    return strings.tracking.methodCard.replace('{brand}', name);
+  }
+  return strings.tracking.methodOther;
+}

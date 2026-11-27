@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { Image, type ImageSource } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -7,15 +7,13 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
 
-import { BackButton, BrandLogo, Button, SelectField } from '@/components/ui';
-import { colors, fontFamily, strings } from '@/constants';
+import { AppText, Button, Icon, Input, ScreenTopBar, SelectField } from '@/components/ui';
+import { colors, radius, spacing, strings } from '@/constants';
+import { CheckoutSteps } from '@/features/checkout/components/CheckoutSteps';
 import { usePlaceOrder } from '@/features/checkout/hooks/usePlaceOrder';
 import {
   cardFormSchema,
@@ -42,6 +40,10 @@ function formatCardNumber(raw: string): string {
     .replace(/(\d{4})(?=\d)/g, '$1 ');
 }
 
+/**
+ * Dados do cartão. Os campos são validados com zod e NUNCA são salvos:
+ * o pedido guarda só a bandeira (ex.: "card:visa").
+ */
 export function PaymentDetailsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -98,333 +100,200 @@ export function PaymentDetailsScreen() {
       style={styles.root}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={[styles.topBar, { paddingTop: insets.top }]}>
-        <BackButton onPress={handleBack} />
-        <BrandLogo style={{ top: insets.top - 2 }} />
-      </View>
+      <ScreenTopBar onBack={handleBack} title={strings.checkout.paymentTitle} />
 
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: Math.max(insets.bottom, 16) + 16 }]}
+        contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.card}>
-          <View style={styles.titleRow}>
-            <Text style={styles.title}>{strings.checkout.detailsTitle}</Text>
-            <Svg width={24} height={26} viewBox="0 0 24 26" fill="none">
-              <Path
-                d="M12 2l8 3v7c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5l8-3z"
-                stroke={colors.black}
-                strokeWidth={1.6}
-                strokeLinejoin="round"
-              />
-              <Path
-                d="M8.5 12.5l2.5 2.5 4.5-5"
-                stroke={colors.black}
-                strokeWidth={1.6}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </Svg>
-          </View>
+        <CheckoutSteps step={1} />
 
-          <Text style={styles.label}>{strings.checkout.cardType}</Text>
-          <View style={styles.radios}>
-            <Radio
+        <View style={styles.group}>
+          <AppText variant="label" color="textSecondary">
+            {strings.checkout.cardTypeLabel}
+          </AppText>
+          <View style={styles.brands} accessibilityRole="radiogroup">
+            <BrandOption
               selected={cardType === 'visa'}
-              onPress={() => setCardType('visa')}
-              source={logos.visa}
               label={strings.checkout.visa}
+              source={logos.visa}
+              onPress={() => setCardType('visa')}
             />
-            <Radio
+            <BrandOption
               selected={cardType === 'mastercard'}
-              onPress={() => setCardType('mastercard')}
-              source={logos.mastercard}
               label={strings.checkout.mastercard}
+              source={logos.mastercard}
+              onPress={() => setCardType('mastercard')}
             />
           </View>
-          {errors.cardType ? <Text style={styles.error}>{errors.cardType}</Text> : null}
+          {errors.cardType ? (
+            <AppText variant="caption" color="danger">
+              {errors.cardType}
+            </AppText>
+          ) : null}
+        </View>
 
-          <Text style={styles.label}>{strings.checkout.cardNumber}</Text>
-          <TextInput
-            value={cardNumber}
-            onChangeText={(text) => setCardNumber(formatCardNumber(text))}
-            placeholder={strings.checkout.cardNumberPlaceholder}
-            placeholderTextColor="rgba(0,0,0,0.4)"
-            keyboardType="number-pad"
-            autoComplete="cc-number"
-            maxLength={19}
-            style={[styles.input, errors.cardNumber ? styles.inputError : null]}
-          />
-          {errors.cardNumber ? <Text style={styles.error}>{errors.cardNumber}</Text> : null}
+        <Input
+          label={strings.checkout.cardNumberLabel}
+          value={cardNumber}
+          onChangeText={(text) => setCardNumber(formatCardNumber(text))}
+          placeholder={strings.checkout.cardNumberPlaceholder}
+          keyboardType="number-pad"
+          autoComplete="cc-number"
+          maxLength={19}
+          error={errors.cardNumber}
+        />
 
+        <View style={styles.group}>
+          <AppText variant="label" color="textSecondary">
+            {strings.checkout.expiryLabel}
+          </AppText>
           <View style={styles.pair}>
-            <View style={styles.pairCol}>
-              <Text style={styles.label}>{strings.checkout.expMonth}</Text>
-              <SelectField
-                value={expMonth}
-                placeholder={strings.checkout.month}
-                options={MONTHS}
-                onChange={setExpMonth}
-                error={Boolean(errors.expiry)}
-              />
-            </View>
-            <View style={styles.pairCol}>
-              <Text style={styles.label}>{strings.checkout.expYear}</Text>
-              <SelectField
-                value={expYear}
-                placeholder={strings.checkout.year}
-                options={YEARS}
-                onChange={setExpYear}
-                error={Boolean(errors.expiry)}
-              />
-            </View>
+            <SelectField
+              value={expMonth}
+              placeholder={strings.checkout.month}
+              options={MONTHS}
+              onChange={setExpMonth}
+              error={Boolean(errors.expiry)}
+              accessibilityLabel={strings.checkout.expMonth}
+            />
+            <SelectField
+              value={expYear}
+              placeholder={strings.checkout.year}
+              options={YEARS}
+              onChange={setExpYear}
+              error={Boolean(errors.expiry)}
+              accessibilityLabel={strings.checkout.expYear}
+            />
           </View>
-          {errors.expiry ? <Text style={styles.error}>{errors.expiry}</Text> : null}
+          {errors.expiry ? (
+            <AppText variant="caption" color="danger">
+              {errors.expiry}
+            </AppText>
+          ) : null}
+        </View>
 
-          <Text style={styles.label}>{strings.checkout.cvn}</Text>
-          <Text style={styles.hint}>{strings.checkout.cvnHint}</Text>
-          <TextInput
+        <View style={styles.group}>
+          <Input
+            label={strings.checkout.cvnLabel}
             value={cvn}
             onChangeText={(text) => setCvn(text.replace(/\D/g, '').slice(0, 4))}
             keyboardType="number-pad"
             secureTextEntry
             autoComplete="cc-csc"
             maxLength={4}
-            style={[styles.input, styles.cvnInput, errors.cvn ? styles.inputError : null]}
+            error={errors.cvn}
+            style={styles.cvn}
           />
-          {errors.cvn ? <Text style={styles.error}>{errors.cvn}</Text> : null}
-
-          <Text style={[styles.label, styles.orderLabel]}>{strings.checkout.yourOrder}</Text>
-          <View style={styles.divider} />
-          <View style={styles.totalBox}>
-            <Text style={styles.totalLabel}>{strings.checkout.totalAmount}</Text>
-            <Text style={styles.totalValue}>{formatPrice(total)}</Text>
-          </View>
+          <AppText variant="caption" color="textSecondary">
+            {strings.checkout.cvnHint}
+          </AppText>
         </View>
 
-        {formError ? <Text style={styles.formError}>{formError}</Text> : null}
+        <View style={styles.note}>
+          <Icon name="alert" size={18} color="textSecondary" />
+          <AppText variant="caption" color="textSecondary" style={styles.noteText}>
+            {strings.checkout.secureNote}
+          </AppText>
+        </View>
+      </ScrollView>
 
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
+        <View style={styles.totalRow}>
+          <AppText variant="body" color="textSecondary">
+            {strings.checkout.totalAmount}
+          </AppText>
+          <AppText variant="priceLarge">{formatPrice(total)}</AppText>
+        </View>
+        {formError ? (
+          <AppText variant="caption" color="danger" accessibilityRole="alert">
+            {formError}
+          </AppText>
+        ) : null}
         <View style={styles.actions}>
           <Button
             title={strings.checkout.cancel}
             variant="outline"
+            fullWidth={false}
             onPress={handleBack}
-            style={styles.cancel}
+            style={styles.action}
           />
           <Button
             title={strings.checkout.confirm}
+            fullWidth={false}
             onPress={handleConfirm}
             loading={isPlacing}
             disabled={!hasItems}
-            style={styles.confirm}
+            style={styles.action}
           />
         </View>
-      </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 }
 
-interface RadioProps {
+interface BrandOptionProps {
   selected: boolean;
-  onPress: () => void;
-  source: number;
   label: string;
+  source: ImageSource;
+  onPress: () => void;
 }
 
-function Radio({ selected, onPress, source, label }: RadioProps) {
+function BrandOption({ selected, label, source, onPress }: BrandOptionProps) {
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="radio"
-      accessibilityState={{ selected }}
-      style={styles.radio}
+      accessibilityState={{ checked: selected }}
+      accessibilityLabel={label}
+      style={[styles.brand, selected ? styles.brandOn : null]}
     >
-      <View style={[styles.radioDot, selected ? styles.radioDotOn : null]}>
-        {selected ? <View style={styles.radioInner} /> : null}
-      </View>
-      <View style={styles.logoBox}>
-        <Image source={source} contentFit="contain" style={styles.logo} />
-      </View>
-      <Text style={styles.radioLabel}>{label}</Text>
+      <Image source={source} contentFit="contain" style={styles.brandLogo} />
+      <AppText variant={selected ? 'bodyStrong' : 'body'}>{label}</AppText>
+      {selected ? <Icon name="check" size={18} color="brand" strokeWidth={2.5} /> : null}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
+  root: { flex: 1, backgroundColor: colors.background },
+  scroll: { padding: spacing.md, gap: spacing.lg },
+  group: { gap: spacing.xs + 2 },
+  brands: { flexDirection: 'row', gap: spacing.sm },
+  brand: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    minHeight: 52,
+    paddingHorizontal: spacing.ms,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+  },
+  brandOn: { borderColor: colors.brand, backgroundColor: colors.surfaceBrand },
+  brandLogo: { width: 34, height: 20 },
+  pair: { flexDirection: 'row', gap: spacing.sm },
+  cvn: { maxWidth: 160 },
+  note: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    padding: spacing.ms,
+    borderRadius: radius.md,
+    backgroundColor: colors.surface,
+  },
+  noteText: { flex: 1 },
+  footer: {
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.ms,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
     backgroundColor: colors.background,
   },
-  topBar: {
-    height: 90,
-    paddingHorizontal: 10,
-    justifyContent: 'center',
-  },
-  scroll: {
-    paddingHorizontal: 0,
-  },
-  card: {
-    marginHorizontal: 0,
-    paddingHorizontal: 18,
-    paddingVertical: 18,
-    backgroundColor: '#FFF1EA',
-    borderWidth: 1,
-    borderColor: '#4A3A33',
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.25)',
-  },
-  title: {
-    fontFamily: fontFamily.interBold,
-    fontSize: 22,
-    color: colors.black,
-  },
-  label: {
-    marginTop: 18,
-    marginBottom: 6,
-    fontFamily: fontFamily.interSemibold,
-    fontSize: 12,
-    color: colors.black,
-  },
-  hint: {
-    marginBottom: 6,
-    fontFamily: fontFamily.regular,
-    fontSize: 10,
-    color: 'rgba(0,0,0,0.65)',
-  },
-  radios: {
-    flexDirection: 'row',
-    gap: 22,
-  },
-  radio: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  radioDot: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  radioDotOn: {
-    borderColor: colors.black,
-  },
-  radioInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.black,
-  },
-  logoBox: {
-    width: 56,
-    height: 32,
-    borderRadius: 6,
-    backgroundColor: colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logo: {
-    width: 44,
-    height: 24,
-  },
-  radioLabel: {
-    fontFamily: fontFamily.regular,
-    fontSize: 11,
-    color: colors.black,
-  },
-  input: {
-    height: 36,
-    borderRadius: 6,
-    backgroundColor: '#C9C9C9',
-    paddingHorizontal: 12,
-    fontFamily: fontFamily.medium,
-    fontSize: 14,
-    color: colors.black,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  cvnInput: {
-    width: 86,
-  },
-  inputError: {
-    borderColor: colors.danger,
-  },
-  error: {
-    marginTop: 4,
-    fontFamily: fontFamily.regular,
-    fontSize: 12,
-    color: colors.danger,
-  },
-  pair: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  pairCol: {
-    flex: 1,
-  },
-  orderLabel: {
-    marginTop: 26,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    marginBottom: 12,
-  },
-  totalBox: {
-    height: 54,
-    borderRadius: 6,
-    backgroundColor: '#F2B9B9',
-    paddingHorizontal: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  totalLabel: {
-    fontFamily: fontFamily.interSemibold,
-    fontSize: 13,
-    color: colors.black,
-  },
-  totalValue: {
-    fontFamily: fontFamily.interBold,
-    fontSize: 18,
-    color: colors.black,
-  },
-  formError: {
-    marginTop: 14,
-    textAlign: 'center',
-    fontFamily: fontFamily.medium,
-    fontSize: 13,
-    color: colors.danger,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 16,
-    paddingHorizontal: 18,
-    marginTop: 24,
-  },
-  cancel: {
-    flex: 1,
-    width: undefined,
-    borderWidth: 1,
-    borderColor: colors.black,
-  },
-  confirm: {
-    flex: 1,
-    width: undefined,
-    backgroundColor: '#FF6F61',
-    shadowOpacity: 0,
-    elevation: 0,
-  },
+  totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
+  actions: { flexDirection: 'row', gap: spacing.ms },
+  action: { flex: 1 },
 });

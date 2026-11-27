@@ -1,11 +1,10 @@
 import { Image } from 'expo-image';
-import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState, type ReactNode } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Path } from 'react-native-svg';
 
-import { Button } from '@/components/ui';
-import { colors, fontFamily, strings } from '@/constants';
+import { AppText, Button } from '@/components/ui';
+import { colors, elevation, radius, spacing, strings } from '@/constants';
 import type { PaymentMethod } from '@/features/checkout/types/payment';
 
 const logos = {
@@ -19,7 +18,7 @@ interface PaymentMethodSheetProps {
   onProceed: (method: PaymentMethod) => void;
 }
 
-/** Sheet "Select your payment method" (frame 25:122): aparece sobre o carrinho. */
+/** Folha de escolha da forma de pagamento, sobre o carrinho. */
 export function PaymentMethodSheet({ onClose, onProceed }: PaymentMethodSheetProps) {
   const insets = useSafeAreaInsets();
   const [method, setMethod] = useState<PaymentMethod>('card');
@@ -29,39 +28,39 @@ export function PaymentMethodSheet({ onClose, onProceed }: PaymentMethodSheetPro
       <Pressable
         style={styles.backdrop}
         onPress={onClose}
+        accessibilityRole="button"
         accessibilityLabel={strings.common.cancel}
       />
-      <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-        <Text style={styles.title}>{strings.checkout.selectMethod}</Text>
+      <View
+        style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}
+        accessibilityViewIsModal
+      >
+        <View style={styles.handle} />
+        <AppText variant="heading" accessibilityRole="header">
+          {strings.checkout.selectMethod}
+        </AppText>
 
-        <Option
-          selected={method === 'card'}
-          accent="#FF9797"
-          checkColor="#E53E3E"
-          label={strings.checkout.methodCard}
-          onPress={() => setMethod('card')}
-        >
-          <View style={styles.logos}>
+        <View accessibilityRole="radiogroup" style={styles.options}>
+          <Option
+            selected={method === 'card'}
+            label={strings.checkout.methodCard}
+            hint={strings.checkout.methodCardHint}
+            onPress={() => setMethod('card')}
+          >
             <Image source={logos.visa} contentFit="contain" style={styles.visa} />
             <Image source={logos.mastercard} contentFit="contain" style={styles.mastercard} />
-          </View>
-        </Option>
+          </Option>
+          <Option
+            selected={method === 'other'}
+            label={strings.checkout.methodOther}
+            hint={strings.checkout.methodOtherHint}
+            onPress={() => setMethod('other')}
+          >
+            <Image source={logos.other} contentFit="contain" style={styles.other} />
+          </Option>
+        </View>
 
-        <Option
-          selected={method === 'other'}
-          accent="#1B1B1B"
-          checkColor={colors.black}
-          label={strings.checkout.methodOther}
-          onPress={() => setMethod('other')}
-        >
-          <Image source={logos.other} contentFit="contain" style={styles.other} />
-        </Option>
-
-        <Button
-          title={strings.checkout.proceed}
-          onPress={() => onProceed(method)}
-          style={styles.proceed}
-        />
+        <Button title={strings.checkout.proceed} onPress={() => onProceed(method)} />
       </View>
     </View>
   );
@@ -69,109 +68,87 @@ export function PaymentMethodSheet({ onClose, onProceed }: PaymentMethodSheetPro
 
 interface OptionProps {
   selected: boolean;
-  accent: string;
-  checkColor: string;
   label: string;
+  hint: string;
   onPress: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-function Option({ selected, accent, checkColor, label, onPress, children }: OptionProps) {
+function Option({ selected, label, hint, onPress, children }: OptionProps) {
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="radio"
-      accessibilityState={{ selected }}
-      style={[styles.option, { borderColor: selected ? accent : '#B2B2B2' }]}
+      accessibilityState={{ checked: selected }}
+      accessibilityLabel={`${label}. ${hint}`}
+      style={({ pressed }) => [
+        styles.option,
+        selected ? styles.optionOn : null,
+        pressed && !selected ? styles.optionPressed : null,
+      ]}
     >
-      <View style={styles.optionBody}>
-        <Text style={styles.optionLabel}>{label}</Text>
-        {children}
+      <View style={[styles.radio, selected ? styles.radioOn : null]}>
+        {selected ? <View style={styles.radioDot} /> : null}
       </View>
-      <Svg width={28} height={28} viewBox="0 0 28 28" fill="none">
-        {selected ? (
-          <>
-            <Circle cx={14} cy={14} r={13} fill={checkColor} />
-            <Path
-              d="M8 14.5l4 4 8-9"
-              stroke={colors.white}
-              strokeWidth={2.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </>
-        ) : (
-          <Circle cx={14} cy={14} r={12.5} stroke="#B2B2B2" strokeWidth={1.5} />
-        )}
-      </Svg>
+      <View style={styles.optionText}>
+        <AppText variant="bodyStrong">{label}</AppText>
+        <AppText variant="caption" color="textSecondary">
+          {hint}
+        </AppText>
+      </View>
+      <View style={styles.logos}>{children}</View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFill,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0,0,0,0.25)',
-  },
+  overlay: { ...StyleSheet.absoluteFill, justifyContent: 'flex-end' },
+  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: colors.scrim },
   sheet: {
-    backgroundColor: colors.white,
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18,
-    borderWidth: 1,
-    borderColor: '#1B1B1B',
-    paddingHorizontal: 22,
-    paddingTop: 34,
-    gap: 12,
+    gap: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    backgroundColor: colors.background,
+    ...elevation.overlay,
   },
-  title: {
-    fontFamily: fontFamily.interSemibold,
-    fontSize: 14,
-    color: colors.black,
-    marginBottom: 18,
+  handle: {
+    alignSelf: 'center',
+    width: 40,
+    height: 4,
+    borderRadius: radius.pill,
+    backgroundColor: colors.border,
+    marginBottom: spacing.xs,
   },
+  options: { gap: spacing.sm },
   option: {
-    height: 62,
-    borderRadius: 10,
-    borderWidth: 1,
-    backgroundColor: colors.white,
-    paddingHorizontal: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: spacing.ms,
+    minHeight: 64,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.ms,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: colors.border,
   },
-  optionBody: {
-    gap: 2,
-  },
-  optionLabel: {
-    fontFamily: fontFamily.interSemibold,
-    fontSize: 12,
-    color: colors.black,
-  },
-  logos: {
-    flexDirection: 'row',
+  optionOn: { borderColor: colors.brand, backgroundColor: colors.surfaceBrand },
+  optionPressed: { backgroundColor: colors.surface },
+  radio: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: colors.borderStrong,
     alignItems: 'center',
-    gap: 2,
+    justifyContent: 'center',
   },
-  visa: {
-    width: 50,
-    height: 26,
-  },
-  mastercard: {
-    width: 28,
-    height: 26,
-  },
-  other: {
-    width: 24,
-    height: 24,
-  },
-  proceed: {
-    marginTop: 20,
-    backgroundColor: colors.primary,
-    shadowOpacity: 0,
-    elevation: 0,
-  },
+  radioOn: { borderColor: colors.brand },
+  radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.brand },
+  optionText: { flex: 1, gap: 2 },
+  logos: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  visa: { width: 40, height: 14 },
+  mastercard: { width: 30, height: 20 },
+  other: { width: 30, height: 24 },
 });

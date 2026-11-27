@@ -1,76 +1,68 @@
 import { useRouter } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Path } from 'react-native-svg';
 
-import { Button } from '@/components/ui';
-import { colors, fontFamily, strings } from '@/constants';
+import { AppText, Button, Icon } from '@/components/ui';
+import { colors, spacing, strings } from '@/constants';
+import { CheckoutSteps } from '@/features/checkout/components/CheckoutSteps';
 
+/** Pedido concluído: confirmação, caminho para acompanhar o pedido e para voltar às compras. */
 export function PaymentSuccessScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
   return (
     <View
-      style={[styles.root, { paddingTop: insets.top, paddingBottom: Math.max(insets.bottom, 16) }]}
+      style={[
+        styles.root,
+        { paddingTop: insets.top + spacing.md, paddingBottom: Math.max(insets.bottom, spacing.md) },
+      ]}
     >
-      <View style={styles.center}>
-        <Svg width={140} height={140} viewBox="0 0 140 140" fill="none">
-          <Circle cx={70} cy={70} r={68} fill="#2FB87A" />
-          {/* Sombra diagonal do ícone (metade inferior mais escura). */}
-          <Path d="M70 138A68 68 0 0 0 138 70L96 28 28 96z" fill="#0F9B63" opacity={0.55} />
-          <Path
-            d="M38 72l22 22 44-48"
-            stroke={colors.white}
-            strokeWidth={14}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </Svg>
+      <CheckoutSteps step={2} />
 
-        <Text style={styles.title}>{strings.checkout.successTitle}</Text>
-        <Text style={styles.text}>{strings.checkout.successText}</Text>
+      <View style={styles.center}>
+        <View style={styles.badge}>
+          <Icon name="check" size={48} color="onBrand" strokeWidth={3} />
+        </View>
+        <AppText variant="display" align="center" accessibilityRole="header">
+          {strings.checkout.successHeading}
+        </AppText>
+        <AppText variant="subheading" align="center">
+          {strings.checkout.successTitle}
+        </AppText>
+        <AppText variant="body" color="textSecondary" align="center" style={styles.text}>
+          {strings.checkout.successText}
+        </AppText>
       </View>
 
-      <Button
-        title={strings.checkout.backHome}
-        onPress={() => router.replace('/(drawer)/(tabs)')}
-        style={styles.button}
-      />
+      <View style={styles.actions}>
+        <Button
+          title={strings.checkout.viewOrders}
+          icon="package"
+          onPress={() => router.replace('/orders')}
+        />
+        <Button
+          title={strings.checkout.keepShopping}
+          variant="ghost"
+          onPress={() => router.replace('/(drawer)/(tabs)')}
+        />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-    paddingHorizontal: 24,
-  },
-  center: {
-    flex: 1,
+  root: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing.lg },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.ms },
+  badge: {
+    width: 104,
+    height: 104,
+    borderRadius: 52,
+    backgroundColor: colors.successText,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 18,
+    marginBottom: spacing.sm,
   },
-  title: {
-    marginTop: 14,
-    textAlign: 'center',
-    fontFamily: fontFamily.interSemibold,
-    fontSize: 19,
-    color: '#6B6B6B',
-  },
-  text: {
-    maxWidth: 260,
-    textAlign: 'center',
-    fontFamily: fontFamily.regular,
-    fontSize: 12,
-    lineHeight: 17,
-    color: '#6B6B6B',
-  },
-  button: {
-    backgroundColor: colors.primary,
-    shadowOpacity: 0,
-    elevation: 0,
-  },
+  text: { maxWidth: 320 },
+  actions: { gap: spacing.xs },
 });

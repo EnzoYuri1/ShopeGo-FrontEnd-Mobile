@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
 import { Icon, type IconName } from '@/components/ui/Icon';
-import { colors, radius, touchTarget } from '@/constants';
+import { colors, radius, touchTarget, type ColorName } from '@/constants';
 
 interface IconButtonProps {
   icon: IconName;
@@ -13,6 +13,8 @@ interface IconButtonProps {
   /** Contador no canto (ex.: itens no carrinho). Oculto quando 0. */
   badgeCount?: number;
   filled?: boolean;
+  /** Cor do ícone (ex.: 'onBrand' sobre fundo Azul Noite). */
+  color?: ColorName;
 }
 
 /** Botão só com ícone, com área de toque de 44 px. */
@@ -23,6 +25,7 @@ export function IconButton({
   variant = 'plain',
   badgeCount = 0,
   filled,
+  color = 'text',
 }: IconButtonProps) {
   return (
     <Pressable
@@ -36,7 +39,7 @@ export function IconButton({
         pressed ? styles.pressed : null,
       ]}
     >
-      <Icon name={icon} size={22} color="text" filled={filled} />
+      <Icon name={icon} size={22} color={color} filled={filled} />
       {badgeCount > 0 ? (
         <View style={styles.badge}>
           <AppText variant="label" color="onPrimary" style={styles.badgeText}>

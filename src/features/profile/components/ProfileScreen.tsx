@@ -7,26 +7,33 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Path } from 'react-native-svg';
 
-import { BackButton, BrandLogo, Button } from '@/components/ui';
-import { colors, fontFamily, strings } from '@/constants';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { AppText, Button, Icon, Input, type IconName } from '@/components/ui';
+import { colors, radius, spacing, strings } from '@/constants';
+import { useAuth, useSignOut } from '@/features/auth/hooks/useAuth';
 import { getAvatarUri, saveAvatarUri } from '@/features/profile/avatarStorage';
 import { useProfile, useUpdateProfile } from '@/features/profile/hooks/useProfile';
 import { compressImage } from '@/utils/compressImage';
 
+type Shortcut = { icon: IconName; label: string; href: '/orders' | '/favorites' | '/offers' };
+
+const SHORTCUTS: Shortcut[] = [
+  { icon: 'package', label: strings.profile.orders, href: '/orders' },
+  { icon: 'heart', label: strings.profile.favorites, href: '/favorites' },
+  { icon: 'tag', label: strings.profile.offers, href: '/offers' },
+];
+
+/** Aba Conta: foto, dados pessoais editáveis, atalhos e sair. */
 export function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { data: profile } = useProfile();
   const updateProfile = useUpdateProfile();
+  const signOut = useSignOut();
 
   const savedName = profile?.name ?? user?.displayName ?? '';
   const savedPhone = profile?.phone ?? '';
@@ -81,9 +88,9 @@ export function ProfileScreen() {
     }
   }
 
-  function handleBack() {
-    if (router.canGoBack()) router.back();
-    else router.replace('/(drawer)/(tabs)');
+  function startEditing() {
+    setMessage(null);
+    setDraft({ name: savedName, phone: savedPhone, address: savedAddress });
   }
 
   function handleCancel() {
@@ -91,13 +98,7 @@ export function ProfileScreen() {
     setMessage(null);
   }
 
-  function handlePrimary() {
-    if (!editing) {
-      setMessage(null);
-      setDraft({ name: savedName, phone: savedPhone, address: savedAddress });
-      return;
-    }
-
+  function handleSave() {
     updateProfile.mutate(
       { name: name.trim() || undefined, phone: phone.trim(), address: address.trim() },
       {
@@ -110,231 +111,221 @@ export function ProfileScreen() {
     );
   }
 
+  const initial = (savedName || email || '?').trim().charAt(0).toUpperCase();
+
   return (
     <KeyboardAvoidingView
       style={[styles.root, { paddingTop: insets.top }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={styles.topBar}>
-        <BackButton onPress={handleBack} />
-        <BrandLogo />
-      </View>
-
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: Math.max(insets.bottom, 16) + 16 }]}
+        contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.avatarWrap}>
-          <View style={styles.avatar}>
+        <AppText variant="title" accessibilityRole="header">
+          {strings.profile.screenTitle}
+        </AppText>
+
+        <View style={styles.identity}>
+          <Pressable
+            onPress={() => void handlePickPhoto()}
+            accessibilityRole="button"
+            accessibilityLabel={strings.profile.changePhoto}
+            style={styles.avatar}
+          >
             {avatarUri ? (
               <Image source={{ uri: avatarUri }} contentFit="cover" style={styles.avatarImage} />
             ) : (
-              <Svg width={112} height={112} viewBox="0 0 96 96">
-                <Circle cx={48} cy={48} r={48} fill="#F4896B" />
-                <Circle cx={48} cy={38} r={15} fill="#1B1B1B" />
-                <Path d="M16 90c2-20 16-30 32-30s30 10 32 30a48 48 0 0 1-64 0z" fill="#1B1B1B" />
-              </Svg>
+              <AppText variant="display" color="onBrand">
+                {initial}
+              </AppText>
             )}
-          </View>
-          <Pressable
-            onPress={handlePickPhoto}
-            accessibilityRole="button"
-            accessibilityLabel={strings.profile.changePhoto}
-            style={({ pressed }) => [styles.pencil, pressed ? styles.pressed : null]}
-          >
-            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Path
-                d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4"
-                stroke={colors.white}
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </Svg>
+            <View style={styles.cameraBadge}>
+              <Icon name="camera" size={14} color="onPrimary" strokeWidth={2.5} />
+            </View>
           </Pressable>
-        </View>
-        <Text style={styles.name}>{savedName || strings.profile.guest}</Text>
-
-        <View style={styles.form}>
-          <Field
-            label={strings.profile.name}
-            value={name}
-            editable={editing}
-            onChangeText={(value) => setDraft((d) => d && { ...d, name: value })}
-            autoComplete="name"
-          />
-          <Field
-            label={strings.profile.address}
-            value={address}
-            editable={editing}
-            onChangeText={(value) => setDraft((d) => d && { ...d, address: value })}
-            autoComplete="street-address"
-          />
-          <Field label={strings.profile.email} value={email} editable={false} />
-          <Field
-            label={strings.profile.phone}
-            value={phone}
-            editable={editing}
-            onChangeText={(value) => setDraft((d) => d && { ...d, phone: value })}
-            keyboardType="phone-pad"
-            autoComplete="tel"
-          />
+          <View style={styles.identityText}>
+            <AppText variant="heading" numberOfLines={1}>
+              {savedName || strings.profile.guest}
+            </AppText>
+            {email ? (
+              <AppText variant="caption" color="textSecondary" numberOfLines={1}>
+                {email}
+              </AppText>
+            ) : null}
+          </View>
         </View>
 
         {message ? (
-          <Text style={[styles.message, message.error ? styles.messageError : null]}>
-            {message.text}
-          </Text>
+          <View style={[styles.message, message.error ? styles.messageError : styles.messageOk]}>
+            <Icon
+              name={message.error ? 'alert' : 'check'}
+              size={18}
+              color={message.error ? 'danger' : 'successText'}
+            />
+            <AppText
+              variant="caption"
+              color={message.error ? 'danger' : 'successText'}
+              style={styles.messageText}
+              accessibilityRole="alert"
+            >
+              {message.text}
+            </AppText>
+          </View>
         ) : null}
 
-        <View style={styles.actions}>
-          <Button
-            title={editing ? strings.profile.save : strings.profile.edit}
-            onPress={handlePrimary}
-            loading={updateProfile.isPending}
-            style={styles.primary}
+        <View style={styles.section}>
+          <AppText variant="subheading">{strings.profile.personalData}</AppText>
+          <Input
+            label={strings.profile.name}
+            value={name}
+            editable={editing}
+            onChangeText={(text) => setDraft((prev) => (prev ? { ...prev, name: text } : prev))}
+            autoComplete="name"
           />
-          <Button
-            title={strings.profile.cancel}
-            variant="outline"
-            onPress={editing ? handleCancel : handleBack}
-            style={styles.cancel}
+          <Input
+            label={strings.profile.phone}
+            value={phone}
+            editable={editing}
+            placeholder={editing ? strings.profile.phonePlaceholder : undefined}
+            keyboardType="phone-pad"
+            autoComplete="tel"
+            onChangeText={(text) => setDraft((prev) => (prev ? { ...prev, phone: text } : prev))}
           />
+          <Input
+            label={strings.profile.address}
+            value={address}
+            editable={editing}
+            placeholder={editing ? strings.profile.addressPlaceholder : undefined}
+            autoComplete="street-address"
+            onChangeText={(text) => setDraft((prev) => (prev ? { ...prev, address: text } : prev))}
+          />
+
+          {editing ? (
+            <View style={styles.editActions}>
+              <Button
+                title={strings.profile.cancel}
+                variant="outline"
+                fullWidth={false}
+                onPress={handleCancel}
+                style={styles.editAction}
+              />
+              <Button
+                title={strings.profile.save}
+                fullWidth={false}
+                onPress={handleSave}
+                loading={updateProfile.isPending}
+                style={styles.editAction}
+              />
+            </View>
+          ) : (
+            <Button
+              title={strings.profile.edit}
+              variant="outline"
+              icon="user"
+              onPress={startEditing}
+            />
+          )}
         </View>
+
+        <View style={styles.section}>
+          <AppText variant="subheading">{strings.profile.shortcuts}</AppText>
+          <View style={styles.shortcuts}>
+            {SHORTCUTS.map((item, index) => (
+              <Pressable
+                key={item.href}
+                onPress={() => router.push(item.href)}
+                accessibilityRole="button"
+                style={({ pressed }) => [
+                  styles.shortcut,
+                  index > 0 ? styles.shortcutDivider : null,
+                  pressed ? styles.shortcutPressed : null,
+                ]}
+              >
+                <View style={styles.shortcutIcon}>
+                  <Icon name={item.icon} size={20} color="brand" />
+                </View>
+                <AppText variant="bodyStrong" style={styles.shortcutLabel}>
+                  {item.label}
+                </AppText>
+                <Icon name="chevronRight" size={18} color="textSecondary" />
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+        <Button
+          title={strings.profile.signOut}
+          variant="ghost"
+          icon="logout"
+          onPress={() => signOut.mutate()}
+          loading={signOut.isPending}
+        />
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
-interface FieldProps {
-  label: string;
-  value: string;
-  editable: boolean;
-  onChangeText?: (value: string) => void;
-  keyboardType?: 'default' | 'phone-pad';
-  autoComplete?: 'name' | 'street-address' | 'tel';
-}
-
-function Field({ label, value, editable, onChangeText, keyboardType, autoComplete }: FieldProps) {
-  return (
-    <View>
-      <Text style={styles.label}>{label}</Text>
-      <TextInput
-        value={value}
-        onChangeText={onChangeText}
-        editable={editable}
-        keyboardType={keyboardType}
-        autoComplete={autoComplete}
-        style={[styles.input, editable ? styles.inputEditable : null]}
-      />
-    </View>
-  );
-}
+const AVATAR = 72;
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  topBar: {
-    height: 64,
-    paddingHorizontal: 10,
-    justifyContent: 'center',
-  },
-  scroll: {
-    paddingHorizontal: 20,
-    alignItems: 'center',
-  },
-  avatarWrap: {
-    width: 112,
-    height: 112,
-  },
+  root: { flex: 1, backgroundColor: colors.background },
+  scroll: { padding: spacing.md, gap: spacing.lg, paddingBottom: spacing.xl },
+  identity: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   avatar: {
-    width: 112,
-    height: 112,
-    borderRadius: 56,
-    backgroundColor: '#FFF3EC',
-    overflow: 'hidden',
-  },
-  avatarImage: {
-    width: 112,
-    height: 112,
-  },
-  pencil: {
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: colors.primary,
-    borderWidth: 2,
-    borderColor: colors.white,
+    width: AVATAR,
+    height: AVATAR,
+    borderRadius: AVATAR / 2,
+    backgroundColor: colors.brand,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  pressed: {
-    opacity: 0.8,
-  },
-  name: {
-    marginTop: 12,
-    fontFamily: fontFamily.interBold,
-    fontSize: 18,
-    color: colors.black,
-  },
-  form: {
-    width: '100%',
-    marginTop: 22,
-    gap: 14,
-  },
-  label: {
-    marginBottom: 4,
-    fontFamily: fontFamily.regular,
-    fontSize: 11,
-    color: colors.textMuted,
-  },
-  input: {
-    height: 44,
-    borderRadius: 8,
-    backgroundColor: '#E9EEFB',
-    paddingHorizontal: 14,
-    fontFamily: fontFamily.medium,
-    fontSize: 14,
-    color: colors.black,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  inputEditable: {
-    backgroundColor: colors.white,
-    borderColor: '#2B7BFF',
-  },
-  message: {
-    marginTop: 14,
-    fontFamily: fontFamily.medium,
-    fontSize: 13,
-    color: colors.success,
-  },
-  messageError: {
-    color: colors.danger,
-  },
-  actions: {
-    width: '100%',
-    flexDirection: 'row',
-    gap: 14,
-    marginTop: 26,
-  },
-  primary: {
-    flex: 1,
-    width: undefined,
+  avatarImage: { width: AVATAR, height: AVATAR, borderRadius: AVATAR / 2 },
+  cameraBadge: {
+    position: 'absolute',
+    right: -2,
+    bottom: -2,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 2,
+    borderColor: colors.background,
     backgroundColor: colors.primary,
-    shadowOpacity: 0,
-    elevation: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  cancel: {
-    flex: 1,
-    width: undefined,
-    borderWidth: 1,
-    borderColor: colors.black,
+  identityText: { flex: 1, gap: 2 },
+  message: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    padding: spacing.ms,
+    borderRadius: radius.md,
   },
+  messageOk: { backgroundColor: colors.successLight },
+  messageError: { backgroundColor: colors.dangerLight },
+  messageText: { flex: 1 },
+  section: { gap: spacing.md },
+  editActions: { flexDirection: 'row', gap: spacing.ms },
+  editAction: { flex: 1 },
+  shortcuts: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.md },
+  shortcut: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.ms,
+    minHeight: 56,
+    paddingHorizontal: spacing.md,
+  },
+  shortcutDivider: { borderTopWidth: 1, borderTopColor: colors.border },
+  shortcutPressed: { backgroundColor: colors.surface },
+  shortcutIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.sm,
+    backgroundColor: colors.surfaceBrand,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  shortcutLabel: { flex: 1 },
 });

@@ -1,16 +1,18 @@
 import { useRef, type ComponentRef } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 
-import { colors, fontFamily } from '@/constants';
+import { colors, radius, spacing, textVariants } from '@/constants';
 
 interface OtpInputProps {
   value: string;
   onChange: (value: string) => void;
   length?: number;
+  /** Destaca as caixas em vermelho (código inválido). */
+  error?: boolean;
 }
 
 /** Campo de código com uma caixa por dígito; as caixas refletem um único valor. */
-export function OtpInput({ value, onChange, length = 6 }: OtpInputProps) {
+export function OtpInput({ value, onChange, length = 6, error = false }: OtpInputProps) {
   const inputs = useRef<(ComponentRef<typeof TextInput> | null)[]>([]);
 
   function handleChange(index: number, text: string) {
@@ -57,7 +59,12 @@ export function OtpInput({ value, onChange, length = 6 }: OtpInputProps) {
           maxLength={length}
           textContentType="oneTimeCode"
           selectTextOnFocus
-          style={styles.box}
+          accessibilityLabel={`Dígito ${index + 1} de ${length}`}
+          style={[
+            styles.box,
+            value[index]?.trim() ? styles.boxFilled : null,
+            error ? styles.boxError : null,
+          ]}
         />
       ))}
     </View>
@@ -65,21 +72,19 @@ export function OtpInput({ value, onChange, length = 6 }: OtpInputProps) {
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 5,
-  },
+  row: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.sm },
   box: {
     flex: 1,
-    height: 72,
-    borderWidth: 2,
-    borderColor: colors.otpBorder,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.63)',
+    height: 60,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceBrand,
     textAlign: 'center',
-    fontFamily: fontFamily.semibold,
-    fontSize: 24,
     color: colors.text,
+    fontFamily: textVariants.title.fontFamily,
+    fontSize: textVariants.title.fontSize,
   },
+  boxFilled: { borderColor: colors.brand, backgroundColor: colors.background },
+  boxError: { borderColor: colors.danger },
 });

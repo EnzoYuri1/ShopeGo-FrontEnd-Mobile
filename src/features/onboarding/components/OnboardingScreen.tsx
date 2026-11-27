@@ -3,261 +3,152 @@ import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
   FlatList,
+  Pressable,
   StyleSheet,
-  Text,
   View,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
-  type StyleProp,
-  type ImageStyle,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, PagerDots } from '@/components/ui';
-import { colors, fontFamily, strings } from '@/constants';
-import { useScreenWidth } from '@/hooks/useScreenWidth';
+import { AppText, Button, RouteLine } from '@/components/ui';
+import { colors, radius, spacing, strings } from '@/constants';
 import { markOnboardingSeen } from '@/features/onboarding/storage';
+import { useScreenWidth } from '@/hooks/useScreenWidth';
 
-/** Largura do frame de referência no Figma (iPhone 16). Posições são escaladas a partir dela. */
-const DESIGN_WIDTH = 393;
-const SLIDE_COUNT = 3;
+const SLIDES = [
+  {
+    key: 'explore',
+    step: strings.onboarding.step1,
+    title: strings.onboarding.slide1Heading,
+    text: strings.onboarding.slide1Text,
+    image: require('../../../../assets/images/onboarding/slide1-illustration.webp'),
+  },
+  {
+    key: 'buy',
+    step: strings.onboarding.step2,
+    title: strings.onboarding.slide2Heading,
+    text: strings.onboarding.slide2Caption,
+    image: require('../../../../assets/images/onboarding/slide2-illustration.webp'),
+  },
+  {
+    key: 'receive',
+    step: strings.onboarding.step3,
+    title: strings.onboarding.slide3Heading,
+    text: strings.onboarding.slide3Text,
+    image: require('../../../../assets/images/onboarding/slide3-illustration.webp'),
+  },
+];
 
-const images = {
-  slide1Ellipse: require('../../../../assets/images/onboarding/slide1-ellipse.svg'),
-  slide1Illustration: require('../../../../assets/images/onboarding/slide1-illustration.webp'),
-  slide2Ellipse: require('../../../../assets/images/onboarding/slide2-ellipse.svg'),
-  slide2Illustration: require('../../../../assets/images/onboarding/slide2-illustration.webp'),
-  slide3Ellipse: require('../../../../assets/images/onboarding/slide3-ellipse.svg'),
-  slide3Illustration: require('../../../../assets/images/onboarding/slide3-illustration.webp'),
-  cartWhite: require('../../../../assets/images/onboarding/cart-white.svg'),
-  cartOrange: require('../../../../assets/images/onboarding/cart-orange.svg'),
-};
+const STOPS = SLIDES.map((slide) => ({ key: slide.key, label: slide.step }));
 
-interface Box {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-}
-
-type Scale = (box: Box) => StyleProp<ImageStyle>;
-
+/** Apresentação em 3 passos (Explore, Compre, Receba) com a linha de rota como progresso. */
 export function OnboardingScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const width = useScreenWidth();
   const [index, setIndex] = useState(0);
   const listRef = useRef<FlatList>(null);
+  const last = index === SLIDES.length - 1;
 
-  const s = width / DESIGN_WIDTH;
-  const place: Scale = (box) => ({
-    position: 'absolute',
-    left: box.left * s,
-    top: box.top * s,
-    width: box.width * s,
-    height: box.height * s,
-  });
+  async function finish() {
+    await markOnboardingSeen();
+    router.replace('/discover');
+  }
 
-  const slides = [
-    <SlideOne key="1" place={place} s={s} />,
-    <SlideTwo key="2" place={place} s={s} />,
-    <SlideThree key="3" place={place} s={s} />,
-  ];
+  function goTo(next: number) {
+    listRef.current?.scrollToIndex({ index: next, animated: true });
+    setIndex(next);
+  }
 
   function handleScrollEnd(event: NativeSyntheticEvent<NativeScrollEvent>) {
     setIndex(Math.round(event.nativeEvent.contentOffset.x / width));
   }
 
-  async function handleNext() {
-    if (index < SLIDE_COUNT - 1) {
-      listRef.current?.scrollToIndex({ index: index + 1, animated: true });
-      setIndex(index + 1);
-      return;
-    }
-    await markOnboardingSeen();
-    router.replace('/discover');
-  }
-
   return (
-    <View style={styles.root}>
+    <View
+      style={[
+        styles.root,
+        { paddingTop: insets.top + spacing.sm, paddingBottom: Math.max(insets.bottom, spacing.md) },
+      ]}
+    >
+      <View style={styles.top}>
+        {!last ? (
+          <Pressable onPress={() => void finish()} hitSlop={10} accessibilityRole="button">
+            <AppText variant="bodyStrong" color="textSecondary">
+              {strings.onboarding.skip}
+            </AppText>
+          </Pressable>
+        ) : null}
+      </View>
+
       <FlatList
         ref={listRef}
-        data={slides}
-        keyExtractor={(_, i) => String(i)}
-        renderItem={({ item }) => <View style={{ width }}>{item}</View>}
+        data={SLIDES}
+        keyExtractor={(item) => item.key}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={handleScrollEnd}
         getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
+        style={styles.list}
+        renderItem={({ item }) => (
+          <View style={[styles.slide, { width }]}>
+            <View style={styles.media}>
+              <Image
+                source={item.image}
+                contentFit="contain"
+                style={styles.image}
+                accessible={false}
+              />
+            </View>
+            <View style={styles.copy}>
+              <AppText variant="display" accessibilityRole="header">
+                {item.title}
+              </AppText>
+              <AppText variant="body" color="textSecondary">
+                {item.text}
+              </AppText>
+            </View>
+          </View>
+        )}
       />
 
       <View style={styles.footer}>
+        <RouteLine stops={STOPS} activeIndex={index} onSelect={goTo} progress />
         <Button
-          title={strings.onboarding.next}
-          display
-          onPress={handleNext}
-          style={styles.nextButton}
+          title={last ? strings.onboarding.start : strings.onboarding.nextStep}
+          icon={last ? undefined : 'arrowRight'}
+          iconPosition="right"
+          onPress={() => (last ? void finish() : goTo(index + 1))}
         />
-        <PagerDots count={SLIDE_COUNT} activeIndex={index} />
       </View>
     </View>
   );
 }
 
-interface SlideProps {
-  place: Scale;
-  s: number;
-}
-
-function SlideOne({ place, s }: SlideProps) {
-  return (
-    <View style={styles.slide}>
-      <Image
-        source={images.slide1Ellipse}
-        contentFit="fill"
-        style={place({ left: -92, top: -112, width: 681, height: 551.6 })}
-      />
-      <Image
-        source={images.cartWhite}
-        contentFit="contain"
-        style={place({ left: 30, top: 46, width: 95.6, height: 73 })}
-      />
-      <Text style={[styles.onColorTitle, { left: 30 * s, top: 145 * s, fontSize: 32 * s }]}>
-        {strings.onboarding.slide1Title}
-      </Text>
-      <View style={[styles.divider, { left: 30 * s, top: 201 * s, width: 313 * s }]} />
-      <Text
-        style={[
-          styles.onColorText,
-          { left: 32 * s, top: 232 * s, width: 241 * s, fontSize: 24 * s, lineHeight: 28 * s },
-        ]}
-      >
-        {strings.onboarding.slide1Text}
-      </Text>
-      <Image
-        source={images.slide1Illustration}
-        contentFit="contain"
-        style={place({ left: -45, top: 367, width: 463, height: 234 })}
-      />
-      <Text style={[styles.heading, { top: 619 * s, fontSize: 32 * s }]}>
-        {strings.onboarding.slide1Heading}
-      </Text>
-      <Text style={[styles.caption, { top: 669 * s, fontSize: 16 * s }]}>
-        {strings.onboarding.slide1Caption}
-      </Text>
-    </View>
-  );
-}
-
-function SlideTwo({ place, s }: SlideProps) {
-  return (
-    <View style={styles.slide}>
-      <Image
-        source={images.slide2Ellipse}
-        contentFit="fill"
-        style={place({ left: -118.7, top: -397, width: 805.7, height: 695.7 })}
-      />
-      <Image
-        source={images.cartOrange}
-        contentFit="contain"
-        style={place({ left: 13, top: 137, width: 95.6, height: 73 })}
-      />
-      <Image
-        source={images.slide2Illustration}
-        contentFit="contain"
-        style={place({ left: 12, top: 362, width: 365, height: 243 })}
-      />
-      <Text style={[styles.heading, { top: 624 * s, fontSize: 24 * s }]}>
-        {strings.onboarding.slide2Heading}
-      </Text>
-      <Text style={[styles.caption, { top: 668 * s, fontSize: 16 * s }]}>
-        {strings.onboarding.slide2Caption}
-      </Text>
-    </View>
-  );
-}
-
-function SlideThree({ place, s }: SlideProps) {
-  return (
-    <View style={styles.slide}>
-      <Image
-        source={images.slide3Ellipse}
-        contentFit="fill"
-        style={place({ left: -124.3, top: -149, width: 594.3, height: 520 })}
-      />
-      <Image
-        source={images.cartWhite}
-        contentFit="contain"
-        style={place({ left: 30, top: 88, width: 95.6, height: 73 })}
-      />
-      <View style={[styles.divider, { left: 41 * s, top: 191 * s, width: 326 * s }]} />
-      <Text
-        style={[
-          styles.onColorText,
-          { left: 41 * s, top: 202 * s, width: 287 * s, fontSize: 24 * s, lineHeight: 30 * s },
-        ]}
-      >
-        {strings.onboarding.slide3Text}
-      </Text>
-      <Image
-        source={images.slide3Illustration}
-        contentFit="contain"
-        style={place({ left: 10, top: 336, width: 371, height: 291 })}
-      />
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.white,
+  root: { flex: 1, backgroundColor: colors.background },
+  top: {
+    height: 32,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
   },
-  slide: {
-    flex: 1,
-    overflow: 'hidden',
-  },
-  onColorTitle: {
-    position: 'absolute',
-    fontFamily: fontFamily.interBold,
-    color: colors.white,
-  },
-  onColorText: {
-    position: 'absolute',
-    fontFamily: fontFamily.interRegular,
-    color: colors.white,
-  },
-  divider: {
-    position: 'absolute',
-    height: 1,
-    backgroundColor: colors.white,
-  },
-  heading: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    textAlign: 'center',
-    fontFamily: fontFamily.interSemibold,
-    color: colors.black,
-  },
-  caption: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    textAlign: 'center',
-    fontFamily: fontFamily.interSemibold,
-    color: colors.black,
-  },
-  footer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 33,
+  list: { flexGrow: 1 },
+  slide: { flex: 1, paddingHorizontal: spacing.lg, gap: spacing.lg, justifyContent: 'center' },
+  media: {
+    flexShrink: 1,
+    aspectRatio: 1,
+    maxHeight: '60%',
+    alignSelf: 'center',
+    width: '100%',
+    borderRadius: radius.lg,
+    backgroundColor: colors.surfaceBrand,
     alignItems: 'center',
-    gap: 20,
+    justifyContent: 'center',
   },
-  nextButton: {
-    width: 204,
-    height: 63,
-    paddingVertical: 10,
-  },
+  image: { width: '80%', height: '80%' },
+  copy: { gap: spacing.sm },
+  footer: { gap: spacing.lg, paddingHorizontal: spacing.lg, paddingTop: spacing.md },
 });

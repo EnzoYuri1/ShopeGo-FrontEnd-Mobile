@@ -1,10 +1,13 @@
 import { useEffect } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, StyleSheet, View } from 'react-native';
 
+import { AppText } from '@/components/ui/AppText';
+import { BrandMark } from '@/components/ui/BrandLogo';
 import { Button } from '@/components/ui/Button';
-import { colors, fontSize, fontFamily, radius, spacing, strings } from '@/constants';
+import { colors, elevation, radius, spacing, strings } from '@/constants';
 import { useAppUpdate } from '@/hooks/useAppUpdate';
 
+/** Aviso de nova versão do app (EAS Update), com "Atualizar agora" e "Depois". */
 export function UpdateModal() {
   const { isModalVisible, isDownloading, error, checkForUpdates, applyUpdate, dismissModal } =
     useAppUpdate();
@@ -16,26 +19,31 @@ export function UpdateModal() {
   return (
     <Modal visible={isModalVisible} transparent animationType="fade" onRequestClose={dismissModal}>
       <View style={styles.backdrop}>
-        <View style={styles.card}>
-          <Text style={styles.title}>{strings.updates.modalTitle}</Text>
-          <Text style={styles.description}>{strings.updates.modalDescription}</Text>
-
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-
+        <View style={styles.card} accessibilityViewIsModal>
+          <BrandMark size={40} />
+          <AppText variant="heading" accessibilityRole="header">
+            {strings.updates.modalTitle}
+          </AppText>
+          <AppText variant="body" color="textSecondary">
+            {strings.updates.modalDescription}
+          </AppText>
+          {error ? (
+            <AppText variant="caption" color="danger" accessibilityRole="alert">
+              {error}
+            </AppText>
+          ) : null}
           <View style={styles.actions}>
             <Button
               title={isDownloading ? strings.updates.updating : strings.updates.updateNow}
               onPress={() => void applyUpdate()}
               loading={isDownloading}
             />
-
-            <Pressable
+            <Button
+              title={strings.updates.later}
+              variant="ghost"
               onPress={dismissModal}
               disabled={isDownloading}
-              style={({ pressed }) => [styles.laterButton, pressed ? styles.pressed : null]}
-            >
-              <Text style={styles.laterText}>{strings.updates.later}</Text>
-            </Pressable>
+            />
           </View>
         </View>
       </View>
@@ -46,51 +54,19 @@ export function UpdateModal() {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: colors.scrim,
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.lg,
   },
   card: {
     width: '100%',
-    maxWidth: 360,
-    backgroundColor: colors.background,
-    borderRadius: radius.lg,
+    maxWidth: 400,
+    gap: spacing.ms,
     padding: spacing.lg,
+    borderRadius: radius.lg,
+    backgroundColor: colors.background,
+    ...elevation.overlay,
   },
-  title: {
-    fontSize: fontSize.lg,
-    fontFamily: fontFamily.bold,
-    color: colors.text,
-    textAlign: 'center',
-  },
-  description: {
-    marginTop: spacing.sm,
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  error: {
-    marginTop: spacing.md,
-    fontSize: fontSize.xs,
-    color: colors.danger,
-    textAlign: 'center',
-  },
-  actions: {
-    marginTop: spacing.lg,
-    gap: spacing.sm,
-  },
-  laterButton: {
-    paddingVertical: spacing.sm,
-    alignItems: 'center',
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  laterText: {
-    fontSize: fontSize.sm,
-    fontFamily: fontFamily.medium,
-    color: colors.textSecondary,
-  },
+  actions: { gap: spacing.xs, marginTop: spacing.sm },
 });

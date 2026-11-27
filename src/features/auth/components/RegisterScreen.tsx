@@ -1,17 +1,10 @@
-import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
-import { AuthHeader, Button, Input } from '@/components/ui';
-import { colors, fontSize, fontFamily, spacing, strings } from '@/constants';
+import { AppText, Button, Input } from '@/components/ui';
+import { spacing, strings } from '@/constants';
+import { AuthLayout } from '@/features/auth/components/AuthLayout';
 import { SocialAuthButtons } from '@/features/auth/components/SocialAuthButtons';
 import { useSignUp } from '@/features/auth/hooks/useAuth';
 import { registerSchema } from '@/features/auth/types/auth';
@@ -26,12 +19,12 @@ interface FieldErrors {
 }
 
 export function RegisterScreen() {
+  const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<FieldErrors>({});
-
   const signUpMutation = useSignUp();
 
   function handleSubmit() {
@@ -64,121 +57,76 @@ export function RegisterScreen() {
     });
   }
 
+  function goToLogin() {
+    if (router.canGoBack()) router.back();
+    else router.replace('/(auth)/login');
+  }
+
   return (
-    <KeyboardAvoidingView
-      style={styles.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <AuthHeader title={strings.auth.registerTitle} />
+    <AuthLayout title={strings.auth.registerTitle} subtitle={strings.auth.registerSubtitle}>
+      <Input
+        label={strings.auth.nameLabel}
+        value={name}
+        onChangeText={setName}
+        autoComplete="name"
+        autoCapitalize="words"
+        error={errors.name}
+      />
+      <Input
+        label={strings.auth.emailLabel}
+        placeholder={strings.auth.emailExample}
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        autoComplete="email"
+        keyboardType="email-address"
+        error={errors.email}
+      />
+      <Input
+        label={strings.auth.passwordLabel}
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        autoComplete="new-password"
+        error={errors.password}
+      />
+      <Input
+        label={strings.auth.confirmPasswordLabel}
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        secureTextEntry
+        autoComplete="new-password"
+        error={errors.confirmPassword}
+      />
 
-        <View style={styles.content}>
-          <Text style={styles.subtitle}>{strings.auth.registerSubtitle}</Text>
+      {errors.form ? (
+        <AppText variant="caption" color="danger" accessibilityRole="alert">
+          {errors.form}
+        </AppText>
+      ) : null}
 
-          <View style={styles.form}>
-            <Input
-              placeholder={strings.auth.namePlaceholder}
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
-              autoComplete="name"
-              error={errors.name}
-            />
+      <Button
+        title={strings.auth.registerButton}
+        onPress={handleSubmit}
+        loading={signUpMutation.isPending}
+      />
 
-            <Input
-              placeholder={strings.auth.emailPlaceholder}
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              autoComplete="email"
-              keyboardType="email-address"
-              error={errors.email}
-            />
+      <View style={styles.switch}>
+        <AppText variant="body" color="textSecondary">
+          {strings.auth.haveAccount}
+        </AppText>
+        <Pressable onPress={goToLogin} hitSlop={8} accessibilityRole="link">
+          <AppText variant="bodyStrong" color="primaryText">
+            {strings.auth.signInLink}
+          </AppText>
+        </Pressable>
+      </View>
 
-            <Input
-              placeholder={strings.auth.passwordPlaceholder}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoComplete="new-password"
-              error={errors.password}
-            />
-
-            <Input
-              placeholder={strings.auth.confirmPasswordPlaceholder}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-              autoComplete="new-password"
-              error={errors.confirmPassword}
-            />
-
-            {errors.form ? <Text style={styles.formError}>{errors.form}</Text> : null}
-
-            <Button
-              title={strings.auth.registerButton}
-              onPress={handleSubmit}
-              loading={signUpMutation.isPending}
-              style={styles.submitButton}
-            />
-
-            <Link href="/(auth)/login" asChild>
-              <Pressable style={styles.secondaryLink}>
-                <Text style={styles.secondaryText}>{strings.auth.alreadyHaveAccount}</Text>
-              </Pressable>
-            </Link>
-          </View>
-
-          <SocialAuthButtons />
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      <SocialAuthButtons />
+    </AuthLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  scroll: {
-    flexGrow: 1,
-    paddingBottom: spacing.xl,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-  },
-  subtitle: {
-    fontSize: fontSize.md,
-    fontFamily: fontFamily.medium,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-  },
-  form: {
-    gap: spacing.md,
-  },
-  formError: {
-    fontSize: fontSize.sm,
-    color: colors.danger,
-    textAlign: 'center',
-  },
-  submitButton: {
-    marginTop: spacing.sm,
-  },
-  secondaryLink: {
-    alignSelf: 'center',
-    paddingVertical: spacing.xs,
-  },
-  secondaryText: {
-    fontSize: fontSize.sm,
-    fontFamily: fontFamily.medium,
-    color: colors.textSecondary,
-  },
+  switch: { flexDirection: 'row', justifyContent: 'center', gap: spacing.xs },
 });

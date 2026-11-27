@@ -51,6 +51,7 @@ const ICONS = {
   camera: [p('M4 8h3l2-3h6l2 3h3v11H4z'), c(12, 13, 3.5)],
   alert: [c(12, 12, 9), p('M12 7.5V13M12 16.5v.5')],
   logout: [p('M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10')],
+  refresh: [p('M20 12a8 8 0 1 1-2.34-5.66'), p('M20 4v5h-5')],
 } satisfies Record<string, Shape[]>;
 
 export type IconName = keyof typeof ICONS;
@@ -66,7 +67,13 @@ interface IconProps {
   strokeWidth?: number;
 }
 
-export function Icon({ name, size = 24, color = 'text', filled = false, strokeWidth = 2 }: IconProps) {
+export function Icon({
+  name,
+  size = 24,
+  color = 'text',
+  filled = false,
+  strokeWidth = 2,
+}: IconProps) {
   const stroke = colors[color];
   const fill = filled && FILLABLE.has(name) ? stroke : 'none';
 

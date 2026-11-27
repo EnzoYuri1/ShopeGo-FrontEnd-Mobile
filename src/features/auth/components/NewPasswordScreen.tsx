@@ -1,17 +1,10 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Alert } from 'react-native';
 
-import { AuthHeader, Button, Input } from '@/components/ui';
-import { colors, fontFamily, spacing, strings } from '@/constants';
+import { Button, Input } from '@/components/ui';
+import { strings } from '@/constants';
+import { AuthLayout } from '@/features/auth/components/AuthLayout';
 import { newPasswordSchema } from '@/features/auth/types/auth';
 
 interface FieldErrors {
@@ -48,72 +41,28 @@ export function NewPasswordScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    <AuthLayout
+      title={strings.auth.newPasswordTitle}
+      subtitle={strings.auth.newPasswordSubtitle}
+      onBack={() => router.back()}
     >
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <AuthHeader title={strings.auth.newPasswordTitle} onBack={() => router.back()} />
-
-        <View style={styles.content}>
-          <Text style={styles.subtitle}>{strings.auth.newPasswordSubtitle}</Text>
-
-          <View style={styles.form}>
-            <View style={styles.inputs}>
-              <Input
-                placeholder={strings.auth.passwordPlaceholder}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                autoComplete="new-password"
-                error={errors.password}
-              />
-              <Input
-                placeholder={strings.auth.confirmPasswordPlaceholder}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-                autoComplete="new-password"
-                error={errors.confirmPassword}
-              />
-            </View>
-            <Button title={strings.auth.newPasswordButton} onPress={handleSubmit} />
-          </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      <Input
+        label={strings.auth.passwordLabel}
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        autoComplete="new-password"
+        error={errors.password}
+      />
+      <Input
+        label={strings.auth.confirmPasswordLabel}
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        secureTextEntry
+        autoComplete="new-password"
+        error={errors.confirmPassword}
+      />
+      <Button title={strings.auth.newPasswordButton} onPress={handleSubmit} />
+    </AuthLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  scroll: {
-    flexGrow: 1,
-    paddingBottom: spacing.xl,
-  },
-  content: {
-    paddingHorizontal: 18,
-    paddingTop: 30,
-  },
-  subtitle: {
-    textAlign: 'center',
-    fontFamily: fontFamily.semibold,
-    fontSize: 20,
-    lineHeight: 30,
-    color: colors.textMuted,
-    marginBottom: 32,
-  },
-  form: {
-    gap: 53,
-  },
-  inputs: {
-    gap: 26,
-  },
-});

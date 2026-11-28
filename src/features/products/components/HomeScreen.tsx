@@ -14,41 +14,43 @@ import {
   getCategoryName,
   isDeal,
 } from '@/features/categories/categoryName';
-import { categoryOf, useCategories } from '@/features/categories/hooks/useCategories';
+import { categoryOf } from '@/features/categories/hooks/useCategories';
 import { ProductGrid } from '@/features/products/components/ProductGrid';
+import { useInfiniteProducts, useProducts } from '@/features/products/hooks/useProducts';
 import { fillTemplate } from '@/utils/fillTemplate';
 
 type SortMode = 'relevance' | 'asc' | 'desc';
 
-// quantas categorias aparecem como paradas na rota da home (além de "tudo")
-const ROUTE_CATEGORIES = 4;
+// paradas iniciais exibidas na rota da home sem depender do catálogo completo
+const FEATURED_SLUGS = ['smartphones', 'laptops', 'fragrances', 'beauty'] as const;
 
 export function HomeScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const router = useRouter();
 
-  const {
-    data: products = [],
-    categories,
-    isLoading,
-    isError,
-    refetch,
-    isRefetching,
-  } = useCategories();
-
   const [stopIndex, setStopIndex] = useState(0);
   const [sortMode, setSortMode] = useState<SortMode>('relevance');
   const [onlyDiscount, setOnlyDiscount] = useState(false);
 
-  const routeCategories = categories.slice(0, ROUTE_CATEGORIES);
+  const isDefaultFeed = stopIndex === 0 && !onlyDiscount && sortMode === 'relevance';
+  const paginated = useInfiniteProducts(20);
+  const allQuery = useProducts(!isDefaultFeed);
+  const products = allQuery.data ?? [];
+
+  const pagedProducts = useMemo(
+    () => paginated.data?.pages.flatMap((page) => page.items) ?? [],
+    [paginated.data],
+  );
+
   const stops = [
     { key: 'all', label: strings.home.all },
-    ...routeCategories.map((category) => ({ key: category.slug, label: category.name })),
+    ...FEATURED_SLUGS.map((slug) => ({ key: slug, label: getCategoryName(slug) })),
   ];
-  const selectedSlug = stopIndex > 0 ? routeCategories[stopIndex - 1]?.slug : undefined;
+  const selectedSlug = stopIndex > 0 ? FEATURED_SLUGS[stopIndex - 1] : undefined;
 
-  const deals = useMemo(() => products.filter(isDeal), [products]);
+  const dealSource = isDefaultFeed ? pagedProducts : products;
+  const deals = useMemo(() => dealSource.filter(isDeal), [dealSource]);
   const topDeal = useMemo(
     () =>
       deals.reduce<(typeof deals)[number] | undefined>(
@@ -75,39 +77,43 @@ export function HomeScreen() {
     setOnlyDiscount(false);
   }
 
+  const searchCount = isDefaultFeed ? pagedProducts.length : products.length;
+
   const header = (
     <View style={styles.header}>
       <Pressable
         onPress={() => router.push('/search')}
         accessibilityRole="search"
-        accessibilityLabel={fillTemplate(strings.home.searchIn, { n: products.length })}
+        accessibilityLabel={
+          searchCount > 0
+            ? fillTemplate(strings.home.searchIn, { n: searchCount })
+            : strings.search.placeholder
+        }
         style={({ pressed }) => [styles.search, pressed ? styles.searchPressed : null]}
       >
         <Icon name="search" size={20} color="textSecondary" />
         <AppText variant="body" color="textSecondary">
-          {products.length > 0
-            ? fillTemplate(strings.home.searchIn, { n: products.length })
+          {searchCount > 0
+            ? fillTemplate(strings.home.searchIn, { n: searchCount })
             : strings.search.placeholder}
         </AppText>
       </Pressable>
 
-      {routeCategories.length > 0 ? (
-        <View style={styles.section}>
-          <View style={styles.sectionHead}>
-            <AppText variant="subheading">{strings.home.exploreTitle}</AppText>
-            <Pressable
-              onPress={() => router.push('/categories')}
-              hitSlop={8}
-              accessibilityRole="link"
-            >
-              <AppText variant="bodyStrong" color="primaryText">
-                {strings.home.seeAll}
-              </AppText>
-            </Pressable>
-          </View>
-          <RouteLine stops={stops} activeIndex={stopIndex} onSelect={setStopIndex} />
+      <View style={styles.section}>
+        <View style={styles.sectionHead}>
+          <AppText variant="subheading">{strings.home.exploreTitle}</AppText>
+          <Pressable
+            onPress={() => router.push('/categories')}
+            hitSlop={8}
+            accessibilityRole="link"
+          >
+            <AppText variant="bodyStrong" color="primaryText">
+              {strings.home.seeAll}
+            </AppText>
+          </Pressable>
         </View>
-      ) : null}
+        <RouteLine stops={stops} activeIndex={stopIndex} onSelect={setStopIndex} />
+      </View>
 
       {topDeal ? (
         <View style={styles.campaign}>
@@ -205,14 +211,17 @@ export function HomeScreen() {
       </View>
 
       <ProductGrid
-        products={visibleProducts}
-        isLoading={isLoading}
-        isError={isError}
-        onRetry={() => void refetch()}
+        products={isDefaultFeed ? pagedProducts : visibleProducts}
+        isLoading={isDefaultFeed ? paginated.isLoading : allQuery.isLoading}
+        isError={isDefaultFeed ? paginated.isError : allQuery.isError}
+        onRetry={() => void (isDefaultFeed ? paginated.refetch() : allQuery.refetch())}
         errorMessage={strings.home.loadError}
         header={header}
-        refreshing={isRefetching}
-        onRefresh={() => void refetch()}
+        refreshing={isDefaultFeed ? paginated.isRefetching : allQuery.isRefetching}
+        onRefresh={() => void (isDefaultFeed ? paginated.refetch() : allQuery.refetch())}
+        hasMore={isDefaultFeed ? paginated.hasNextPage : undefined}
+        isLoadingMore={isDefaultFeed ? paginated.isFetchingNextPage : false}
+        onLoadMore={isDefaultFeed ? () => void paginated.fetchNextPage() : undefined}
         empty={{
           title: strings.home.emptyTitle,
           message: strings.home.emptyMessage,

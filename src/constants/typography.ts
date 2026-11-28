@@ -1,28 +1,24 @@
 // tipografia do shopgo — identidade "rota"
 import {
   Archivo_400Regular,
-  Archivo_500Medium,
   Archivo_600SemiBold,
   Archivo_700Bold,
-  Archivo_800ExtraBold,
 } from '@expo-google-fonts/archivo';
 import type { TextStyle } from 'react-native';
 
 export const fontFamily = {
   brandRegular: 'Archivo_400Regular',
-  brandMedium: 'Archivo_500Medium',
+  brandMedium: 'Archivo_600SemiBold',
   brandSemibold: 'Archivo_600SemiBold',
   brandBold: 'Archivo_700Bold',
-  brandHeavy: 'Archivo_800ExtraBold',
+  brandHeavy: 'Archivo_700Bold',
 } as const;
 
 // mapa passado para `usefonts` no layout raiz
 export const appFonts = {
   Archivo_400Regular,
-  Archivo_500Medium,
   Archivo_600SemiBold,
   Archivo_700Bold,
-  Archivo_800ExtraBold,
 };
 
 // escala tipográfica da marca

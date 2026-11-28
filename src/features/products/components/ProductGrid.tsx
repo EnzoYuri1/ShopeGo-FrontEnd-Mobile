@@ -21,6 +21,9 @@ interface ProductGridProps {
   refreshing?: boolean;
   onRefresh?: () => void;
   bottomInset?: number;
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
+  onLoadMore?: () => void;
 }
 
 const SKELETON_COUNT = 6;
@@ -59,6 +62,9 @@ export function ProductGrid({
   refreshing = false,
   onRefresh,
   bottomInset = 0,
+  hasMore: externalHasMore,
+  isLoadingMore = false,
+  onLoadMore,
 }: ProductGridProps) {
   const router = useRouter();
   const columns = useGridColumns();
@@ -73,11 +79,16 @@ export function ProductGrid({
     setVisibleCount(PAGE_SIZE);
   }
 
-  const visibleProducts = products.slice(0, visibleCount);
-  const hasMore = visibleCount < products.length;
+  const isExternalPagination = Boolean(onLoadMore);
+  const visibleProducts = isExternalPagination ? products : products.slice(0, visibleCount);
+  const hasMore = isExternalPagination ? Boolean(externalHasMore) : visibleCount < products.length;
 
   function handleLoadMore() {
-    if (hasMore) {
+    if (isExternalPagination) {
+      if (externalHasMore && !isLoadingMore) onLoadMore?.();
+      return;
+    }
+    if (visibleCount < products.length) {
       setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, products.length));
     }
   }
@@ -113,7 +124,7 @@ export function ProductGrid({
       }
       ListEmptyComponent={emptyComponent}
       ListFooterComponent={
-        !isLoading && !showError && hasMore ? (
+        !isLoading && !showError && (hasMore || isLoadingMore) ? (
           <View style={styles.footerLoader}>
             <ActivityIndicator size="small" color={colors.primary} />
             <AppText variant="caption" color="textSecondary">

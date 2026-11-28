@@ -4,7 +4,6 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText, Badge, Icon } from '@/components/ui';
 import { colors, radius, spacing, strings } from '@/constants';
 import { getEffectivePrice } from '@/features/cart/hooks/useCart';
-import { getCardImageSource } from '@/features/products/productImages';
 import type { Product } from '@/features/products/types/product';
 import { fillTemplate } from '@/utils/fillTemplate';
 import { formatPrice } from '@/utils/formatPrice';
@@ -30,7 +29,7 @@ export function ProductCard({
   onPress,
 }: ProductCardProps) {
   const finalPrice = getEffectivePrice(product);
-  const imageSource = getCardImageSource(product);
+  const imageSource = product.imageUrl ? { uri: product.imageUrl } : undefined;
   const hasDiscount = Boolean(product.discountPercent);
 
   return (

@@ -23,7 +23,6 @@ import { getCategoryName } from '@/features/categories/categoryName';
 import { categoryOf } from '@/features/categories/hooks/useCategories';
 import { RelatedProducts } from '@/features/products/components/RelatedProducts';
 import { useProduct } from '@/features/products/hooks/useProducts';
-import { getCardImageSource, getProductImages } from '@/features/products/productImages';
 import type { Product } from '@/features/products/types/product';
 import { useIsLandscape } from '@/hooks/useScreenWidth';
 import { useFavoritesStore } from '@/store';
@@ -39,17 +38,11 @@ interface ProductDetailScreenProps {
   productId: string;
 }
 
-// fotos do produto: assets locais (mocks) ou a galeria da api; no mínimo a foto do card
+// fotos do produto: galeria remota ou `imageurl` principal
 function getGallery(product: Product): ImageSource[] {
-  const local = getProductImages(product);
-  if (local) {
-    if (local.variants.length === 0) return [local.banner];
-    return local.variants.map((variant, index) => (index === 0 ? local.banner : variant));
-  }
   const remote = (product.images ?? []).map((uri) => ({ uri }));
   if (remote.length > 0) return remote;
-  const card = getCardImageSource(product);
-  return card ? [card] : [];
+  return product.imageUrl ? [{ uri: product.imageUrl }] : [];
 }
 
 function formatRating(rating: number): string {

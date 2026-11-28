@@ -21,7 +21,6 @@ import { CheckoutSteps } from '@/features/checkout/components/CheckoutSteps';
 import { PaymentMethodSheet } from '@/features/checkout/components/PaymentMethodSheet';
 import { usePlaceOrder } from '@/features/checkout/hooks/usePlaceOrder';
 import type { PaymentMethod } from '@/features/checkout/types/payment';
-import { getCardImageSource } from '@/features/products/productImages';
 import { fillTemplate } from '@/utils/fillTemplate';
 import { formatPrice } from '@/utils/formatPrice';
 
@@ -139,7 +138,7 @@ interface CartRowProps {
 function CartRow({ item, onOpen, onChange, onRemove }: CartRowProps) {
   const { product, quantity } = item;
   const unitPrice = getEffectivePrice(product);
-  const source = getCardImageSource(product);
+  const source = product.imageUrl ? { uri: product.imageUrl } : undefined;
 
   return (
     <View style={styles.row}>

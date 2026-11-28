@@ -6,7 +6,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText, Badge, ErrorBanner, ErrorState, Icon, Skeleton } from '@/components/ui';
 import { colors, radius, spacing, strings } from '@/constants';
 import { useCategories, type Category } from '@/features/categories/hooks/useCategories';
-import { getCardImageSource } from '@/features/products/productImages';
 import { useIsLandscape } from '@/hooks/useScreenWidth';
 import { fillTemplate } from '@/utils/fillTemplate';
 
@@ -17,7 +16,7 @@ function countLabel(count: number): string {
 }
 
 function CategoryTile({ category, onPress }: { category: Category; onPress: () => void }) {
-  const cover = getCardImageSource(category.cover);
+  const cover = category.cover.imageUrl ? { uri: category.cover.imageUrl } : undefined;
   return (
     <Pressable
       onPress={onPress}

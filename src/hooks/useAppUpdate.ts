@@ -38,7 +38,8 @@ export const useAppUpdate = create<AppUpdateState>((set, get) => ({
       } else if (!silent) {
         Alert.alert(strings.updates.upToDateTitle, strings.updates.upToDateMessage);
       }
-    } catch {
+    } catch (error) {
+      console.error('[useAppUpdate] checkForUpdates:', error);
       if (!silent) {
         Alert.alert(strings.app.name, strings.updates.errorMessage);
       }
@@ -54,7 +55,8 @@ export const useAppUpdate = create<AppUpdateState>((set, get) => ({
     try {
       await Updates.fetchUpdateAsync();
       await Updates.reloadAsync();
-    } catch {
+    } catch (error) {
+      console.error('[useAppUpdate] applyUpdate:', error);
       set({ error: strings.updates.errorMessage, isDownloading: false });
     }
   },

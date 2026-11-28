@@ -14,7 +14,8 @@ export async function compressImage(
     const image = await context.resize({ width: maxSize }).renderAsync();
     const result = await image.saveAsync({ compress: quality, format: SaveFormat.WEBP });
     return result.uri;
-  } catch {
+  } catch (error) {
+    console.warn('[compressImage]', error);
     return uri;
   }
 }

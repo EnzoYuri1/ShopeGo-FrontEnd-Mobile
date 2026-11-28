@@ -93,7 +93,8 @@ export function ProfileScreen() {
       setAvatarUri(uri);
       setMessage(null);
       if (user) void saveAvatarUri(user.uid, uri);
-    } catch {
+    } catch (error) {
+      console.error('[ProfileScreen] handlePickPhoto:', error);
       setMessage({ text: strings.profile.photoUnavailable, error: true });
     }
   }

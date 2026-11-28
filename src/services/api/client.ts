@@ -33,6 +33,7 @@ export async function apiGet(path: string, timeoutMs = DEFAULT_TIMEOUT_MS): Prom
     }
     return await response.json();
   } catch (error) {
+    console.error('[apiGet]', url, error);
     if (error instanceof ApiError) throw error;
     if (error instanceof Error && error.name === 'AbortError') {
       throw new ApiError('Tempo de resposta esgotado', 'timeout');

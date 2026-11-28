@@ -16,13 +16,15 @@ export class ApiError extends Error {
   }
 }
 
-// get em `config.apiurl + path`, com tempo limite. devolve o json sem validar
+// get em url completa ou `config.apiurl + path`, com tempo limite
 export async function apiGet(path: string, timeoutMs = DEFAULT_TIMEOUT_MS): Promise<unknown> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const url =
+    path.startsWith('http://') || path.startsWith('https://') ? path : `${config.apiUrl}${path}`;
 
   try {
-    const response = await fetch(`${config.apiUrl}${path}`, {
+    const response = await fetch(url, {
       headers: { Accept: 'application/json' },
       signal: controller.signal,
     });

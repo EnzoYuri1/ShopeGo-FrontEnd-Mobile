@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { lookupCep } from '@/features/profile/services/cepService';
 import { getUserProfile, updateUserProfile } from '@/features/profile/services/profileService';
 import type { UpdateProfileInput } from '@/features/profile/types/profile';
 
@@ -35,5 +36,11 @@ export function useUpdateProfile() {
         queryClient.invalidateQueries({ queryKey: profileKeys.detail(user.uid) });
       }
     },
+  });
+}
+
+export function useLookupCep() {
+  return useMutation({
+    mutationFn: lookupCep,
   });
 }

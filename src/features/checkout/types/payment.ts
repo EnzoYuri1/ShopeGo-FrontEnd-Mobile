@@ -7,10 +7,7 @@ export type PaymentMethod = 'card' | 'other';
 export const cardTypeSchema = z.enum(['visa', 'mastercard']);
 export type CardType = z.infer<typeof cardTypeSchema>;
 
-/**
- * Validação do formulário de cartão. Estes dados NUNCA são salvos nem enviados:
- * o pedido guarda apenas o método (ex.: "card:visa"). A cobrança real depende do backend.
- */
+// validação do formulário de cartão
 export const cardFormSchema = z
   .object({
     cardType: cardTypeSchema,

@@ -4,7 +4,15 @@ import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppText, Button, EmptyState, Icon, IconButton, QuantityStepper } from '@/components/ui';
+import {
+  AppText,
+  Button,
+  EmptyState,
+  ErrorBanner,
+  Icon,
+  IconButton,
+  QuantityStepper,
+} from '@/components/ui';
 import { colors, elevation, radius, spacing, strings } from '@/constants';
 import { getEffectivePrice, useCart } from '@/features/cart/hooks/useCart';
 import { useCartTotals } from '@/features/cart/hooks/useCartTotals';
@@ -17,7 +25,7 @@ import { getCardImageSource } from '@/features/products/productImages';
 import { fillTemplate } from '@/utils/fillTemplate';
 import { formatPrice } from '@/utils/formatPrice';
 
-/** Aba Carrinho: itens, resumo (subtotal, imposto de 10%, total) e escolha do pagamento. */
+// aba carrinho: itens, resumo (subtotal, imposto de 10%, total) e escolha do pagamento
 export function CartScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -33,7 +41,7 @@ export function CartScreen() {
       router.push('/checkout/payment');
       return;
     }
-    // "Outro": conclui o pedido direto, sem formulário de cartão.
+    // "outro": conclui o pedido direto, sem formulário de cartão
     setOrderError(false);
     placeOrder(
       'other',
@@ -100,9 +108,10 @@ export function CartScreen() {
             <AppText variant="priceLarge">{formatPrice(total)}</AppText>
           </View>
           {orderError ? (
-            <AppText variant="caption" color="danger" accessibilityRole="alert">
-              {strings.checkout.orderFailed}
-            </AppText>
+            <ErrorBanner
+              message={strings.checkout.orderFailed}
+              onRetry={() => handleProceed('other')}
+            />
           ) : null}
           <Button
             title={strings.cart.choosePayment}

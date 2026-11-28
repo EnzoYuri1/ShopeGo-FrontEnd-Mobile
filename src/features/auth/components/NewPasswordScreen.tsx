@@ -34,7 +34,7 @@ export function NewPasswordScreen() {
     }
 
     setErrors({});
-    // A troca de senha por código depende do backend (o Firebase usa link por e-mail).
+    // a troca de senha por código depende do backend (o firebase usa link por e-mail)
     Alert.alert(strings.common.soon, strings.auth.newPasswordUnavailable, [
       { text: strings.common.confirm, onPress: () => router.replace('/(auth)/login') },
     ]);

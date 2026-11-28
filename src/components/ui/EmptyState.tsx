@@ -9,12 +9,11 @@ interface EmptyStateProps {
   icon: IconName;
   title: string;
   message?: string;
-  /** Ação que resolve o vazio (ex.: "Explorar categorias"). */
   actionLabel?: string;
   onAction?: () => void;
 }
 
-/** Tela/lista vazia: diz o que falta e oferece o próximo passo. */
+// tela/lista vazia: diz o que falta e oferece o próximo passo
 export function EmptyState({ icon, title, message, actionLabel, onAction }: EmptyStateProps) {
   return (
     <View style={styles.container}>
@@ -30,14 +29,25 @@ export function EmptyState({ icon, title, message, actionLabel, onAction }: Empt
         </AppText>
       ) : null}
       {actionLabel && onAction ? (
-        <Button title={actionLabel} variant="outline" size="md" fullWidth={false} onPress={onAction} />
+        <Button
+          title={actionLabel}
+          variant="outline"
+          size="md"
+          fullWidth={false}
+          onPress={onAction}
+        />
       ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { alignItems: 'center', gap: spacing.ms, paddingVertical: spacing.xl, paddingHorizontal: spacing.lg },
+  container: {
+    alignItems: 'center',
+    gap: spacing.ms,
+    paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.lg,
+  },
   iconWrap: {
     width: 64,
     height: 64,

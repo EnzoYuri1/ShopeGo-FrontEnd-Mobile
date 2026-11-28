@@ -3,7 +3,7 @@ import { getEffectivePrice, useCart } from '@/features/cart/hooks/useCart';
 import { useCartTotals } from '@/features/cart/hooks/useCartTotals';
 import { useCreateOrder } from '@/features/orders/hooks/useOrders';
 
-/** Monta o pedido a partir do carrinho e o cria. `paymentMethod` ex.: "card:visa" ou "other". */
+// monta o pedido a partir do carrinho e o cria. `paymentmethod` ex.: "card:visa" ou "other"
 export function usePlaceOrder() {
   const { items } = useCart();
   const { total } = useCartTotals();
@@ -20,7 +20,7 @@ export function usePlaceOrder() {
           imageUrl: item.product.imageUrl,
         })),
         total,
-        // O app ainda não coleta endereço (depende do perfil/backend).
+        // o app ainda não coleta endereço (depende do perfil/backend)
         shippingAddress: strings.checkout.pendingAddress,
         paymentMethod,
       },

@@ -6,6 +6,7 @@ import { AppText, BrandLogo, Icon, IconButton, type IconName } from '@/component
 import { colors, radius, spacing, strings } from '@/constants';
 import { useSignOut } from '@/features/auth/hooks/useAuth';
 import { useAppUpdate } from '@/hooks/useAppUpdate';
+import { useFeedbackStore } from '@/store';
 
 interface CustomDrawerContentProps {
   navigation: {
@@ -19,15 +20,13 @@ interface MenuItem {
   onPress: () => void;
 }
 
-/**
- * Menu lateral: destinos secundários (os principais estão na barra inferior),
- * buscar atualizações e sair.
- */
+// menu lateral: destinos secundários (os principais estão na barra inferior), buscar atualizações e sair
 export function CustomDrawerContent({ navigation }: CustomDrawerContentProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const signOutMutation = useSignOut();
   const { isChecking, checkForUpdates } = useAppUpdate();
+  const showFeedback = useFeedbackStore((state) => state.show);
 
   function go(href: '/favorites' | '/orders' | '/offers') {
     navigation.closeDrawer();
@@ -78,7 +77,11 @@ export function CustomDrawerContent({ navigation }: CustomDrawerContentProps) {
           <MenuRow
             icon="logout"
             label={strings.drawer.signOutLabel}
-            onPress={() => signOutMutation.mutate()}
+            onPress={() =>
+              signOutMutation.mutate(undefined, {
+                onError: () => showFeedback({ message: strings.errors.signOutFailed, lift: 0 }),
+              })
+            }
             disabled={signOutMutation.isPending}
             danger
           />

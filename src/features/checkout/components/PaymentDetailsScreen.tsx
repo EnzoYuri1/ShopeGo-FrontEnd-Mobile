@@ -11,7 +11,15 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppText, Button, Icon, Input, ScreenTopBar, SelectField } from '@/components/ui';
+import {
+  AppText,
+  Button,
+  ErrorBanner,
+  Icon,
+  Input,
+  ScreenTopBar,
+  SelectField,
+} from '@/components/ui';
 import { colors, radius, spacing, strings } from '@/constants';
 import { CheckoutSteps } from '@/features/checkout/components/CheckoutSteps';
 import { usePlaceOrder } from '@/features/checkout/hooks/usePlaceOrder';
@@ -40,10 +48,7 @@ function formatCardNumber(raw: string): string {
     .replace(/(\d{4})(?=\d)/g, '$1 ');
 }
 
-/**
- * Dados do cartão. Os campos são validados com zod e NUNCA são salvos:
- * o pedido guarda só a bandeira (ex.: "card:visa").
- */
+// dados do cartão
 export function PaymentDetailsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -87,7 +92,7 @@ export function PaymentDetailsScreen() {
 
     setErrors({});
     setFormError(undefined);
-    // Só o tipo do cartão vai no pedido; número e CVV ficam apenas nesta tela.
+    // só o tipo do cartão vai no pedido; número e cvv ficam apenas nesta tela
     placeOrder(
       `card:${parsed.data.cardType}`,
       () => router.replace('/checkout/success'),
@@ -206,11 +211,7 @@ export function PaymentDetailsScreen() {
           </AppText>
           <AppText variant="priceLarge">{formatPrice(total)}</AppText>
         </View>
-        {formError ? (
-          <AppText variant="caption" color="danger" accessibilityRole="alert">
-            {formError}
-          </AppText>
-        ) : null}
+        {formError ? <ErrorBanner message={formError} onRetry={handleConfirm} /> : null}
         <View style={styles.actions}>
           <Button
             title={strings.checkout.cancel}

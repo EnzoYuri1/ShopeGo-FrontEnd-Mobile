@@ -11,11 +11,10 @@ interface SelectFieldProps {
   options: string[];
   onChange: (value: string) => void;
   error?: boolean;
-  /** Descreve o campo para leitores de tela (ex.: "Mês de validade"). */
   accessibilityLabel?: string;
 }
 
-/** Campo de seleção da marca (lista em modal), igual no nativo e no web. */
+// campo de seleção da marca (lista em modal), igual no nativo e no web
 export function SelectField({
   value,
   placeholder,

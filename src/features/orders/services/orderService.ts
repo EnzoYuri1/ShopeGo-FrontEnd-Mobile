@@ -42,13 +42,14 @@ export async function getOrdersByUser(userId: string): Promise<Order[]> {
   );
   const snapshot = await getDocs(q);
 
-  return snapshot.docs.map((item) => {
+  return snapshot.docs.flatMap((item) => {
     const data = item.data();
-    return orderSchema.parse({
+    const parsed = orderSchema.safeParse({
       id: item.id,
       ...data,
       createdAt: normalizeCreatedAt(data.createdAt),
     });
+    return parsed.success ? [parsed.data] : [];
   });
 }
 
@@ -73,7 +74,7 @@ export async function getOrderById(orderId: string): Promise<Order | undefined> 
 export async function createOrder(userId: string, input: CreateOrderInput): Promise<string> {
   const payload = createOrderSchema.parse(input);
 
-  // Modo demonstração: não grava no Firestore (a coleção exige regras/backend prontos).
+  // modo demonstração: não grava no firestore (a coleção exige regras/backend prontos)
   if (config.useMocks) {
     return `mock-${Date.now()}`;
   }

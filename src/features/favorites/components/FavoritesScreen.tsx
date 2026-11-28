@@ -9,7 +9,7 @@ import { useProducts } from '@/features/products/hooks/useProducts';
 import { useFavoritesStore } from '@/store';
 import { fillTemplate } from '@/utils/fillTemplate';
 
-/** Favoritos em grade, com o mesmo card da Home. Tocar no coração remove o produto. */
+// favoritos em grade, com o mesmo card da home. tocar no coração remove o produto
 export function FavoritesScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();

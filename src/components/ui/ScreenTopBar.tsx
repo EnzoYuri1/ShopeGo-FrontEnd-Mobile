@@ -8,16 +8,11 @@ import { colors, spacing, strings } from '@/constants';
 
 interface ScreenTopBarProps {
   onBack: () => void;
-  /** Título curto ao lado do voltar. Omita quando a tela tem título grande no conteúdo. */
   title?: string;
-  /** Ações à direita (ex.: favoritar, carrinho). */
   right?: ReactNode;
 }
 
-/**
- * Cabeçalho padrão das telas empilhadas: voltar, título e ações.
- * Já aplica a área segura do topo.
- */
+// cabeçalho padrão das telas empilhadas: voltar, título e ações. já aplica a área segura do topo
 export function ScreenTopBar({ onBack, title, right }: ScreenTopBarProps) {
   const insets = useSafeAreaInsets();
   return (

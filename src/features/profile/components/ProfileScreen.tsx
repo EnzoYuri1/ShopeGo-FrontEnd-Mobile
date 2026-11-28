@@ -11,11 +11,12 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppText, Button, Icon, Input, type IconName } from '@/components/ui';
+import { AppText, Button, ErrorBanner, Icon, Input, type IconName } from '@/components/ui';
 import { colors, radius, spacing, strings } from '@/constants';
 import { useAuth, useSignOut } from '@/features/auth/hooks/useAuth';
 import { getAvatarUri, saveAvatarUri } from '@/features/profile/avatarStorage';
 import { useProfile, useUpdateProfile } from '@/features/profile/hooks/useProfile';
+import { useFeedbackStore } from '@/store';
 import { compressImage } from '@/utils/compressImage';
 
 type Shortcut = { icon: IconName; label: string; href: '/orders' | '/favorites' | '/offers' };
@@ -26,21 +27,22 @@ const SHORTCUTS: Shortcut[] = [
   { icon: 'tag', label: strings.profile.offers, href: '/offers' },
 ];
 
-/** Aba Conta: foto, dados pessoais editáveis, atalhos e sair. */
+// aba conta: foto, dados pessoais editáveis, atalhos e sair
 export function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const { data: profile } = useProfile();
+  const { data: profile, isError: profileError, refetch: refetchProfile } = useProfile();
   const updateProfile = useUpdateProfile();
   const signOut = useSignOut();
+  const showFeedback = useFeedbackStore((state) => state.show);
 
   const savedName = profile?.name ?? user?.displayName ?? '';
   const savedPhone = profile?.phone ?? '';
   const savedAddress = profile?.address ?? '';
   const email = profile?.email ?? user?.email ?? '';
 
-  // `draft` só existe durante a edição; fora dela os campos mostram o perfil salvo.
+  // `draft` só existe durante a edição; fora dela os campos mostram o perfil salvo
   const [draft, setDraft] = useState<{ name: string; phone: string; address: string } | null>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
@@ -63,7 +65,7 @@ export function ProfileScreen() {
 
   async function handlePickPhoto() {
     try {
-      // Import tardio: se o app instalado não tiver o módulo nativo, só este botão falha (a tela abre).
+      // import tardio: se o app instalado não tiver o módulo nativo, só este botão falha (a tela abre)
       const ImagePicker = await import('expo-image-picker');
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permission.granted) {
@@ -78,7 +80,7 @@ export function ProfileScreen() {
       });
       const pickedUri = result.assets?.[0]?.uri;
       if (result.canceled || !pickedUri) return;
-      // Comprime antes de guardar: o avatar não precisa de mais de 512 px.
+      // comprime antes de guardar: o avatar não precisa de mais de 512 px
       const uri = await compressImage(pickedUri);
       setAvatarUri(uri);
       setMessage(null);
@@ -156,6 +158,13 @@ export function ProfileScreen() {
             ) : null}
           </View>
         </View>
+
+        {profileError ? (
+          <ErrorBanner
+            message={strings.errors.profileLoadFailed}
+            onRetry={() => void refetchProfile()}
+          />
+        ) : null}
 
         {message ? (
           <View style={[styles.message, message.error ? styles.messageError : styles.messageOk]}>
@@ -259,7 +268,11 @@ export function ProfileScreen() {
           title={strings.profile.signOut}
           variant="ghost"
           icon="logout"
-          onPress={() => signOut.mutate()}
+          onPress={() =>
+            signOut.mutate(undefined, {
+              onError: () => showFeedback({ message: strings.errors.signOutFailed }),
+            })
+          }
           loading={signOut.isPending}
         />
       </ScrollView>

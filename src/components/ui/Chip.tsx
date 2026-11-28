@@ -11,7 +11,7 @@ interface ChipProps {
   onPress?: () => void;
 }
 
-/** Filtro ou opção selecionável (ordenar, filtrar, variação de produto). */
+// filtro ou opção selecionável (ordenar, filtrar, variação de produto)
 export function Chip({ label, selected = false, icon, onPress }: ChipProps) {
   const fg = selected ? 'onBrand' : 'text';
   return (

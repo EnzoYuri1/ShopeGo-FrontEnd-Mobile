@@ -1,7 +1,4 @@
-/**
- * Textos da interface em português (pt-BR), centralizados.
- * Todo texto visível ao usuário deve vir daqui — não escreva strings soltas nas telas.
- */
+// textos da interface em português (pt-br), centralizados
 export const strings = {
   app: {
     name: 'ShopGo',
@@ -103,6 +100,7 @@ export const strings = {
     emptyMessage: 'Tire o filtro "Em oferta" ou escolha outra categoria.',
     clearFilters: 'Limpar filtros',
     emptyProducts: 'Nenhum produto encontrado.',
+    loadingMore: 'Carregando mais produtos...',
     loadError: 'Não foi possível carregar os produtos.',
   },
   tabs: {
@@ -390,11 +388,16 @@ export const strings = {
   },
   errors: {
     generic: 'Algo deu errado. Tente novamente.',
+    unexpectedMessage: 'O aplicativo encontrou um erro inesperado. Tente novamente.',
     network: 'Sem conexão com o servidor.',
     invalidCredentials: 'E-mail ou senha inválidos.',
     emailInUse: 'Este e-mail já está em uso.',
     weakPassword: 'A senha deve ter pelo menos 6 caracteres.',
     invalidEmail: 'E-mail inválido.',
     tooManyRequests: 'Muitas tentativas. Aguarde um momento e tente novamente.',
+    signOutFailed: 'Não foi possível sair da conta. Tente novamente.',
+    profileLoadFailed: 'Não foi possível carregar os dados do perfil.',
+    relatedLoadFailed: 'Não foi possível carregar os produtos relacionados.',
+    refreshFailed: 'Não foi possível atualizar os dados.',
   },
 } as const;

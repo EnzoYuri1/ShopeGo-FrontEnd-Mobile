@@ -14,7 +14,6 @@ interface ProductCardProps {
   isFavorite?: boolean;
   onToggleFavorite?: (productId: string) => void;
   onAddToCart: (product: Product) => void;
-  /** Toque no card (abre o detalhe do produto). */
   onPress?: (product: Product) => void;
 }
 
@@ -22,10 +21,7 @@ function formatRating(rating: number): string {
   return rating.toFixed(1).replace('.', ',');
 }
 
-/**
- * Card de produto da marca: foto sobre painel Céu, selo de desconto, nome em 2 linhas,
- * nota, preço final (com o antigo riscado) e botão de adicionar.
- */
+// card de produto da marca: foto sobre painel céu, selo de desconto, nome em 2 linhas, nota, preço final (com...
 export function ProductCard({
   product,
   isFavorite = false,

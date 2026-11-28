@@ -1,6 +1,6 @@
 import { useCart } from '@/features/cart/hooks/useCart';
 
-/** Imposto aplicado sobre o subtotal (10%, conforme o Figma). */
+// imposto aplicado sobre o subtotal (10%, conforme o figma)
 export const TAX_RATE = 0.1;
 
 export function useCartTotals() {

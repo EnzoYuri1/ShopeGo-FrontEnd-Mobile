@@ -7,11 +7,10 @@ interface OtpInputProps {
   value: string;
   onChange: (value: string) => void;
   length?: number;
-  /** Destaca as caixas em vermelho (código inválido). */
   error?: boolean;
 }
 
-/** Campo de código com uma caixa por dígito; as caixas refletem um único valor. */
+// campo de código com uma caixa por dígito; as caixas refletem um único valor
 export function OtpInput({ value, onChange, length = 6, error = false }: OtpInputProps) {
   const inputs = useRef<(ComponentRef<typeof TextInput> | null)[]>([]);
 
@@ -25,7 +24,7 @@ export function OtpInput({ value, onChange, length = 6, error = false }: OtpInpu
       return;
     }
 
-    // Suporta colar o código inteiro: distribui a partir da caixa atual.
+    // suporta colar o código inteiro: distribui a partir da caixa atual
     digits
       .slice(0, length - index)
       .split('')

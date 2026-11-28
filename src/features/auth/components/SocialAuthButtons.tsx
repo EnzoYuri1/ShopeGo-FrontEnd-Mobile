@@ -12,7 +12,7 @@ export function SocialAuthButtons() {
     <View style={styles.container}>
       <Text style={styles.label}>{strings.auth.orContinueWith}</Text>
       <View style={styles.row}>
-        {/* shortcut: login social OAuth sera conectado apos configuracao de provedores no Firebase */}
+        {/* shortcut: login social oauth sera conectado apos configuracao de provedores no firebase */}
         <Pressable style={styles.iconButton} onPress={showUnavailable} accessibilityLabel="Google">
           <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
             <Path

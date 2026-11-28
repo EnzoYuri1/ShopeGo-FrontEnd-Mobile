@@ -1,11 +1,12 @@
 import { useRouter } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   AppText,
   Badge,
   EmptyState,
+  ErrorBanner,
   ErrorState,
   Icon,
   ScreenTopBar,
@@ -18,11 +19,11 @@ import { formatDate, getStatusLabel, getStatusTone } from '@/features/orders/uti
 import { fillTemplate } from '@/utils/fillTemplate';
 import { formatPrice } from '@/utils/formatPrice';
 
-/** Meus pedidos: status, data, itens e total; toque abre o rastreio. */
+// meus pedidos: status, data, itens e total; toque abre o rastreio
 export function OrdersScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { data: orders = [], isLoading, isError, refetch } = useOrders();
+  const { data: orders = [], isLoading, isError, refetch, isRefetching } = useOrders();
 
   function handleBack() {
     if (router.canGoBack()) router.back();
@@ -60,6 +61,14 @@ export function OrdersScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + spacing.xl }]}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={() => void refetch()}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        }
         ListHeaderComponent={
           <View style={styles.header}>
             <AppText variant="title" accessibilityRole="header">
@@ -71,6 +80,9 @@ export function OrdersScreen() {
                   ? strings.orders.countOne
                   : fillTemplate(strings.orders.count, { n: orders.length })}
               </AppText>
+            ) : null}
+            {isError && orders.length > 0 ? (
+              <ErrorBanner message={strings.errors.refreshFailed} onRetry={() => void refetch()} />
             ) : null}
           </View>
         }

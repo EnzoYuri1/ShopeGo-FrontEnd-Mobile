@@ -5,12 +5,11 @@ import { AppText } from '@/components/ui/AppText';
 import { colors, radius, spacing, textVariants } from '@/constants';
 
 interface InputProps extends TextInputProps {
-  /** Rótulo visível acima do campo. */
   label?: string;
   error?: string;
 }
 
-/** Campo de texto da marca: fundo Céu, borda Azul Noite no foco, vermelho no erro. */
+// campo de texto da marca: fundo céu, borda azul noite no foco, vermelho no erro
 export function Input({ label, error, style, onFocus, onBlur, ...props }: InputProps) {
   const [focused, setFocused] = useState(false);
 
@@ -60,7 +59,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: 'transparent',
     color: colors.text,
-    // Sem lineHeight: no Android ele desalinha o texto dentro do TextInput.
+    // sem lineheight: no android ele desalinha o texto dentro do textinput
     fontFamily: textVariants.body.fontFamily,
     fontSize: textVariants.body.fontSize,
   },

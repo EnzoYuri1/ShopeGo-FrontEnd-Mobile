@@ -7,26 +7,18 @@ import { colors, spacing } from '@/constants';
 export interface RouteStop {
   key: string;
   label: string;
-  /** Texto de apoio (só na orientação vertical). */
   description?: string;
 }
 
 interface RouteLineProps {
   stops: RouteStop[];
-  /** Parada atual. Nas verticais, as anteriores aparecem como concluídas. */
   activeIndex: number;
   orientation?: 'horizontal' | 'vertical';
-  /** Torna as paradas tocáveis (ex.: categorias). */
   onSelect?: (index: number) => void;
-  /** Horizontal como progresso (ex.: etapas do checkout): paradas anteriores aparecem concluídas. */
   progress?: boolean;
 }
 
-/**
- * Elemento próprio da marca ShopGo: uma rota com paradas.
- * Use só onde existe sequência ou percurso real: categorias, etapas do checkout,
- * status do pedido. Nunca como enfeite.
- */
+// elemento próprio da marca shopgo: uma rota com paradas
 export function RouteLine({
   stops,
   activeIndex,
@@ -75,7 +67,7 @@ export function RouteLine({
   return (
     <View
       style={styles.hWrap}
-      // Sem onSelect é só um indicador: lido como progresso, não como abas.
+      // sem onselect é só um indicador: lido como progresso, não como abas
       accessible={!interactive}
       accessibilityRole={interactive ? 'tablist' : 'progressbar'}
       accessibilityLabel={!interactive && currentStop ? currentStop.label : undefined}

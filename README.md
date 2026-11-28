@@ -19,8 +19,9 @@ Após instalar o APK uma única vez no celular, novas atualizações de telas e 
 - **Framework:** React Native + Expo + Expo Router (roteamento baseado em arquivos em `app/`)
 - **Linguagem:** TypeScript (`strict: true`, alias `@/*` mapeado para `src/*`)
 - **Backend as a Service (BaaS):** Firebase (`firebase/app`, `firebase/auth`, `firebase/firestore`, `firebase/storage`) com persistência de sessão via `@react-native-async-storage/async-storage`
+- **Catálogo de Produtos:** API REST (DummyJSON por padrão, configurável via `EXPO_PUBLIC_PRODUCTS_SOURCE` entre `api`, `firestore` ou `mock`)
 - **Estado Remoto e Cache:** TanStack Query (`@tanstack/react-query`)
-- **Estado Local e UI:** Zustand (`src/store/`)
+- **Estado Local e UI:** Zustand (`src/store/`: carrinho, favoritos e feedback global)
 - **Validação e Schemas:** Zod
 
 ---
@@ -58,10 +59,14 @@ EXPO_PUBLIC_FIREBASE_PROJECT_ID=...
 EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=...
 EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
 EXPO_PUBLIC_FIREBASE_APP_ID=...
+
 EXPO_PUBLIC_USE_MOCKS=true
+EXPO_PUBLIC_API_URL=https://dummyjson.com
+EXPO_PUBLIC_USD_TO_BRL=5.5
+EXPO_PUBLIC_PRODUCTS_SOURCE=api
 ```
 
-> Com `EXPO_PUBLIC_USE_MOCKS=true`, o módulo de produtos utiliza os dados de `src/mocks/products.ts` como fallback local. Altere para `false` para consultar apenas o Cloud Firestore.
+> Com `EXPO_PUBLIC_USE_MOCKS=true`, pedidos e perfil utilizam `src/mocks/` como fallback local. A origem dos produtos é controlada por `EXPO_PUBLIC_PRODUCTS_SOURCE` (`api`, `firestore` ou `mock`).
 
 3. **Inicie o servidor de desenvolvimento:**
 
@@ -94,7 +99,7 @@ O projeto conta com pipeline automatizada em `.github/workflows/ci-cd.yml` (GitH
 
 - **CI (Pull Requests e push na `main`):** executa `npm ci`, `npm run typecheck` e `npm run lint`.
 - **CD (push/merge na `main` ou disparo manual):** publica automaticamente uma atualização OTA no canal `preview` (`eas update --branch preview --environment preview`), atualizando o APK já instalado nos celulares sem necessidade de novo build.
-- **Requisito no repositório:** secret `EXPO_TOKEN` configurado em *Settings -> Secrets and variables -> Actions* (as variáveis `EXPO_PUBLIC_FIREBASE_*` ficam gerenciadas no ambiente `preview` do EAS).
+- **Requisito no repositório:** secret `EXPO_TOKEN` configurado em *Settings -> Secrets and variables -> Actions* (as variáveis `EXPO_PUBLIC_*` ficam gerenciadas no ambiente `preview` do EAS).
 
 ---
 
@@ -102,32 +107,33 @@ O projeto conta com pipeline automatizada em `.github/workflows/ci-cd.yml` (GitH
 
 ```mermaid
 flowchart TD
-    Start["Abertura do App (app/_layout.tsx)"] --> Providers["QueryClientProvider + AuthProvider"]
+    Start["Abertura do App (app/_layout.tsx)"] --> Providers["ErrorBoundary + QueryClientProvider + AuthProvider"]
     Providers --> Entry["app/index.tsx"]
-    Entry --> Loading{"isLoading?"}
+    Entry --> Loading{"isLoading ou onboarding?"}
     Loading -- "Sim" --> Spinner["ActivityIndicator"]
     Loading -- "Não" --> AuthCheck{"isAuthenticated?"}
 
-    AuthCheck -- "Não" --> AuthGroup["app/(auth)/"]
-    AuthGroup --> Login["login.tsx (LoginScreen)"]
-    AuthGroup --> Register["register.tsx (RegisterScreen)"]
-    Login -- "signInWithEmailAndPassword" --> FirebaseAuth["Firebase Auth + AsyncStorage"]
-    Register -- "createUserWithEmailAndPassword + setDoc" --> FirebaseAuth
-    FirebaseAuth -- "Sessão ativa" --> DrawerGroup
+    AuthCheck -- "Não" --> OnboardingCheck{"Viu onboarding?"}
+    OnboardingCheck -- "Não" --> Onboarding["app/onboarding.tsx -> app/discover.tsx"]
+    OnboardingCheck -- "Sim" --> AuthGroup["app/(auth)/"]
+    Onboarding --> AuthGroup
+    AuthGroup --> Login["login / register / forgot-password"]
+    Login --> FirebaseAuth["Firebase Auth + AsyncStorage"]
+    FirebaseAuth -- "Sessão ativa" --> MainApp
 
-    AuthCheck -- "Sim" --> DrawerGroup["app/(drawer)/"]
-    DrawerGroup --> Home["index.tsx (Área Autenticada)"]
-    Home --> Products["products: TanStack Query -> Firestore / Mocks"]
-    Home --> Cart["cart: Zustand (useCartStore) + AsyncStorage"]
-    Home --> Orders["orders: TanStack Query -> Firestore"]
-    Home --> Profile["profile: TanStack Query -> Firestore"]
+    AuthCheck -- "Sim" --> MainApp["app/(drawer)/(tabs)/"]
+    MainApp --> Home["Início (HomeScreen + carregamento progressivo)"]
+    MainApp --> Categories["Categorias -> category/[slug]"]
+    MainApp --> Search["Buscar -> product/[id]"]
+    MainApp --> Cart["Carrinho -> checkout/payment -> checkout/success"]
+    MainApp --> Profile["Perfil -> orders -> tracking/[id] / favorites / offers"]
 ```
 
 ---
 
 ## Arquitetura (Feature-Based)
 
-Toda comunicação com o Firebase é isolada na camada `services/` de cada feature, consumida pelas telas exclusivamente via `hooks/` (TanStack Query ou Zustand) e validada com schemas **Zod** em `types/`.
+A comunicação externa é isolada na camada `services/` de cada feature, consumida pelas telas via `hooks/` (TanStack Query ou Zustand) e validada com schemas **Zod** em `types/`. Erros de renderização são capturados globalmente pelo `ErrorBoundary` e avisos globais são exibidos pelo `FeedbackHost`.
 
 ```mermaid
 flowchart LR
@@ -137,7 +143,7 @@ flowchart LR
     subgraph Feature ["Estrutura Interna de cada Feature"]
         Components["components/ (UI do domínio)"]
         Hooks["hooks/ (TanStack Query / Store)"]
-        Services["services/ (única camada que acessa Firebase)"]
+        Services["services/ (Firebase / API REST)"]
         Types["types/ (Zod schemas e interfaces)"]
         Components --> Hooks
         Hooks --> Services
@@ -146,7 +152,8 @@ flowchart LR
 
     Features --> Feature
     Services --> Firebase["src/services/firebase.ts (app, auth, db, storage)"]
-    Hooks --> Store["src/store/useCartStore.ts (Zustand)"]
+    Services --> ApiClient["src/services/api/client.ts (HTTP)"]
+    Hooks --> Store["src/store/ (Cart, Favorites, Feedback)"]
     Firebase --> Cloud["Firebase Spark (Auth, Firestore, Storage)"]
     Cloud --> Rules["firestore.rules (Controle de acesso por uid)"]
 ```
@@ -158,30 +165,26 @@ ShopeGo-FrontEnd-Mobile/
 ├── .github/workflows/
 │   └── ci-cd.yml                 # Pipeline de CI (typecheck/lint) e CD (EAS Update OTA)
 ├── app/                          # Rotas Expo Router (arquivos finos de navegação)
-│   ├── (auth)/                   # Fluxo público: login e cadastro
-│   ├── (drawer)/                 # Fluxo autenticado principal
-│   ├── checkout/                 # Fluxo de pagamento
-│   ├── product/                  # Detalhes do produto
-│   ├── tracking/                 # Rastreamento de pedidos
-│   ├── _layout.tsx               # Providers globais (QueryClientProvider, AuthProvider)
-│   └── index.tsx                 # Redirecionamento inicial conforme estado de auth
+│   ├── (auth)/                   # Fluxo público: login, cadastro e recuperação de senha
+│   ├── (drawer)/(tabs)/          # Navegação principal (Início, Categorias, Buscar, Carrinho, Conta)
+│   ├── category/[slug].tsx       # Produtos por categoria e ofertas
+│   ├── checkout/                 # Pagamento e confirmação de pedido
+│   ├── product/[id].tsx          # Detalhes do produto
+│   ├── tracking/[id].tsx         # Rastreamento do pedido
+│   ├── _layout.tsx               # ErrorBoundary, QueryClientProvider, AuthProvider e FeedbackHost
+│   └── index.tsx                 # Redirecionamento inicial (onboarding, auth ou área principal)
 ├── src/
 │   ├── components/               # Componentes globais reutilizáveis (ui/ e layout/)
 │   ├── constants/                # Design tokens, cores, espaçamentos, strings e config
-│   ├── features/                 # Módulos isolados por domínio
-│   │   ├── auth/                 # components/, hooks/, providers/, services/, types/, utils/
-│   │   ├── cart/                 # components/, hooks/, services/, types/
-│   │   ├── orders/               # components/, hooks/, services/, types/
-│   │   ├── products/             # components/, hooks/, services/, types/
-│   │   └── profile/              # components/, hooks/, services/, types/
-│   ├── hooks/                    # Hooks genéricos globais
+│   ├── features/                 # Módulos isolados por domínio (auth, cart, categories, checkout,
+│   │                             # design-system, favorites, offers, onboarding, orders, products, profile)
+│   ├── hooks/                    # Hooks genéricos globais (atualização OTA, largura de tela)
 │   ├── mocks/                    # Dados fictícios para fallback local
-│   ├── services/
-│   │   └── firebase.ts           # Singleton do Firebase SDK
-│   ├── store/                    # Estado global local com Zustand (useCartStore.ts)
+│   ├── services/                 # Singleton do Firebase (firebase.ts) e cliente HTTP (api/client.ts)
+│   ├── store/                    # Estado global local com Zustand (cart, favorites, feedback)
 │   ├── types/                    # Tipagens globais compartilhadas
-│   └── utils/                    # Funções utilitárias puras
-├── .env.example                  # Modelo das variáveis EXPO_PUBLIC_FIREBASE_*
+│   └── utils/                    # Funções utilitárias puras (preço, templates, compressão de imagem)
+├── .env.example                  # Modelo das variáveis EXPO_PUBLIC_*
 ├── eas.json                      # Perfis do EAS Build e canais do EAS Update
 └── firestore.rules               # Regras de segurança do Cloud Firestore
 ```

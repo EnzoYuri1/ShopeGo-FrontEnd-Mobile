@@ -1,6 +1,6 @@
 import type { Order } from '@/features/orders/types/order';
 
-/** Pedidos FICTÍCIOS para desenvolvimento (modo EXPO_PUBLIC_USE_MOCKS=true). */
+// pedidos fictícios para desenvolvimento (modo expo_public_use_mocks=true)
 export const mockOrders: Order[] = [
   {
     id: 'mock-1',

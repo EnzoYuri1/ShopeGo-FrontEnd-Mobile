@@ -1,6 +1,6 @@
 import type { Product } from '@/features/products/types/product';
 
-/** Dados FICTÍCIOS para desenvolvimento. Não usar dados reais. */
+// dados fictícios para desenvolvimento. não usar dados reais
 export const mockProducts: Product[] = [
   {
     id: '1',

@@ -6,7 +6,7 @@ import { AppText, Button, Icon } from '@/components/ui';
 import { colors, spacing, strings } from '@/constants';
 import { CheckoutSteps } from '@/features/checkout/components/CheckoutSteps';
 
-/** Pedido concluído: confirmação, caminho para acompanhar o pedido e para voltar às compras. */
+// pedido concluído: confirmação, caminho para acompanhar o pedido e para voltar às compras
 export function PaymentSuccessScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();

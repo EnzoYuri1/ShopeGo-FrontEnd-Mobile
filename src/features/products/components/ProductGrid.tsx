@@ -1,9 +1,9 @@
 import { useRouter } from 'expo-router';
-import type { ReactElement } from 'react';
-import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { useState, type ReactElement } from 'react';
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
-import { EmptyState, ErrorState, Skeleton } from '@/components/ui';
-import { colors, spacing } from '@/constants';
+import { AppText, EmptyState, ErrorBanner, ErrorState, Skeleton } from '@/components/ui';
+import { colors, spacing, strings } from '@/constants';
 import { useAddToCart } from '@/features/cart/hooks/useAddToCart';
 import { ProductCard } from '@/features/products/components/ProductCard';
 import type { Product } from '@/features/products/types/product';
@@ -16,7 +16,6 @@ interface ProductGridProps {
   isError: boolean;
   onRetry: () => void;
   errorMessage: string;
-  /** Conteúdo acima da grade (rola junto). */
   header?: ReactElement;
   empty: { title: string; message?: string; actionLabel?: string; onAction?: () => void };
   refreshing?: boolean;
@@ -25,8 +24,9 @@ interface ProductGridProps {
 }
 
 const SKELETON_COUNT = 6;
+const PAGE_SIZE = 12;
 
-/** Completa a última linha com espaços vazios, para o último card não esticar. */
+// completa a última linha com espaços vazios, para o último card não esticar
 function fillLastRow(products: Product[], columns: number): (Product | null)[] {
   const remainder = products.length % columns;
   if (remainder === 0) return products;
@@ -65,9 +65,26 @@ export function ProductGrid({
   const addToCart = useAddToCart();
   const favoriteIds = useFavoritesStore((state) => state.ids);
   const toggleFavorite = useFavoritesStore((state) => state.toggle);
+  const [prevProducts, setPrevProducts] = useState(products);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  // Erro só sem dados: se um refetch falhar, a lista em cache continua visível.
+  if (products !== prevProducts) {
+    setPrevProducts(products);
+    setVisibleCount(PAGE_SIZE);
+  }
+
+  const visibleProducts = products.slice(0, visibleCount);
+  const hasMore = visibleCount < products.length;
+
+  function handleLoadMore() {
+    if (hasMore) {
+      setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, products.length));
+    }
+  }
+
+  // Erro em tela cheia só sem dados; com cache visível, mostra aviso no topo.
   const showError = isError && products.length === 0;
+  const showRefreshError = isError && products.length > 0;
 
   let emptyComponent: ReactElement;
   if (isLoading) emptyComponent = <GridSkeleton columns={columns} />;
@@ -77,13 +94,34 @@ export function ProductGrid({
   return (
     <FlatList
       key={columns}
-      data={isLoading || showError ? [] : fillLastRow(products, columns)}
+      data={isLoading || showError ? [] : fillLastRow(visibleProducts, columns)}
       keyExtractor={(item, index) => item?.id ?? `spacer-${index}`}
       numColumns={columns}
       columnWrapperStyle={styles.row}
       contentContainerStyle={[styles.content, { paddingBottom: bottomInset + spacing.xl }]}
-      ListHeaderComponent={header}
+      onEndReached={handleLoadMore}
+      onEndReachedThreshold={0.4}
+      ListHeaderComponent={
+        header || showRefreshError ? (
+          <View style={styles.headerWrap}>
+            {header}
+            {showRefreshError ? (
+              <ErrorBanner message={strings.errors.refreshFailed} onRetry={onRetry} />
+            ) : null}
+          </View>
+        ) : undefined
+      }
       ListEmptyComponent={emptyComponent}
+      ListFooterComponent={
+        !isLoading && !showError && hasMore ? (
+          <View style={styles.footerLoader}>
+            <ActivityIndicator size="small" color={colors.primary} />
+            <AppText variant="caption" color="textSecondary">
+              {strings.home.loadingMore}
+            </AppText>
+          </View>
+        ) : undefined
+      }
       showsVerticalScrollIndicator={false}
       initialNumToRender={8}
       maxToRenderPerBatch={8}
@@ -124,6 +162,7 @@ const GAP = spacing.ms;
 
 const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.md, gap: spacing.ml },
+  headerWrap: { gap: spacing.md },
   row: { gap: GAP },
   cell: { flex: 1 },
   skeletonGrid: {
@@ -134,4 +173,11 @@ const styles = StyleSheet.create({
   },
   skeletonCell: { paddingHorizontal: GAP / 2, gap: spacing.sm },
   skeletonMedia: { aspectRatio: 1 },
+  footerLoader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+  },
 });

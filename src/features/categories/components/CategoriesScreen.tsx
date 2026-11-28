@@ -1,9 +1,9 @@
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppText, Badge, ErrorState, Icon, Skeleton } from '@/components/ui';
+import { AppText, Badge, ErrorBanner, ErrorState, Icon, Skeleton } from '@/components/ui';
 import { colors, radius, spacing, strings } from '@/constants';
 import { useCategories, type Category } from '@/features/categories/hooks/useCategories';
 import { getCardImageSource } from '@/features/products/productImages';
@@ -63,7 +63,14 @@ export function CategoriesScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const columns = useIsLandscape() ? 4 : 2;
-  const { data: products = [], categories, isLoading, isError, refetch } = useCategories();
+  const {
+    data: products = [],
+    categories,
+    isLoading,
+    isError,
+    refetch,
+    isRefetching,
+  } = useCategories();
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -75,6 +82,14 @@ export function CategoriesScreen() {
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={() => void refetch()}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        }
         ListHeaderComponent={
           <View style={styles.header}>
             <AppText variant="title" accessibilityRole="header">
@@ -87,6 +102,9 @@ export function CategoriesScreen() {
                   p: products.length,
                 })}
               </AppText>
+            ) : null}
+            {isError && categories.length > 0 ? (
+              <ErrorBanner message={strings.errors.refreshFailed} onRetry={() => void refetch()} />
             ) : null}
           </View>
         }

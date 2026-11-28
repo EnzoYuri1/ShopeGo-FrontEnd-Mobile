@@ -1,4 +1,11 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, View, type PressableProps } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type PressableProps,
+} from 'react-native';
 
 import { Icon, type IconName } from '@/components/ui/Icon';
 import { colors, radius, spacing, textVariants, type ColorName } from '@/constants';
@@ -8,19 +15,11 @@ type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
 interface ButtonProps extends Omit<PressableProps, 'children'> {
   title: string;
   loading?: boolean;
-  /**
-   * - primary: Laranja Sinal, ação principal da tela (uma por tela).
-   * - secondary: Azul Noite, ação forte alternativa.
-   * - outline: contorno Azul Noite, ação secundária.
-   * - ghost: só texto, ação terciária.
-   */
   variant?: ButtonVariant;
   size?: 'md' | 'lg';
   icon?: IconName;
   iconPosition?: 'left' | 'right';
-  /** Ocupa toda a largura disponível (padrão). */
   fullWidth?: boolean;
-  /** Legado (onboarding): texto maior e mais pesado. */
   display?: boolean;
 }
 
@@ -81,7 +80,11 @@ export function Button({
             numberOfLines={1}
             adjustsFontSizeToFit
             minimumFontScale={0.85}
-            style={[textVariants.button, display ? styles.displayText : null, { color: colors[look.fg] }]}
+            style={[
+              textVariants.button,
+              display ? styles.displayText : null,
+              { color: colors[look.fg] },
+            ]}
           >
             {title}
           </Text>

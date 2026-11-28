@@ -19,7 +19,7 @@ interface BadgeProps {
   tone?: BadgeTone;
 }
 
-/** Selo curto: desconto (signal), status de pedido (success/warning/danger), contagem. */
+// selo curto: desconto (signal), status de pedido (success/warning/danger), contagem
 export function Badge({ label, tone = 'neutral' }: BadgeProps) {
   const look = TONES[tone];
   return (

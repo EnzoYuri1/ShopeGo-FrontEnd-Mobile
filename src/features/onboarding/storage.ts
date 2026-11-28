@@ -14,6 +14,6 @@ export async function markOnboardingSeen(): Promise<void> {
   try {
     await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
   } catch {
-    // Falha ao persistir não deve bloquear o fluxo; o onboarding apenas reaparece.
+    // falha ao persistir não deve bloquear o fluxo; o onboarding apenas reaparece
   }
 }

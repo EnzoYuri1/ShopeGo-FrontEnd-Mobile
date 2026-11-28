@@ -15,7 +15,7 @@ import { AppText, Button, ErrorBanner, Icon, Input, type IconName } from '@/comp
 import { colors, radius, spacing, strings } from '@/constants';
 import { useAuth, useSignOut } from '@/features/auth/hooks/useAuth';
 import { getAvatarUri, saveAvatarUri } from '@/features/profile/avatarStorage';
-import { useProfile, useUpdateProfile } from '@/features/profile/hooks/useProfile';
+import { useLookupCep, useProfile, useUpdateProfile } from '@/features/profile/hooks/useProfile';
 import { useFeedbackStore } from '@/store';
 import { compressImage } from '@/utils/compressImage';
 
@@ -27,6 +27,11 @@ const SHORTCUTS: Shortcut[] = [
   { icon: 'tag', label: strings.profile.offers, href: '/offers' },
 ];
 
+function formatCep(raw: string): string {
+  const digits = raw.replace(/\D/g, '').slice(0, 8);
+  return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
+}
+
 // aba conta: foto, dados pessoais editáveis, atalhos e sair
 export function ProfileScreen() {
   const router = useRouter();
@@ -34,6 +39,7 @@ export function ProfileScreen() {
   const { user } = useAuth();
   const { data: profile, isError: profileError, refetch: refetchProfile } = useProfile();
   const updateProfile = useUpdateProfile();
+  const lookupCep = useLookupCep();
   const signOut = useSignOut();
   const showFeedback = useFeedbackStore((state) => state.show);
 
@@ -44,6 +50,8 @@ export function ProfileScreen() {
 
   // `draft` só existe durante a edição; fora dela os campos mostram o perfil salvo
   const [draft, setDraft] = useState<{ name: string; phone: string; address: string } | null>(null);
+  const [cep, setCep] = useState('');
+  const [cepError, setCepError] = useState<string | undefined>();
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
 
@@ -92,12 +100,28 @@ export function ProfileScreen() {
 
   function startEditing() {
     setMessage(null);
+    setCep('');
+    setCepError(undefined);
     setDraft({ name: savedName, phone: savedPhone, address: savedAddress });
   }
 
   function handleCancel() {
     setDraft(null);
+    setCep('');
+    setCepError(undefined);
     setMessage(null);
+  }
+
+  function handleLookupCep() {
+    setCepError(undefined);
+    lookupCep.mutate(cep, {
+      onSuccess: (formattedAddress) => {
+        setDraft((prev) => (prev ? { ...prev, address: formattedAddress } : prev));
+      },
+      onError: (err) => {
+        setCepError(err instanceof Error ? err.message : strings.profile.cepFailed);
+      },
+    });
   }
 
   function handleSave() {
@@ -202,6 +226,33 @@ export function ProfileScreen() {
             autoComplete="tel"
             onChangeText={(text) => setDraft((prev) => (prev ? { ...prev, phone: text } : prev))}
           />
+          {editing ? (
+            <View style={styles.cepRow}>
+              <View style={styles.cepInput}>
+                <Input
+                  label={strings.profile.cep}
+                  value={cep}
+                  placeholder={strings.profile.cepPlaceholder}
+                  keyboardType="number-pad"
+                  maxLength={9}
+                  onChangeText={(text) => {
+                    setCep(formatCep(text));
+                    if (cepError) setCepError(undefined);
+                  }}
+                  error={cepError}
+                />
+              </View>
+              <Button
+                title={strings.profile.cepSearch}
+                variant="secondary"
+                size="md"
+                fullWidth={false}
+                onPress={handleLookupCep}
+                loading={lookupCep.isPending}
+                style={styles.cepButton}
+              />
+            </View>
+          ) : null}
           <Input
             label={strings.profile.address}
             value={address}
@@ -320,6 +371,9 @@ const styles = StyleSheet.create({
   messageError: { backgroundColor: colors.dangerLight },
   messageText: { flex: 1 },
   section: { gap: spacing.md },
+  cepRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
+  cepInput: { flex: 1 },
+  cepButton: { marginTop: 22 },
   editActions: { flexDirection: 'row', gap: spacing.ms },
   editAction: { flex: 1 },
   shortcuts: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.md },

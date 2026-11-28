@@ -263,6 +263,12 @@ export const strings = {
     signOut: 'Sair da conta',
     addressPlaceholder: 'Rua, número, bairro, cidade',
     phonePlaceholder: '(00) 00000-0000',
+    cep: 'CEP',
+    cepPlaceholder: '00000-000',
+    cepSearch: 'Buscar',
+    cepInvalid: 'Informe um CEP válido com 8 dígitos.',
+    cepNotFound: 'CEP não encontrado.',
+    cepFailed: 'Não foi possível buscar o CEP. Tente novamente.',
   },
   orders: {
     title: 'Meus pedidos',
